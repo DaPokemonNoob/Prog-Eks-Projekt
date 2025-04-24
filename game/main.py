@@ -4,9 +4,9 @@ import pygame, sys
 pygame.init()
 
 # viser hvor stort spillet skal være og sætter navn og icon til spillet
-flags = pygame.RESIZABLE
-SCREEN = pygame.display.set_mode((1280, 720), flags)
-SCREEN.fill("White")
+SCREEN = pygame.display.set_mode((1280, 720))
+SCREEN.fill("salmon")
+clock = pygame.time.Clock()
 
 pygame.display.set_caption("test")
 
@@ -24,6 +24,7 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 None
 
+        clock.tick(60)
         pygame.display.update()
         
 # starter spillet på main menuen
