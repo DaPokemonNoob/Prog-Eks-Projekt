@@ -16,13 +16,20 @@ def main_menu():
         # viser baggrunden på skærmen
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        # button to quit the game
+        QUIT_BUTTON = pygame.Rect(100, 100, 200, 50)
+        pygame.draw.rect(SCREEN, "red", QUIT_BUTTON)
+        
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                None
+                if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
 
         clock.tick(60)
         pygame.display.update()
