@@ -23,7 +23,7 @@ class Button:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.image.collidepoint(pygame.mouse.get_pos()):
-                    pygame.quit()
+                    SCREEN.fill("blue")
 
 def play_menu():
     while True:
