@@ -1,4 +1,5 @@
 import pygame, sys
+from cards import Deck
 
 # starter pygame
 pygame.init()
@@ -9,6 +10,10 @@ pygame.display.set_caption("test")
 
 # state to track which menu we're in
 current_screen = "main_menu"
+
+deck = Deck()
+deck.shuffle()
+last_drawn_card = None
 
 class Button:
     def __init__(self, pos, color, size):
@@ -54,6 +59,9 @@ def show_play_menu():
     MENU_BUTTON = Button((100, 100), "red", (200, 50))
     MENU_BUTTON.run()
 
+    NEXT_TURN_BUTTON = Button((400, 200), "gray", (200, 50))
+    NEXT_TURN_BUTTON.run()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -62,6 +70,13 @@ def show_play_menu():
             if MENU_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
                 current_screen = "main_menu"
                 print("Switched to main menu")
+            if NEXT_TURN_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
+                try:
+                    last_drawn_card = deck.draw()
+                    print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
+                except IndexError:
+                    print("No more cards left to draw.")
+                    last_drawn_card = ("No", "Cards")
 
     pygame.display.update()
 
