@@ -11,9 +11,9 @@ pygame.display.set_caption("test")
 # state to track which menu we're in
 current_screen = "main_menu"
 
-deck = Deck()
-deck.shuffle()
-last_drawn_card = None
+deck = Deck()               # opretter en ny kortbunke
+deck.shuffle()              # blander kortene i bunken          
+last_drawn_card = None      # initialiserer last_drawn_card
 
 class Button:
     def __init__(self, pos, color, size):
@@ -70,9 +70,9 @@ def show_play_menu():
             if MENU_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
                 current_screen = "main_menu"
                 print("Switched to main menu")
-            if NEXT_TURN_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
+            if NEXT_TURN_BUTTON.image.collidepoint(PLAY_MOUSE_POS):                 # Tjekker om next_turn knappen er blevet klikket på
                 try:
-                    last_drawn_card = deck.draw()
+                    last_drawn_card = deck.draw()                                   # Bruger træk funktionen i cards.py
                     print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
                 except IndexError:
                     print("No more cards left to draw.")
