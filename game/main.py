@@ -20,6 +20,12 @@ class Button:
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.image)
 
+    def check_click(self, mouse_pos):
+        # tjekker om knappen er blevet klikket på
+        if self.image.collidepoint(mouse_pos):
+            return True
+        return False
+
 def show_play_menu():
     global current_screen  # <- this is important
     SCREEN.fill("blue")
@@ -28,14 +34,14 @@ def show_play_menu():
     MENU_BUTTON = Button((100, 100), "red", (200, 50))
     MENU_BUTTON.draw(SCREEN)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if MENU_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
-                current_screen = "main_menu"
-                print("Switched to main menu")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if QUIT_BUTTON.check_click(PLAY_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()  
 
     pygame.display.update()
 
