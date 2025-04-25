@@ -67,7 +67,7 @@ def show_play_menu():
 
 
 def show_main_menu():
-    global current_screen
+    global current_screen # <- this is also important
     SCREEN.fill("salmon")
     MENU_MOUSE_POS = pygame.mouse.get_pos()
 
