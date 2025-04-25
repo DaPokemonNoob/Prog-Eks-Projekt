@@ -20,10 +20,12 @@ class Button:
     def draw(self, screen):
         # tegner knappen på skærmen
         pygame.draw.rect(screen, self.color, self.image)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.image.collidepoint(pygame.mouse.get_pos()):
-                    SCREEN.fill("blue")
+
+    def check_click(self, mouse_pos):
+        # tjekker om knappen er blevet klikket på
+        if self.image.collidepoint(mouse_pos):
+            return True
+        return False
 
 def play_menu():
     while True:
@@ -40,6 +42,10 @@ def play_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if QUIT_BUTTON.check_click(PLAY_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()  
 
         clock.tick(60)
         pygame.display.update()
