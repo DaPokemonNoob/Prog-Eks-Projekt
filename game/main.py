@@ -1,5 +1,6 @@
 import pygame, sys
 from cards import Deck
+import webbrowser
 
 # starter pygame
 pygame.init()
@@ -86,23 +87,32 @@ def show_main_menu():
     SCREEN.fill("salmon")
     MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-    QUIT_BUTTON = pygame.Rect(100, 100, 200, 50)
-    pygame.draw.rect(SCREEN, "red", QUIT_BUTTON)
+    PLAY_BUTTON = Button((480, 200), "red", (300, 100))
+    PLAY_BUTTON.run()
 
-    PLAY_BUTTON = pygame.Rect(100, 200, 200, 50)
-    pygame.draw.rect(SCREEN, "green", PLAY_BUTTON)
+    OPTIONS_BUTTON = Button((480, 380), "red", (300, 100))
+    OPTIONS_BUTTON.run()
+
+    QUIT_BUTTON = Button((480, 560), "red", (300, 100))
+    QUIT_BUTTON.run()
+
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 70).render("MAIN MENU", True, "black"), (360, 50)) # main menu tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 65).render("PLAY", True, "black"), (515, 210)) # play tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 45).render("OPTIONS", True, "black"), (495, 403)) # options tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 35).render("QUIT GAME", True, "black"), (490, 590)) # quit tekst
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+            if PLAY_BUTTON.image.collidepoint(MENU_MOUSE_POS):
+                current_screen = "play_menu"
+            if OPTIONS_BUTTON.image.collidepoint(MENU_MOUSE_POS):
+                webbrowser.open("www.youtube.com/watch?v=dQw4w9WgXcQ")
+            if QUIT_BUTTON.image.collidepoint(MENU_MOUSE_POS):
                 pygame.quit()
                 sys.exit()
-            if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
-                current_screen = "play_menu"
-                print("Switched to play menu")
 
     pygame.display.update()
 
