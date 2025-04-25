@@ -15,16 +15,36 @@ class Button:
         self.size = size
         self.pos = pos
         self.color = color
+        self.original_color = color
         self.image = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+        self.mouse_pos = pygame.mouse.get_pos()
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.image)
-
-    def check_click(self, mouse_pos):
+    
+    def check_click(self):
         # tjekker om knappen er blevet klikket på
-        if self.image.collidepoint(mouse_pos):
+        if self.image.collidepoint(self.mouse_pos):
             return True
         return False
+
+    def check_hover(self):
+        # tjekker om musen er over knappen
+        if self.image.collidepoint(self.mouse_pos):
+            return True
+        return False
+
+    def hover_color(self, hover_color):
+        # ændrer farven på knappen når musen er over den
+        if self.check_hover():
+            self.color = hover_color
+        else:
+            self.color = self.original_color
+
+    def run(self):
+        self.check_hover()
+        self.hover_color("green")
+        self.draw(SCREEN)
 
 def show_play_menu():
     global current_screen  # <- this is important
@@ -32,16 +52,16 @@ def show_play_menu():
     PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
     MENU_BUTTON = Button((100, 100), "red", (200, 50))
-    MENU_BUTTON.draw(SCREEN)
+    MENU_BUTTON.run()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if QUIT_BUTTON.check_click(PLAY_MOUSE_POS):
-                    pygame.quit()
-                    sys.exit()  
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if MENU_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
+                current_screen = "main_menu"
+                print("Switched to main menu")
 
     pygame.display.update()
 
