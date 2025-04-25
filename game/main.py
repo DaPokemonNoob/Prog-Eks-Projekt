@@ -15,7 +15,9 @@ class Button:
         self.size = size
         self.pos = pos
         self.color = color
+        self.original_color = color
         self.image = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+        self.mouse_pos = pygame.mouse.get_pos()
 
     def draw(self, screen):
         # tegner knappen på skærmen
@@ -27,6 +29,19 @@ class Button:
             return True
         return False
 
+    def check_hover(self, mouse_pos):
+        # tjekker om musen er over knappen
+        if self.image.collidepoint(mouse_pos):
+            return True
+        return False
+
+    def hover_color(self, hover_color, mouse_pos,):
+        # ændrer farven på knappen når musen er over den
+        if self.check_hover(mouse_pos):
+            self.color = hover_color
+        else:
+            self.color = self.original_color
+
 def play_menu():
     while True:
         # viser baggrunden på skærmen
@@ -35,7 +50,10 @@ def play_menu():
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         # button to quit the game
-        QUIT_BUTTON = Button((100,100), "red", (200, 50))
+        QUIT_BUTTON = Button((100,100), "blue", (200, 50))
+        
+        QUIT_BUTTON.check_click(PLAY_MOUSE_POS)
+        QUIT_BUTTON.hover_color("red", PLAY_MOUSE_POS)
         QUIT_BUTTON.draw(SCREEN)
 
         for event in pygame.event.get():
