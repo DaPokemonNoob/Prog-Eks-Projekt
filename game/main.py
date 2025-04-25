@@ -3,12 +3,12 @@ import pygame, sys
 # starter pygame
 pygame.init()
 
-# viser hvor stort spillet skal være og sætter navn og icon til spillet
 SCREEN = pygame.display.set_mode((1280, 720))
-SCREEN.fill("salmon")
 clock = pygame.time.Clock()
-
 pygame.display.set_caption("test")
+
+# state to track which menu we're in
+current_screen = "main_menu"
 
 class Button:
     def __init__(self, pos, color, size):
@@ -18,62 +18,59 @@ class Button:
         self.image = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
     def draw(self, screen):
-        # tegner knappen på skærmen
         pygame.draw.rect(screen, self.color, self.image)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.image.collidepoint(pygame.mouse.get_pos()):
-                    pygame.quit()
 
-def play_menu():
-    while True:
-        # viser baggrunden på skærmen
-        SCREEN.fill("green")
+def show_play_menu():
+    global current_screen  # <- this is important
+    SCREEN.fill("blue")
+    PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        PLAY_MOUSE_POS = pygame.mouse.get_pos()
+    MENU_BUTTON = Button((100, 100), "red", (200, 50))
+    MENU_BUTTON.draw(SCREEN)
 
-        # button to quit the game
-        QUIT_BUTTON = Button((100,100), "red", (200, 50))
-        QUIT_BUTTON.draw(SCREEN)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if MENU_BUTTON.image.collidepoint(PLAY_MOUSE_POS):
+                current_screen = "main_menu"
+                print("Switched to main menu")
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    pygame.display.update()
+
+
+def show_main_menu():
+    global current_screen
+    SCREEN.fill("salmon")
+    MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+    QUIT_BUTTON = pygame.Rect(100, 100, 200, 50)
+    pygame.draw.rect(SCREEN, "red", QUIT_BUTTON)
+
+    PLAY_BUTTON = pygame.Rect(100, 200, 200, 50)
+    pygame.draw.rect(SCREEN, "green", PLAY_BUTTON)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
                 pygame.quit()
                 sys.exit()
+            if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
+                current_screen = "play_menu"
+                print("Switched to play menu")
 
-        clock.tick(60)
-        pygame.display.update()
+    pygame.display.update()
 
-def main_menu():
-    # while true loop der laver "main menu" delen af spillet
-    while True:
-        # viser baggrunden på skærmen
+# === Main loop ===
+running = True
+while running:
+    if current_screen == "main_menu":
+        show_main_menu()
+    elif current_screen == "play_menu":
+        show_play_menu()
 
-        MENU_MOUSE_POS = pygame.mouse.get_pos()
-
-        # button to quit the game
-        QUIT_BUTTON = pygame.Rect(100, 100, 200, 50)
-        pygame.draw.rect(SCREEN, "red", QUIT_BUTTON)
-
-        PLAY_BUTTON = pygame.Rect(100, 200, 200, 50)
-        pygame.draw.rect(SCREEN, "green", PLAY_BUTTON)
-        
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
-                    pygame.quit()
-                    sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
-                    play_menu()
-                    
-
-        clock.tick(60)
-        pygame.display.update()
-        
-# starter spillet på main menuen
-main_menu() 
+    clock.tick(60)
