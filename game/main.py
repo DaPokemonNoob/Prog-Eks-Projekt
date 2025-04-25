@@ -81,6 +81,42 @@ def show_play_menu():
 
     pygame.display.update()
 
+def show_options_menu():
+    global current_screen, SCREEN # <- this is also important
+    SCREEN.fill("black")
+    OPTION_MOUSE_POS = pygame.mouse.get_pos()
+
+    FULLSCREEN_BUTTON = Button((480, 200), "red", (300, 100))
+    FULLSCREEN_BUTTON.run()
+
+    MUTE_BUTTON = Button((480, 380), "red", (300, 100))
+    MUTE_BUTTON.run()
+
+    PLACEHOLDER_BUTTON = Button((480, 560), "red", (300, 100))
+    PLACEHOLDER_BUTTON.run()
+
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 70).render("OPTIONS", True, "white"), (420, 50)) # main menu tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 30).render("FULLSCREEN", True, "white"), (487, 230)) # play tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 45).render("MUTE", True, "white"), (540, 403)) # options tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 35).render("PLACEHOLDER", True, "white"), (490, 590)) # quit tekst
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if FULLSCREEN_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
+                if SCREEN.get_flags() & pygame.FULLSCREEN:
+                    SCREEN = pygame.display.set_mode((1280, 720))
+                else:
+                    SCREEN = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
+            if MUTE_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
+                pass
+            if PLACEHOLDER_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
+                pass
+
+    pygame.display.update()
+
 
 def show_main_menu():
     global current_screen # <- this is also important
@@ -109,7 +145,7 @@ def show_main_menu():
             if PLAY_BUTTON.image.collidepoint(MENU_MOUSE_POS):
                 current_screen = "play_menu"
             if OPTIONS_BUTTON.image.collidepoint(MENU_MOUSE_POS):
-                webbrowser.open("www.youtube.com/watch?v=dQw4w9WgXcQ")
+                current_screen = "options_menu"
             if QUIT_BUTTON.image.collidepoint(MENU_MOUSE_POS):
                 pygame.quit()
                 sys.exit()
@@ -123,5 +159,7 @@ while running:
         show_main_menu()
     elif current_screen == "play_menu":
         show_play_menu()
+    elif current_screen == "options_menu":
+        show_options_menu()
 
     clock.tick(60)
