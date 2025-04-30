@@ -20,27 +20,3 @@ class Deck:
     
     def __len__(self) -> int:
         return len(self.cards)
-
-
-def main():
-    deck = Deck()
-    deck.shuffle()
-    print("Deck is shuffled. Type 'd' to draw a card, or 'q' to quit.")
-    
-    while True:
-        cmd = input("> ").strip().lower()
-        if cmd == 'd':
-            try:
-                rank, suit = deck.drawCard()
-                print(f"You drew: {rank}{suit}  ({len(deck)} cards remaining)")
-            except IndexError:
-                print("The deck is empty—no more cards to draw!")
-                break
-        elif cmd == 'q':
-            print("Goodbye!")
-            break
-        else:
-            print("Unknown command. Type 'd' to draw, or 'q' to quit.")
-
-if __name__ == "__main__":
-    main()
