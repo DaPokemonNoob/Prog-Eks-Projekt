@@ -19,6 +19,7 @@ last_drawn_card = None      # initialiserer last_drawn_card
 
 suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 hand = []               # opretter en tom hånd
+discard = []           # opretter en tom discard bunke
 
 def load_card_image(rank, suit):
     suit_name = suit_map[suit]
@@ -92,15 +93,24 @@ def show_play_menu():
                     last_drawn_card = deck.drawCard()
                     image = load_card_image(*last_drawn_card)
                     if image:
-                        hand.append((last_drawn_card[0], last_drawn_card[1], image))
-                        print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
+                        if len(hand) < 7:
+                            hand.append((last_drawn_card[0], last_drawn_card[1], image))
+                        else:
+                            discard.append((last_drawn_card[0], last_drawn_card[1], image))
+                            print(f"Drew card: {discard[0]}{discard[1]}")
                 except IndexError:
                     print("No more cards left to draw.")
                     last_drawn_card = ("No", "Cards")
+
     
     x, y = 50, 400
-    for i, (_, _, img) in enumerate(hand[-10:]):
-        SCREEN.blit(img, (x + i * 90, y))  # Tegner kortene
+    for i, (_, _, img) in enumerate(hand):
+        SCREEN.blit(img, (x + i * 90, y))
+
+    # Draw the discard pile (last 5 discarded)
+    x_discard, y_discard = 50, 550
+    for i, (_, _, img) in enumerate(discard[-5:]):
+        SCREEN.blit(img, (x_discard + i * 60, y_discard))
 
     pygame.display.update()
 
