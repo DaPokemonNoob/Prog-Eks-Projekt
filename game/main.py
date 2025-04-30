@@ -1,5 +1,7 @@
 import pygame, sys
 from cards import Deck
+import webbrowser
+import os
 
 # starter pygame
 pygame.init()
@@ -14,6 +16,21 @@ current_screen = "main_menu"
 deck = Deck()               # opretter en ny kortbunke
 deck.shuffle()              # blander kortene i bunken          
 last_drawn_card = None      # initialiserer last_drawn_card
+
+suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
+hand = []               # opretter en tom hånd
+
+def load_card_image(rank, suit):
+    suit_name = suit_map[suit]
+    filename = f"{rank}_of_{suit_name}.png"  # Matches '2_of_hearts.png', etc.
+    path = os.path.join("assets", "card", filename)
+    try:
+        image = pygame.image.load(path).convert_alpha()
+        return pygame.transform.scale(image, (80, 120))  # Resize for consistency
+    except pygame.error as e:
+        print(f"Failed to load {path}: {e}")
+        return None
+
 
 class Button:
     def __init__(self, pos, color, size):
@@ -72,11 +89,18 @@ def show_play_menu():
                 print("Switched to main menu")
             if NEXT_TURN_BUTTON.image.collidepoint(PLAY_MOUSE_POS):                 # Tjekker om next_turn knappen er blevet klikket på
                 try:
-                    last_drawn_card = deck.draw()                                   # Bruger træk funktionen i cards.py
-                    print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
+                    last_drawn_card = deck.drawCard()
+                    image = load_card_image(*last_drawn_card)
+                    if image:
+                        hand.append((last_drawn_card[0], last_drawn_card[1], image))
+                        print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
                 except IndexError:
                     print("No more cards left to draw.")
                     last_drawn_card = ("No", "Cards")
+    
+    x, y = 50, 400
+    for i, (_, _, img) in enumerate(hand[-10:]):
+        SCREEN.blit(img, (x + i * 90, y))  # space out images horizontally
 
     pygame.display.update()
 
