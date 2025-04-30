@@ -115,13 +115,13 @@ def show_options_menu():
     MUTE_BUTTON = Button((480, 380), "red", (300, 100))
     MUTE_BUTTON.run()
 
-    PLACEHOLDER_BUTTON = Button((480, 560), "red", (300, 100))
-    PLACEHOLDER_BUTTON.run()
+    BACK_BUTTON = Button((480, 560), "red", (300, 100))
+    BACK_BUTTON.run()
 
-    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 70).render("OPTIONS", True, "white"), (420, 50)) # main menu tekst
-    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 30).render("FULLSCREEN", True, "white"), (487, 230)) # play tekst
-    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 45).render("MUTE", True, "white"), (540, 403)) # options tekst
-    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 35).render("PLACEHOLDER", True, "white"), (490, 590)) # quit tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 70).render("OPTIONS", True, "white"), (420, 50)) # options tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 30).render("FULLSCREEN", True, "white"), (487, 230)) # fullscreen option tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 45).render("MUTE", True, "white"), (540, 403)) # mute option tekst
+    SCREEN.blit(pygame.font.Font("assets/font/impact.ttf", 60).render("BACK", True, "white"), (520, 575)) # back tekst
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -138,8 +138,8 @@ def show_options_menu():
                     pygame.mixer.quit()
                 else:
                     pygame.mixer.init()
-            if PLACEHOLDER_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
-                pass
+            if BACK_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
+                current_screen = "main_menu"
 
     pygame.display.update()
 
