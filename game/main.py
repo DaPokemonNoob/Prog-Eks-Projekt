@@ -1,6 +1,5 @@
 import pygame, sys
 from cards import Deck
-import webbrowser
 
 # starter pygame
 pygame.init()
