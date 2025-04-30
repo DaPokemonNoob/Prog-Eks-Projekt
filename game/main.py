@@ -22,11 +22,11 @@ hand = []               # opretter en tom hånd
 
 def load_card_image(rank, suit):
     suit_name = suit_map[suit]
-    filename = f"{rank}_of_{suit_name}.png"  # Matches '2_of_hearts.png', etc.
+    filename = f"{rank}_of_{suit_name}.png"  # Finder de forskellige kort fra en fil
     path = os.path.join("assets", "card", filename)
     try:
         image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (80, 120))  # Resize for consistency
+        return pygame.transform.scale(image, (80, 120))  # Resize Ændre størrelsen på kortene
     except pygame.error as e:
         print(f"Failed to load {path}: {e}")
         return None
@@ -100,7 +100,7 @@ def show_play_menu():
     
     x, y = 50, 400
     for i, (_, _, img) in enumerate(hand[-10:]):
-        SCREEN.blit(img, (x + i * 90, y))  # space out images horizontally
+        SCREEN.blit(img, (x + i * 90, y))  # Tegner kortene
 
     pygame.display.update()
 
