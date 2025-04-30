@@ -19,14 +19,15 @@ last_drawn_card = None      # initialiserer last_drawn_card
 
 suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 hand = []               # opretter en tom hånd
+discard = []           # opretter en tom discard bunke
 
 def load_card_image(rank, suit):
     suit_name = suit_map[suit]
-    filename = f"{rank}_of_{suit_name}.png"  # Matches '2_of_hearts.png', etc.
+    filename = f"{rank}_of_{suit_name}.png"  # Finder de forskellige kort fra en fil
     path = os.path.join("assets", "card", filename)
     try:
         image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (80, 120))  # Resize for consistency
+        return pygame.transform.scale(image, (80, 120))  # Resize Ændre størrelsen på kortene
     except pygame.error as e:
         print(f"Failed to load {path}: {e}")
         return None
@@ -92,15 +93,24 @@ def show_play_menu():
                     last_drawn_card = deck.drawCard()
                     image = load_card_image(*last_drawn_card)
                     if image:
-                        hand.append((last_drawn_card[0], last_drawn_card[1], image))
-                        print(f"Drew card: {last_drawn_card[0]}{last_drawn_card[1]}")
+                        if len(hand) < 7:
+                            hand.append((last_drawn_card[0], last_drawn_card[1], image))
+                        else:
+                            discard.append((last_drawn_card[0], last_drawn_card[1], image))
+                            print(f"Drew card: {discard[0]}{discard[1]}")
                 except IndexError:
                     print("No more cards left to draw.")
                     last_drawn_card = ("No", "Cards")
+
     
     x, y = 50, 400
-    for i, (_, _, img) in enumerate(hand[-10:]):
-        SCREEN.blit(img, (x + i * 90, y))  # space out images horizontally
+    for i, (_, _, img) in enumerate(hand):
+        SCREEN.blit(img, (x + i * 90, y))
+
+    # Draw the discard pile (last 5 discarded)
+    x_discard, y_discard = 50, 550
+    for i, (_, _, img) in enumerate(discard[-5:]):
+        SCREEN.blit(img, (x_discard + i * 60, y_discard))
 
     pygame.display.update()
 
