@@ -15,10 +15,11 @@ class Hero(Card):
 
 # Minion subclass:
 class Minion(Card):
-    def __init__(self, name, manaCost, attack, hp, pic=None):
+    def __init__(self, name, manaCost, attack, hp, effect, pic=None):
         super().__init__('minion', name, manaCost, pic)
         self.attack = attack
         self.hp = hp
+        self.effect = effect
 
 # Spell subclass:
 class Spell(Card):
@@ -30,4 +31,3 @@ class Weapon(Card):
     def __init__(self, name, manaCost, attack, durability, pic=None):
         super().__init__('weapon', name, manaCost, pic)
         self.attack = attack
-        self.durability = durability
