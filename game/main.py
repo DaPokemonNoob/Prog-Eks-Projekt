@@ -111,7 +111,10 @@ def show_options_menu():
                 else:
                     SCREEN = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
             if MUTE_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
-                pass
+                if pygame.mixer.get_init() is not None:
+                    pygame.mixer.quit()
+                else:
+                    pygame.mixer.init()
             if PLACEHOLDER_BUTTON.image.collidepoint(OPTION_MOUSE_POS):
                 pass
 
