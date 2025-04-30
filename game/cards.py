@@ -6,14 +6,14 @@ Card = Tuple[str, str]
 
 class Deck:
     def __init__(self):
-        ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+        ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
         suits = ['♠', '♥', '♦', '♣']
         self.cards: List[Card] = [(rank, suit) for suit in suits for rank in ranks]
     
     def shuffle(self):
         random.shuffle(self.cards)
     
-    def draw(self) -> Card:
+    def drawCard(self) -> Card:
         if not self.cards:
             raise IndexError("Cannot draw from an empty deck")
         return self.cards.pop(0)
@@ -31,7 +31,7 @@ def main():
         cmd = input("> ").strip().lower()
         if cmd == 'd':
             try:
-                rank, suit = deck.draw()
+                rank, suit = deck.drawCard()
                 print(f"You drew: {rank}{suit}  ({len(deck)} cards remaining)")
             except IndexError:
                 print("The deck is empty—no more cards to draw!")
