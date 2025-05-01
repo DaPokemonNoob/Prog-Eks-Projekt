@@ -25,8 +25,6 @@ screens = {
 
 switch_screen("main_menu")
 
-# state to track which menu we're in
-
 deck = Deck()               # opretter en ny kortbunke
 deck.shuffle()              # blander kortene i bunken          
 last_drawn_card = None      # initialiserer last_drawn_card

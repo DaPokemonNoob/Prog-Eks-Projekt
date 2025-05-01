@@ -164,6 +164,11 @@ class PlayMenu(Screen):
         self.hand = []              # Laver en liste til kort på hånden
         self.discard = []           # Laver en liste til discarded kort
 
+        self.dragged_card = None
+        self.drag_offset = (0,0)
+        self.lock_zone = pygame.Rect(1000, 400, 120, 160)  # x, y, width, height
+        self.locked_cards = []  # Liste til kort som er låst fast
+
         self.menu_button = Button((100, 100), "red", (200, 50))
         self.next_turn_button = Button((400, 200), "gray", (200, 50))
 
@@ -187,12 +192,58 @@ class PlayMenu(Screen):
         except IndexError:                                      # Hvis der ikke er flere kort i bunken
             print("No more cards to draw.")
 
+    def handle_event(self, event):
+        super().handle_event(event)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.pos
+            for i in range(len(self.hand)-1, -1, -1):
+                _, _, img = self.hand[i]
+                card_rect = pygame.Rect(50 + i * 90, 400, 80, 120)
+                if card_rect.collidepoint(mouse_x, mouse_y):
+                    self.dragged_card = self.hand.pop(i)
+                    offset_x = mouse_x - card_rect.x
+                    offset_y = mouse_y - card_rect.y
+                    self.drag_offset = (offset_x, offset_y)
+                    break
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if self.dragged_card:
+                mouse_x, mouse_y = event.pos
+                if self.lock_zone.collidepoint(mouse_x, mouse_y):
+                    self.locked_cards.append((mouse_x - 40, mouse_y - 60, self.dragged_card[2]))  # Brug musens position
+                else:
+                    new_index = (mouse_x - 50) // 90
+                    new_index = max(0, min(len(self.hand), new_index))
+                    self.hand.insert(new_index, self.dragged_card)
+                self.dragged_card = None
+
+        elif event.type == pygame.MOUSEMOTION:
+            if self.dragged_card:
+                # Optional: could update live position here
+                pass
+
+
+
     # funktion der tegner alt på skærmen
     def draw(self, screen):
         super().draw(screen)
+
+        pygame.draw.rect(screen, (160, 32, 240), self.lock_zone, border_radius=10)
+
         x, y = 50, 400
         for i, (_, _, img) in enumerate(self.hand):             # Tegner alle kortene på hånden og forskyder dem med 90
             screen.blit(img, (x + i * 90, y))
+
+        for lx, ly, img in self.locked_cards:
+            screen.blit(img, (lx, ly))
+
+        if self.dragged_card:
+            _, _, img = self.dragged_card
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            offset_x, offset_y = self.drag_offset
+            screen.blit(img, (mouse_x - offset_x, mouse_y - offset_y))
+
         x_d, y_d = 50, 550
         for i, (_, _, img) in enumerate(self.discard[-5:]):     # Tegner de fem seneste kort i discard bunken
             screen.blit(img, (x_d + i * 60, y_d))
