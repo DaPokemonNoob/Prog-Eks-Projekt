@@ -77,7 +77,7 @@ class Button:
 
 
 # Klasse der opretter knapper som objekter
-"""class Button:
+class Button:
     def __init__(self, pos, color, size):                                                   # Initialisere en knap, som skal have en position, farve og størelse.
         self.size = size
         self.pos = pos
@@ -104,7 +104,7 @@ class Button:
     # Tegner knappen
     def run(self):
         self.hover_color("green")
-        self.draw(SCREEN)"""
+        self.draw(SCREEN)
 
 # En super klasse som bliver nedarvet af alle andre
 class Screen:
