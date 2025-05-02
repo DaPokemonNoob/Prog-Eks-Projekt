@@ -24,82 +24,44 @@ class Button:
         self.pos = pos
         self.color = color
         self.original_color = color
-        self.rect = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
-        self.image_path = image_path
-        self.hover_image_path = hover_image_path
-
-        if image_path:
-            self.image = pygame.image.load(image_path).convert_alpha()
-            self.image = pygame.transform.scale(self.image, self.size)
-            self.mask = pygame.mask.from_surface(self.image)  # ← Lav maske
-        else:
-            self.image = None
-            self.mask = None
-
-        self.hover_image = pygame.image.load(hover_image_path).convert_alpha() if hover_image_path else None
-        if self.hover_image:
-            self.hover_image = pygame.transform.scale(self.hover_image, self.size)
-
-    def is_clicked(self, pos):
-        if self.image and self.mask:
-            local_x = pos[0] - self.pos[0]
-            local_y = pos[1] - self.pos[1]
-            if 0 <= local_x < self.size[0] and 0 <= local_y < self.size[1]:
-                return self.mask.get_at((local_x, local_y))  # True hvis ikke-gennemsigtig pixel
-            return False
-        else:
-            return self.rect.collidepoint(pos)
-
-    def draw(self, screen):
-        if self.image:
-            if self.check_hover() and self.hover_image:
-                # Brug masken til hover-billedet
-                screen.blit(self.hover_image, self.pos)
-            else:
-                # Brug masken til det oprindelige billede
-                screen.blit(self.image, self.pos)
-        else:
-            pygame.draw.rect(screen, self.color, self.rect)
-
-    def check_hover(self):
-        mouse_pos = pygame.mouse.get_pos()
-        return self.rect.collidepoint(mouse_pos)
-
-    def hover_color(self, hover_color):
-        if self.image:
-            return  # Hvis der bruges billeder, farveskift bruges ikke
-        self.color = hover_color if self.check_hover() else self.original_color
-
-    def run(self):
-        self.hover_color("green")
-        self.draw(SCREEN)
-
-
-# Klasse der opretter knapper som objekter
-"""class Button:
-    def __init__(self, pos, color, size):                                                   # Initialisere en knap, som skal have en position, farve og størelse.
-        self.size = size
-        self.pos = pos
-        self.color = color
-        self.original_color = color
         self.image = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+        self.button_image = None
+        self.hover_image = None
+        if image_path:
+            try:
+                self.button_image = pygame.image.load(image_path).convert_alpha()
+                self.button_image = pygame.transform.scale(self.button_image, size)
+            except pygame.error as e:
+                print(f"Failed to load button image {image_path}: {e}")
+        if hover_image_path:
+            try:
+                self.hover_image = pygame.image.load(hover_image_path).convert_alpha()
+                self.hover_image = pygame.transform.scale(self.hover_image, size)
+            except pygame.error as e:
+                print(f"Failed to load hover image {hover_image_path}: {e}")
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.image)
+        if self.check_hover() and self.hover_image:
+            screen.blit(self.hover_image, self.pos)
+        elif self.button_image:
+            screen.blit(self.button_image, self.pos)
+        else:
+            pygame.draw.rect(screen, self.color, self.image)
 
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
 
     def hover_color(self, hover_color):
-        if self.check_hover():
-            self.color = hover_color
-        else:
-            self.color = self.original_color
+        if not self.button_image and not self.hover_image:
+            if self.check_hover():
+                self.color = hover_color
+            else:
+                self.color = self.original_color
 
     def run(self):
         self.hover_color("green")
-        self.draw(SCREEN)"""
+        self.draw(SCREEN)
 
 class Screen:
     def __init__(self):
@@ -111,7 +73,7 @@ class Screen:
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = event.pos
             for button, action in self.actions.items():
-                if button.is_clicked(pos):  # ← Brug din pixel-perfect klik her
+                if button.image.collidepoint(pos):
                     action()
 
     def draw(self, screen):
@@ -136,7 +98,7 @@ class MainMenu(Screen):
         self.buttons = [self.play_button, self.options_button, self.quit_button]
 
         self.actions = {
-            self.play_button: lambda: self.switch_screen("map_menu"),
+            self.play_button: lambda: self.switch_screen("play_menu"), #AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
             self.options_button: lambda: self.switch_screen("options_menu"),
             self.quit_button: lambda: sys.exit()
         }
