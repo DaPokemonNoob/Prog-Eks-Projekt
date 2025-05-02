@@ -6,7 +6,8 @@ from screen import MainMenu, PlayMenu, OptionsMenu
 # starter pygame
 pygame.init()
 
-SCREEN = pygame.display.set_mode((1280, 720))
+width, height = 1280, 720
+SCREEN = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
 pygame.display.set_caption("test")
 
@@ -22,26 +23,11 @@ screens = {
     "options_menu": OptionsMenu(switch_screen, SCREEN)
 }
 
-
 switch_screen("main_menu")
-
-deck = Deck()               # opretter en ny kortbunke
-deck.shuffle()              # blander kortene i bunken          
-last_drawn_card = None      # initialiserer last_drawn_card
-
-suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
-hand = []               # opretter en tom hånd
-discard = []           # opretter en tom discard bunke
 
 # === Main loop ===
 running = True
 while running:
-    """if current_screen == "main_menu":
-        show_main_menu()
-    elif current_screen == "play_menu":
-        show_play_menu()
-    elif current_screen == "options_menu":
-        show_options_menu()"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
