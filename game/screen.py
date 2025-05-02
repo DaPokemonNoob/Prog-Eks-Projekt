@@ -19,7 +19,65 @@ def load_card_image(rank, suit):
         return None
 
 class Button:
-    def __init__(self, pos, color, size):
+    def __init__(self, pos, color, size, image_path=None, hover_image_path=None):
+        self.size = size
+        self.pos = pos
+        self.color = color
+        self.original_color = color
+        self.rect = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+        self.image_path = image_path
+        self.hover_image_path = hover_image_path
+
+        if image_path:
+            self.image = pygame.image.load(image_path).convert_alpha()
+            self.image = pygame.transform.scale(self.image, self.size)
+            self.mask = pygame.mask.from_surface(self.image)  # ← Lav maske
+        else:
+            self.image = None
+            self.mask = None
+
+        self.hover_image = pygame.image.load(hover_image_path).convert_alpha() if hover_image_path else None
+        if self.hover_image:
+            self.hover_image = pygame.transform.scale(self.hover_image, self.size)
+
+    def is_clicked(self, pos):
+        if self.image and self.mask:
+            local_x = pos[0] - self.pos[0]
+            local_y = pos[1] - self.pos[1]
+            if 0 <= local_x < self.size[0] and 0 <= local_y < self.size[1]:
+                return self.mask.get_at((local_x, local_y))  # True hvis ikke-gennemsigtig pixel
+            return False
+        else:
+            return self.rect.collidepoint(pos)
+
+    def draw(self, screen):
+        if self.image:
+            if self.check_hover() and self.hover_image:
+                # Brug masken til hover-billedet
+                screen.blit(self.hover_image, self.pos)
+            else:
+                # Brug masken til det oprindelige billede
+                screen.blit(self.image, self.pos)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
+
+    def check_hover(self):
+        mouse_pos = pygame.mouse.get_pos()
+        return self.rect.collidepoint(mouse_pos)
+
+    def hover_color(self, hover_color):
+        if self.image:
+            return  # Hvis der bruges billeder, farveskift bruges ikke
+        self.color = hover_color if self.check_hover() else self.original_color
+
+    def run(self):
+        self.hover_color("green")
+        self.draw(SCREEN)
+
+
+# Klasse der opretter knapper som objekter
+"""class Button:
+    def __init__(self, pos, color, size):                                                   # Initialisere en knap, som skal have en position, farve og størelse.
         self.size = size
         self.pos = pos
         self.color = color
@@ -41,7 +99,7 @@ class Button:
 
     def run(self):
         self.hover_color("green")
-        self.draw(SCREEN)
+        self.draw(SCREEN)"""
 
 class Screen:
     def __init__(self):
@@ -51,9 +109,9 @@ class Screen:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
+            pos = event.pos
             for button, action in self.actions.items():
-                if button.image.collidepoint(pos):
+                if button.is_clicked(pos):  # ← Brug din pixel-perfect klik her
                     action()
 
     def draw(self, screen):
@@ -78,7 +136,7 @@ class MainMenu(Screen):
         self.buttons = [self.play_button, self.options_button, self.quit_button]
 
         self.actions = {
-            self.play_button: lambda: self.switch_screen("play_menu"),
+            self.play_button: lambda: self.switch_screen("map_menu"),
             self.options_button: lambda: self.switch_screen("options_menu"),
             self.quit_button: lambda: sys.exit()
         }
@@ -152,7 +210,7 @@ class PlayMenu(Screen):
         self.enemy_back_row_zone = pygame.Rect(980, 200, 200, 400)
 
         self.menu_button = Button((100, 100), "red", (200, 50))
-        self.next_turn_button = Button((400, 200), "gray", (200, 50))
+        self.next_turn_button = Button((400, 200), "gray", (200, 100), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
 
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
@@ -269,3 +327,9 @@ class PlayMenu(Screen):
             mouse_x, mouse_y = pygame.mouse.get_pos()
             rank, suit, img = self.dragged_card
             screen.blit(img, (mouse_x - self.drag_offset[0], mouse_y - self.drag_offset[1]))
+class MapMenu(Screen):
+    def __init__(self, switch_screen, screen_ref):
+        super().__init__()
+        self.bg_color = "white"
+        self.switch_screen = switch_screen
+        self.screen_ref = screen_ref
