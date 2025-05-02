@@ -9,10 +9,10 @@ def someCoolGuy():
     ed.increase(1, 0)
     return cc.Minion("Some Cool Guy", manaCost=5, attack=4, hp=6, effect="When summoned: increase all minions attack by 1.")
 
-def tank():
+def knight():
     ed.armor(2)
     ed.taunt()
-    return cc.Minion("Tank", manaCost=3, attack=1, hp=7, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
+    return cc.Minion("Knight", manaCost=3, attack=1, hp=7, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
     
 # Eksempel på spell kort:
 def fireball():

@@ -7,7 +7,8 @@ from level import generate_map, assign_level_positions, draw_map
 # starter pygame
 pygame.init()
 
-SCREEN = pygame.display.set_mode((1280, 720))
+width, height = 1280, 720
+SCREEN = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
 pygame.display.set_caption("test")
 
@@ -30,14 +31,6 @@ screens = {
 }
 
 switch_screen("main_menu")
-
-deck = Deck()               # opretter en ny kortbunke
-deck.shuffle()              # blander kortene i bunken          
-last_drawn_card = None      # initialiserer last_drawn_card
-
-suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
-hand = []               # opretter en tom hånd
-discard = []           # opretter en tom discard bunke
 
 # === Main loop ===
 running = True
