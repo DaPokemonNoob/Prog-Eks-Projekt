@@ -316,3 +316,10 @@ class PlayMenu(Screen):
         x_d, y_d = 50, 550
         for i, (_, _, img) in enumerate(self.discard[-5:]):     # Tegner de fem seneste kort i discard bunken
             screen.blit(img, (x_d + i * 60, y_d))
+
+class MapMenu(Screen):
+    def __init__(self, switch_screen, screen_ref):
+        super().__init__()
+        self.bg_color = "white"
+        self.switch_screen = switch_screen
+        self.screen_ref = screen_ref
