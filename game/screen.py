@@ -167,7 +167,7 @@ class PlayMenu(Screen):
         self.dragged_card = None
         self.drag_offset = (0,0)
         self.lock_zone = pygame.Rect(1000, 400, 120, 160)  # x, y, width, height
-        self.locked_cards = []  # Liste til kort som er låst fast
+        self.locked_card = None  # Liste til kort som er låst fast
 
         self.menu_button = Button((100, 100), "red", (200, 50))
         self.next_turn_button = Button((400, 200), "gray", (200, 50))
@@ -211,7 +211,18 @@ class PlayMenu(Screen):
             if self.dragged_card:
                 mouse_x, mouse_y = event.pos
                 if self.lock_zone.collidepoint(mouse_x, mouse_y):
-                    self.locked_cards.append((mouse_x - 40, mouse_y - 60, self.dragged_card[2]))  # Brug musens position
+                    if self.locked_card is None:
+                        # Lås kortet i zonen
+                        self.locked_card = (
+                            self.lock_zone.x + (self.lock_zone.width - 80) // 2,
+                            self.lock_zone.y + (self.lock_zone.height - 120) // 2,
+                            self.dragged_card[2]
+                        )
+                    else:
+                        # Der ligger allerede et kort, så returnér det til hånden
+                        new_index = (mouse_x - 50) // 90
+                        new_index = max(0, min(len(self.hand), new_index))
+                        self.hand.insert(new_index, self.dragged_card)
                 else:
                     new_index = (mouse_x - 50) // 90
                     new_index = max(0, min(len(self.hand), new_index))
@@ -235,7 +246,8 @@ class PlayMenu(Screen):
         for i, (_, _, img) in enumerate(self.hand):             # Tegner alle kortene på hånden og forskyder dem med 90
             screen.blit(img, (x + i * 90, y))
 
-        for lx, ly, img in self.locked_cards:
+        if self.locked_card:
+            lx, ly, img = self.locked_card
             screen.blit(img, (lx, ly))
 
         if self.dragged_card:
