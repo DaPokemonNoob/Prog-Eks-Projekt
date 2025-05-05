@@ -166,13 +166,10 @@ class PlayMenu(Screen):
         self.dragged_card = None
         self.drag_offset = (0, 0)
 
-        self.background_image = pygame.image.load("assets/background/playscreen1.png").convert()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
-
-        self.player_front_row_zone = pygame.Rect(300, 20, 200, 400)
-        self.player_back_row_zone = pygame.Rect(100, 200, 200, 400)
-        self.enemy_front_row_zone = pygame.Rect(780, 200, 200, 400)
-        self.enemy_back_row_zone = pygame.Rect(980, 200, 200, 400)
+        self.player_front_row_zone = pygame.Rect(300, 275, 200, 300) #top-right corner x-position, top-right corner y-position, width, height
+        self.player_back_row_zone = pygame.Rect(100, 200, 200, 450)  #top-right corner x-position, top-right corner y-position, width, height
+        self.enemy_front_row_zone = pygame.Rect(780, 275, 200, 300)  #top-right corner x-position, top-right corner y-position, width, height
+        self.enemy_back_row_zone = pygame.Rect(980, 200, 200, 450)   #top-right corner x-position, top-right corner y-position, width, height
 
         self.menu_button = Button((100, 100), "red", (200, 50))
         self.next_turn_button = Button((993, 587), "gray", (240, 128), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
