@@ -52,10 +52,30 @@ def play_card_draw_and_flip_animation(screen, clock, card_back, card_front, deck
                 pygame.display.flip()
 
                 # Tilføj en forsinkelse for at vise forsiden af kortet
-                pygame.time.wait(delay_after_flip)  # Vent i millisekunder
+                delay_running = True
+                delay_start_time = pygame.time.get_ticks()
+                while delay_running:
+                    # Tegn PlayMenu som baggrund
+                    playmenu_draw_function(screen)
 
-                # Animationen er færdig, men kortet forbliver synligt
-                running = False  # Afslut animationen
+                    # Tegn det aktuelle kort
+                    screen.blit(current_image, (card_pos[0], card_pos[1]))
+
+                    # Opdater skærmen
+                    pygame.display.flip()
+
+                    # Tjek for events
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            delay_running = False
+                            running = False
+
+                    # Stop forsinkelsen efter den angivne tid
+                    if pygame.time.get_ticks() - delay_start_time >= delay_after_flip:
+                        delay_running = False
+
+                # Afslut animationen
+                running = False
 
             if flip_progress < 0.5:
                 # Første halvdel af flip: kortet bliver smallere
