@@ -266,7 +266,7 @@ class PlayMenu(Screen):
         self.draw_labels(screen)
 
         # tegner midter dividerlinjen
-        pygame.draw.line(screen, (255, 255, 255), (width/2, 200), (width/2, 520), 2)
+        pygame.draw.line(screen, (255, 255, 255), (width/2, 100), (width/2, 420), 2)
 
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
