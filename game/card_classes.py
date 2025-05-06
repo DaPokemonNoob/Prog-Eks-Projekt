@@ -24,29 +24,30 @@ class Minion(Card):
         self.attack = attack
         self.hp = hp
         self.effect = effect
-        self.is_selected = False
+        self.is_selected_for_attack = False  # Renamed to clarify purpose
         self.image = None  # This should be set when the minion is placed on the board
         self.is_enemy = False
-        self.is_front_row = False
-        Minion.all_minions.append(self)  # Add this minion to the tracking list
+        self.is_front_row = False  # Once set, this cannot be changed (minions cannot move between rows)
+        Minion.all_minions.append(self)
 
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
 
     def selected(self):
+        # Selection is only used for attacking
         if self.check_hover() and pygame.mouse.get_pressed()[0]:
-            self.is_selected = not self.is_selected
+            self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
     def attack(self, target, battle_state):
-        if self.is_selected and target:
+        if self.is_selected_for_attack and target:
             # Deal damage to target
             target.hp -= self.attack
             # Take damage from target if it's a minion
             if isinstance(target, Minion):
                 self.hp -= target.attack
-            # Handle minion death
+            # Handle minion death and automatic position shifting within the same row
             if target.hp <= 0:
                 if target.is_enemy:
                     if target.is_front_row:
@@ -64,12 +65,14 @@ class Minion(Card):
                 else:
                     battle_state.player_back_row.remove(self)
             # Deselect after attack
-            self.is_selected = False
+            self.is_selected_for_attack = False
 
 # Spell subclass:
 class Spell(Card):
-    def __init__(self, name, manaCost, pic=None):
-        super().__init__('spell', name, manaCost, effect=None, pic=pic)
+    def __init__(self, name, manaCost, attack, activationTimes=1, effect=None, pic=None):
+        super().__init__('spell', name, manaCost, effect, pic)
+        self.attack = attack
+        self.activationTimes = activationTimes
 
 # Weapon subclass:
 class Weapon(Card):
@@ -106,7 +109,7 @@ class BoardState:
         # Find any currently selected minion
         for row in [self.player_front_row, self.player_back_row]:
             for minion in row:
-                if minion.is_selected:
+                if minion.is_selected_for_attack:
                     selected_minion = minion
                     break
             if selected_minion:
@@ -119,7 +122,7 @@ class BoardState:
         elif not clicked_minion.is_enemy:
             # Select/deselect player minion
             if selected_minion and selected_minion != clicked_minion:
-                selected_minion.is_selected = False
+                selected_minion.is_selected_for_attack = False
             clicked_minion.selected()
             return True
         return False

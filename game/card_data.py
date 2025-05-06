@@ -23,7 +23,7 @@ def fireball():
     return Spell("Fireball", manaCost=4, attack=2)
 
 def chaosCrystal():
-    return Spell("Chaos Crystal", manaCost=2, attack=1, effect="Deals 5 damage split among all Minions and Heroes.")
+    return Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage split among all Minions and Heroes.")
 
 def firestorm():
     return Spell("Firestorm", manaCost=5, attack=3, effect="Deals 3 damage to all Minions.")
