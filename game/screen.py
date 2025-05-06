@@ -353,3 +353,59 @@ class MapMenu(Screen):
         self.bg_color = "white"
         self.switch_screen = switch_screen
         self.screen_ref = screen_ref
+
+class PauseMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = None  # We'll use a transparent overlay instead
+        
+        # Create buttons
+        button_width = 550
+        button_height = 100
+        center_x = width // 2 - button_width // 2
+        
+        self.resume_button = Button((center_x, 200), "red", (button_width, button_height))
+        self.main_menu_button = Button((center_x, 350), "red", (button_width, button_height))
+        self.quit_button = Button((center_x, 500), "red", (button_width, button_height))
+        
+        self.buttons = [self.resume_button, self.main_menu_button, self.quit_button]
+        self.actions = {
+            self.resume_button: lambda: self.switch_screen("resume"),
+            self.main_menu_button: lambda: self.switch_screen("main_menu"),
+            self.quit_button: lambda: sys.exit()
+        }
+    
+    def draw(self, screen):
+        # lav semi-transparent overlay
+        overlay = pygame.Surface((1280, 720))
+        overlay.fill((0, 0, 0))
+        overlay.set_alpha(128)
+        screen.blit(overlay, (0, 0))
+        
+        # tegn knapper
+        for button in self.buttons:
+            button.run()
+        self.draw_labels(screen)
+    
+    def draw_labels(self, screen):
+        font = pygame.font.Font("assets/font/impact.ttf", 50)
+    
+        resume_text = font.render("RESUME", True, "white")
+        menu_text = font.render("QUIT TO MENU", True, "white")
+        quit_text = font.render("QUIT GAME", True, "white")
+        
+        # placer teksten i midten af knappen
+        for button, text in [
+            (self.resume_button, resume_text),
+            (self.main_menu_button, menu_text),
+            (self.quit_button, quit_text)
+        ]:
+            # udregn tekstens placering
+            text_rect = text.get_rect()
+            button_center_x = button.pos[0] + button.size[0] // 2
+            button_center_y = button.pos[1] + button.size[1] // 2
+            text_rect.center = (button_center_x, button_center_y)
+            
+            # skriv tekst
+            screen.blit(text, text_rect)
