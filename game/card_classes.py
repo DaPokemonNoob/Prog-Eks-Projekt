@@ -1,4 +1,5 @@
 import pygame
+
 # Card superclass:
 class Card:
     def __init__(self, category, name, manaCost, effect, pic=None):
@@ -18,7 +19,6 @@ class Hero(Card):
 # Minion subclass:
 class Minion(Card):
     all_minions = []  # Class variable to track all minions
-
     def __init__(self, name, manaCost, attack, hp, effect, pic=None):
         super().__init__('minion', name, manaCost, effect, pic)
         self.attack = attack
@@ -39,7 +39,7 @@ class Minion(Card):
             self.is_selected = not self.is_selected
             return self
 
-    def attack(self, target):
+    def attack(self, target, battle_state):
         if self.is_selected and target:
             # Deal damage to target
             target.hp -= self.attack
@@ -77,7 +77,7 @@ class Weapon(Card):
         super().__init__('weapon', name, manaCost, effect=None, pic=pic)
         self.attack = attack
 
-class BattleState:
+class BoardState:
     def __init__(self):
         self.enemy_front_row = []  # max 2 minions
         self.enemy_back_row = []   # max 3 minions
@@ -114,7 +114,7 @@ class BattleState:
                 
         if clicked_minion.is_enemy and selected_minion:
             # Attack enemy minion
-            selected_minion.attack(clicked_minion)
+            selected_minion.attack(clicked_minion, self)
             return True
         elif not clicked_minion.is_enemy:
             # Select/deselect player minion
@@ -123,6 +123,3 @@ class BattleState:
             clicked_minion.selected()
             return True
         return False
-
-# Create a global battle state instance
-battle_state = BattleState()
