@@ -2,7 +2,7 @@ import pygame, sys
 from cards import Deck
 import os
 from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu
-from level import generate_map, assign_level_positions, draw_map
+from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 
 # starter pygame
 pygame.init()
@@ -35,6 +35,7 @@ switch_screen("main_menu")
 # === Main loop ===
 running = True
 while running:
+    mouse_pos = pygame.mouse.get_pos()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -43,7 +44,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 map_data = generate_map() # genererer et nyt kort når R trykkes
+                Level.current_level = None
                 assign_level_positions(map_data)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            handle_click(mouse_pos, map_data)
 
     current_screen.draw(SCREEN)
     if current_screen == screens['map_menu']:

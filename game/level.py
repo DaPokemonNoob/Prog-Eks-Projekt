@@ -2,12 +2,32 @@ import random
 import pygame
 
 class Level: 
+    current_level = None # definerer en klassevariabel til at holde styr på det nuværende level
     # definerer en klasse til at repræsentere et level i spillet
     def __init__(self, id, level_number, encounter_type=None):
         self.id = id
         self.level_number = level_number
         self.encounter_type = encounter_type
         self.next_level = []
+        self.radius = 20
+
+    def is_clickable(self):
+        # definerer en funktion til at håndtere klik på leveler
+        mouse_x, mouse_y = pygame.mouse.get_pos() # henter musens position
+        distance = ((self.x - mouse_x) ** 2 + (self.y - mouse_y) ** 2) ** 0.5 # beregner afstanden mellem musen og levelet
+
+        if distance <= self.radius:
+            if Level.current_level is None:
+                # laver første gruppe af levels clickable hvis intet level er valgt
+                return self.level_number == 0
+            return self in Level.current_level.next_level
+        
+        return False
+
+    @classmethod
+    def set_current_level(cls, level):
+        # definerer en klassemetode til at sætte det nuværende level
+        cls.current_level = level
 
 def verificer_map(map_levels):
     # definerer en funktion til at verificere kortet
@@ -37,8 +57,15 @@ def verificer_map(map_levels):
                 random_tidligere_level = random.choice(tidligere_gruppe) # vælger et tilfældigt level fra den tidligere gruppe
                 random_tidligere_level.next_level.append(utilgængelig_level) # tilføjer det utilgængelige level til den tidligere gruppe
         
-
-
+def handle_click(mouse_pos, map_levels):
+    for level_group in map_levels:
+        for level in level_group:
+            if level.is_clickable():
+                # levelet kunne klikkes, så gør det til det nuværende level
+                Level.set_current_level(level)
+                print(f"Moved to level {level.id}")
+                return True
+    return False
 
 def generate_map(level_count=6):
     encounter_types = ["battle", "treasure", "shop", "heal"] # de forskellige typer af encounters
@@ -117,7 +144,14 @@ def draw_map(map_levels, screen, font):
                 "boss": (255, 0, 255)
             }.get(level.encounter_type, (255, 255, 255))
 
-            pygame.draw.circle(screen, color, (level.x, level.y), 20) # tegner cirkler for hver level
+            if level.is_clickable():
+                pygame.draw.circle(screen, (255, 255, 0), (level.x, level.y), level.radius + 5)
+
+            pygame.draw.circle(screen, color, (level.x, level.y), level.radius) # tegner cirkler for levelerne
+
+            if level == Level.current_level:
+                pygame.draw.circle(screen, (0, 0, 0), (level.x, level.y), level.radius + 2, 5)
+
             text = font.render(str(level.id), True, (0, 0, 0))
             screen.blit(text, (level.x - text.get_width() // 2, level.y - text.get_height() // 2))
 
