@@ -1,7 +1,7 @@
 import pygame
 import sys
 import os
-from cards import Deck
+from playingCards import Deck
 
 width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))

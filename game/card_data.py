@@ -7,7 +7,7 @@ def someGuy():
 
 def someCoolGuy():
     attack_bonus, hp_bonus = effect.increase(1, 0)
-    return Minion("Some Cool Guy", manaCost=5, attack=4 + attack_bonus, hp=6 + hp_bonus, effect="When summoned: increase all minions attack by 1.")
+    return Minion("Some Cool Guy", manaCost=5, attack=4 + attack_bonus, hp=6 + hp_bonus, effect="When summoned: increase all ally Minions attack by 1.")
 
 def knight():
     armor_amount = effect.armor(2)
@@ -21,6 +21,12 @@ def adventurer():
 # Eksempel på spell kort:
 def fireball():
     return Spell("Fireball", manaCost=4, attack=2)
+
+def chaosCrystal():
+    return Spell("Chaos Crystal", manaCost=2, attack=1, effect="Deals 5 damage split among all Minions and Heroes.")
+
+def firestorm():
+    return Spell("Firestorm", manaCost=5, attack=3, effect="Deals 3 damage to all Minions.")
 
 # Eksempel på weapon kort:
 def sword():
