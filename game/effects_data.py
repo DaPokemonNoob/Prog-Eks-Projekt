@@ -1,9 +1,8 @@
-def armor(self, armor):
-    self.armor += armor
+def armor(amount):
+    return amount
 
-def taunt(self):
+def taunt():
     return True
 
-def increase(self, attack, hp):
-    self.attack += attack
-    self.hp += hp
+def increase(attack, hp):
+    return attack, hp
