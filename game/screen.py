@@ -13,7 +13,7 @@ def load_card_image(rank, suit):
     path = os.path.join("assets", "card", filename)
     try:
         image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (80, 120))
+        return pygame.transform.scale(image, (100, 140))
     except pygame.error as e:
         print(f"Failed to load {path}: {e}")
         return None
@@ -166,13 +166,13 @@ class PlayMenu(Screen):
         self.dragged_card = None
         self.drag_offset = (0, 0)
 
-        self.player_front_row_zone = pygame.Rect(300, 200, 200, 400)
-        self.player_back_row_zone = pygame.Rect(100, 200, 200, 400)
-        self.enemy_front_row_zone = pygame.Rect(780, 200, 200, 400)
-        self.enemy_back_row_zone = pygame.Rect(980, 200, 200, 400)
+        self.player_front_row_zone = pygame.Rect(300, 275, 200, 300) #top-right corner x-position, top-right corner y-position, width, height
+        self.player_back_row_zone = pygame.Rect(100, 200, 200, 450)  #top-right corner x-position, top-right corner y-position, width, height
+        self.enemy_front_row_zone = pygame.Rect(780, 275, 200, 300)  #top-right corner x-position, top-right corner y-position, width, height
+        self.enemy_back_row_zone = pygame.Rect(980, 200, 200, 450)   #top-right corner x-position, top-right corner y-position, width, height
 
         self.menu_button = Button((100, 100), "red", (200, 50))
-        self.next_turn_button = Button((400, 200), "gray", (200, 100), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
+        self.next_turn_button = Button((993, 587), "gray", (240, 128), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
 
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
@@ -257,7 +257,10 @@ class PlayMenu(Screen):
             y += 120 + spacing  # Move down by card height plus spacing
 
     def draw(self, screen):
-        super().draw(screen)
+        screen.blit(self.background_image, (0, 0))
+        for button in self.buttons:
+            button.run()
+        self.draw_labels(screen)
 
         # tegner midter dividerlinjen
         pygame.draw.line(screen, (255, 255, 255), (width/2, 200), (width/2, 520), 2)
