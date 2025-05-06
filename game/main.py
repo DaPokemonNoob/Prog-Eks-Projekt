@@ -1,5 +1,4 @@
 import pygame, sys
-from cards import Deck
 import os
 from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
