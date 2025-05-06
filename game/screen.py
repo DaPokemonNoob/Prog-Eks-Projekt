@@ -4,6 +4,7 @@ import os
 from playingCards import Deck
 import card_data as card
 from card_classes import BoardState, Hero
+from enemy import Enemy
 import random
 
 width, height = 1280, 720
@@ -160,32 +161,34 @@ class PlayMenu(Screen):
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
-        self.is_player_turn = True  # 'True' hvis det er spillerens tur, 'False' hvis det er modstanderens tur
+        self.is_player_turn = True
         
         self.battle_state = BoardState()
         self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
         
-        # deckPile = index af kort der er i spillerens dæk
+        # Player deck and hand
         self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), card.fireball(), card.fireball(), card.fireball(), card.sword()]
         random.shuffle(self.playerDeckPile)
-        # enemy_deck = index af kort der er i modstanderens dæk
-        self.enemyDeckPile = [card.knight(), card.someGuy(), card.someCoolGuy(), card.knight()]
-        self.playerHand = []          # index af spillerens hånd
-        self.playerDiscard = []       # index af spillerens discard bunke
-        self.enemyHand = []    # index af modstanderens hånd
-        self.enemyDiscard = [] # index af modstanderens discard bunke
+        self.playerHand = []
+        self.playerDiscard = []
+        
+        # Create enemy instance
+        self.enemy = Enemy(self.battle_state)
 
         self.dragged_card = None
         self.drag_offset = (0, 0)
 
-        self.player_front_row_zone = pygame.Rect(300, 87, 200, 300) #top-højre hjørne x-position, top-højre hjørne y-position, width, height
-        self.player_back_row_zone = pygame.Rect(100, 25, 200, 450)  #top-højre hjørne x-position, top-højre hjørne y-position, width, height
-        self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)  #top-højre hjørne x-position, top-højre hjørne y-position, width, height
-        self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)   #top-højre hjørne x-position, top-højre hjørne y-position, width, height
+        # Setup play zones
+        self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
+        self.player_back_row_zone = pygame.Rect(100, 25, 200, 450)
+        self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
+        self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
 
+        # Load background
         self.background_image = pygame.image.load("assets/background/playscreen1.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
 
+        # Setup buttons
         self.menu_button = Button((100, 100), "red", (200, 50))
         self.next_turn_button = Button((993, 587), "gray", (240, 128), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
 
@@ -199,33 +202,8 @@ class PlayMenu(Screen):
     def end_turn(self):
         self.draw_card()
         self.is_player_turn = False
-        self.enemy_turn()
-
-    def enemy_turn(self):
-        # Draw a card for enemy
-        if len(self.enemyDeckPile) > 0 and len(self.enemyHand) < 7:
-            enemy_minion = self.enemyDeckPile.pop(0)
-            self.enemyHand.append(enemy_minion)
-        
-        # Place a minion if possible
-        if len(self.battle_state.enemy_front_row) < 3 and len(self.enemyHand) > 0:
-            # Place first card from enemy hand
-            enemy_minion = self.enemyHand.pop(0)
-            self.battle_state.add_minion(enemy_minion, True, True)
-        
-        # Attack with enemy minions
-        for minion in self.battle_state.enemy_front_row:
-            if not self.battle_state.player_front_row:
-                self.battle_state.player_hero.hp -= minion.attack
-            elif self.battle_state.player_front_row:
-                target = self.battle_state.player_front_row[0]
-                target.hp -= minion.attack
-                if target.hp <= 0:
-                    self.battle_state.player_front_row.remove(target)
-                    self.playerDiscard.append(target)
-        
+        self.enemy.perform_turn()
         self.is_player_turn = True
-    
 
     def draw_card(self):
         try:
@@ -294,7 +272,7 @@ class PlayMenu(Screen):
                                         self.battle_state.enemy_front_row.remove(minion)
                                     else:
                                         self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemyDiscard.append(minion)
+                                    self.enemy.enemyDiscard.append(minion)
                                 weapon_used = True
                                 self.playerDiscard.append(self.dragged_card)
                                 self.dragged_card = None
@@ -329,7 +307,7 @@ class PlayMenu(Screen):
                                         self.battle_state.enemy_front_row.remove(minion)
                                     else:
                                         self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemyDiscard.append(minion)
+                                    self.enemy.enemyDiscard.append(minion)
                                 spell_cast = True
                                 self.playerDiscard.append(self.dragged_card)
                                 self.dragged_card = None

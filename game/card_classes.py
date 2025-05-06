@@ -40,7 +40,7 @@ class Minion(Card):
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
-    def attack(self, target, battle_state):
+    def perform_attack(self, target, battle_state):
         if self.is_selected_for_attack and target:
             # Deal damage to target
             target.hp -= self.attack
@@ -117,7 +117,7 @@ class BoardState:
                 
         if clicked_minion.is_enemy and selected_minion:
             # Attack enemy minion
-            selected_minion.attack(clicked_minion, self)
+            selected_minion.perform_attack(clicked_minion, self)
             return True
         elif not clicked_minion.is_enemy:
             # Select/deselect player minion
