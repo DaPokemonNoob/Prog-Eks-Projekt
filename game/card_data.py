@@ -2,6 +2,7 @@ import card_classes as cc
 import effects_data as ed
 
 # Eksempel på minion kort:
+
 def someGuy():
     return cc.Minion("Some Guy", manaCost=3, attack=2, hp=5, effect=None)
 

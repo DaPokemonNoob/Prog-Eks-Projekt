@@ -1,4 +1,5 @@
 import pygame
+import card_data as cd
 # Card superclass:
 class Card:
     def __init__(self, category, name, manaCost, effect, pic=None):
@@ -18,9 +19,8 @@ class Hero(Card):
 # Minion subclass:
 class Minion(Card):
     all_minions = []  # Class variable to track all minions
-
     def __init__(self, name, manaCost, attack, hp, effect, pic=None):
-        super().__init__('minion', name, manaCost, effect, pic)
+        super().__init__('minion', name, manaCost, effect, pic, played=False, rest=False) #sæt "rest" til True når program er færdig
         self.attack = attack
         self.hp = hp
         self.effect = effect
@@ -30,22 +30,30 @@ class Minion(Card):
         self.is_front_row = False
         Minion.all_minions.append(self)  # Add this minion to the tracking list
 
+    # checker om musen er over minionen
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
+    
+    # funktion for at summon en minion på boardet
+    def summon(self):
+        if self.category == 'minion' and not self.played:
+            self.image = pygame.image.load(self.pic).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (100, 100))
 
+    # funktion for at selektere en minion som er placeret på boardet
     def selected(self):
         if self.check_hover() and pygame.mouse.get_pressed()[0]:
             self.is_selected = not self.is_selected
             return self
 
+    # funktion for en minion der angriber
     def attack(self, target):
-        if self.is_selected and target:
+        if self.is_selected and target and self.rest == False:
             # Deal damage to target
             target.hp -= self.attack
             # Take damage from target if it's a minion
-            if isinstance(target, Minion):
-                self.hp -= target.attack
+            self.hp -= target.attack
             # Handle minion death
             if target.hp <= 0:
                 if target.is_enemy:
@@ -77,14 +85,14 @@ class Weapon(Card):
         super().__init__('weapon', name, manaCost, effect=None, pic=pic)
         self.attack = attack
 
-class BattleState:
+class BoardState:
     def __init__(self):
         self.enemy_front_row = []  # max 2 minions
         self.enemy_back_row = []   # max 3 minions
         self.player_front_row = [] # max 2 minions
         self.player_back_row = []  # max 3 minions
         self.enemy_hero = None
-        self.player_hero = None
+        self.player_hero = cd.adventurer()
         
     def add_minion(self, minion, is_enemy, is_front_row):
         target_row = None
@@ -125,4 +133,4 @@ class BattleState:
         return False
 
 # Create a global battle state instance
-battle_state = BattleState()
+battle_state = BoardState()
