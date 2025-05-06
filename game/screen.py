@@ -98,7 +98,7 @@ class MainMenu(Screen):
         self.buttons = [self.play_button, self.options_button, self.quit_button]
 
         self.actions = {
-            self.play_button: lambda: self.switch_screen("main_menu"), #AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+            self.play_button: lambda: self.switch_screen("play_menu"), #AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
             self.options_button: lambda: self.switch_screen("options_menu"),
             self.quit_button: lambda: sys.exit()
         }
