@@ -162,12 +162,9 @@ class PlayMenu(Screen):
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
-<<<<<<< HEAD
         self.is_player_turn = True
-=======
         self.clock = clock
         self.is_player_turn = True  # 'True' hvis det er spillerens tur, 'False' hvis det er modstanderens tur
->>>>>>> d478f3e4b90fa612bbac7e94b9d288f9ccce8447
         
         self.battle_state = BoardState()
         self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
@@ -190,12 +187,9 @@ class PlayMenu(Screen):
         self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
         self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
 
-<<<<<<< HEAD
         # Load background
         self.background_image = pygame.image.load("assets/background/playscreen1.png").convert_alpha()
-=======
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
->>>>>>> d478f3e4b90fa612bbac7e94b9d288f9ccce8447
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
 
         # Setup buttons
