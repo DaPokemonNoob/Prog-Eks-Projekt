@@ -188,7 +188,6 @@ class PlayMenu(Screen):
         self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
 
         # Load background
-        self.background_image = pygame.image.load("assets/background/playscreen1.png").convert_alpha()
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
 
