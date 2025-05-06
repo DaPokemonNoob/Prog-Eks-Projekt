@@ -158,8 +158,12 @@ class PlayMenu(Screen):
         self.bg_color = "blue"
         self.switch_screen = switch_screen
 
-        self.deck = Deck()
-        self.deck.shuffle()
+        from card_data import someGuy, someCoolGuy, knight
+        from card_classes import BoardState, Hero
+        self.battle_state = BoardState()
+        self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
+        
+        self.minion_deck = [someGuy(), someCoolGuy(), knight(), someGuy(), someCoolGuy(), knight()]
         self.hand = []
         self.discard = []
 
@@ -186,14 +190,11 @@ class PlayMenu(Screen):
 
     def draw_card(self):
         try:
-            card = self.deck.drawCard()
-            image = load_card_image(*card)
-            if image:
-                if len(self.hand) < 7:
-                    self.hand.append((*card, image))
-                else:
-                    self.discard.append((*card, image))
-                    print(f"Drew card: {card}")
+            if len(self.minion_deck) > 0 and len(self.hand) < 7:
+                minion = self.minion_deck.pop(0)
+                self.hand.append(minion)
+            else:
+                print("No more cards to draw or hand is full")
         except IndexError:
             print("No more cards to draw.")
 
@@ -211,30 +212,24 @@ class PlayMenu(Screen):
 
             # Only check minions if we didn't grab a card
             if not self.dragged_card:
-                from card_classes import battle_state
-                for row in [battle_state.enemy_front_row, battle_state.enemy_back_row,
-                          battle_state.player_front_row, battle_state.player_back_row]:
+                for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row,
+                          self.battle_state.player_front_row, self.battle_state.player_back_row]:
                     for minion in row:
                         if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                            battle_state.handle_minion_click(minion)
+                            self.battle_state.handle_minion_click(minion)
                             break
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if self.dragged_card:
                 mouse_x, mouse_y = event.pos
-                from card_classes import battle_state, Minion
 
                 if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
-                    rank, suit, img = self.dragged_card
-                    minion = Minion(rank, manaCost=0, attack=1, hp=1, effect=None, pic=img)
-                    if battle_state.add_minion(minion, False, True):
+                    if self.battle_state.add_minion(self.dragged_card, False, True):
                         self.dragged_card = None
                         return
 
                 elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
-                    rank, suit, img = self.dragged_card
-                    minion = Minion(rank, manaCost=0, attack=1, hp=1, effect=None, pic=img)
-                    if battle_state.add_minion(minion, False, False):
+                    if self.battle_state.add_minion(self.dragged_card, False, False):
                         self.dragged_card = None
                         return
 
@@ -250,14 +245,19 @@ class PlayMenu(Screen):
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
-        x = zone_rect.x + (zone_rect.width - 80) // 2  # Center the cards horizontally in the zone
-        y = zone_rect.y + spacing  # Start from the top of the zone
+        x = zone_rect.x + (zone_rect.width - 80) // 2  # Center cards horizontally
+        y = zone_rect.y + spacing  # Start from top
 
         for minion in row:
             minion.image = pygame.Rect(x, y, 80, 120)
-            if minion.pic:  # Draw the card image if it exists
-                screen.blit(minion.pic, (x, y))
-            y += 120 + spacing  # Move down by card height plus spacing
+            # Draw gray box with name for placed minions
+            pygame.draw.rect(screen, (200, 200, 200), minion.image)
+            # Draw minion name
+            font = pygame.font.Font(None, 24)
+            text = font.render(minion.name, True, (0, 0, 0))
+            text_rect = text.get_rect(center=(x + 40, y + 60))
+            screen.blit(text, text_rect)
+            y += 120 + spacing
 
     def draw(self, screen):
         screen.blit(self.background_image, (0, 0))
@@ -265,36 +265,45 @@ class PlayMenu(Screen):
             button.run()
         self.draw_labels(screen)
 
-        # tegner midter dividerlinjen
-        pygame.draw.line(screen, (255, 255, 255), (width/2, 100), (width/2, 420), 2)
-
+        # Draw row zones
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
         pygame.draw.rect(screen, (200, 100, 100), self.enemy_front_row_zone, 2)
         pygame.draw.rect(screen, (200, 100, 100), self.enemy_back_row_zone, 2)
 
-        from card_classes import battle_state
-
-        self.draw_minion_row(screen, battle_state.player_front_row, self.player_front_row_zone)
-        self.draw_minion_row(screen, battle_state.player_back_row, self.player_back_row_zone)
-        self.draw_minion_row(screen, battle_state.enemy_front_row, self.enemy_front_row_zone)
-        self.draw_minion_row(screen, battle_state.enemy_back_row, self.enemy_back_row_zone)
+        self.draw_minion_row(screen, self.battle_state.player_front_row, self.player_front_row_zone)
+        self.draw_minion_row(screen, self.battle_state.player_back_row, self.player_back_row_zone)
+        self.draw_minion_row(screen, self.battle_state.enemy_front_row, self.enemy_front_row_zone)
+        self.draw_minion_row(screen, self.battle_state.enemy_back_row, self.enemy_back_row_zone)
 
         # Draw hand
         self.hand_card_rects = []
         x = 20
         y = height - 150
-        for card in self.hand:
-            rank, suit, img = card
-            rect = screen.blit(img, (x, y))
-            self.hand_card_rects.append(rect)
+        for minion in self.hand:
+            card_rect = pygame.Rect(x, y, 80, 120)
+            pygame.draw.rect(screen, (200, 200, 200), card_rect)
+            # Draw minion name
+            font = pygame.font.Font(None, 24)
+            text = font.render(minion.name, True, (0, 0, 0))
+            text_rect = text.get_rect(center=(x + 40, y + 60))
+            screen.blit(text, text_rect)
+            self.hand_card_rects.append(card_rect)
             x += 90
 
         # Draw dragged card
         if self.dragged_card:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            rank, suit, img = self.dragged_card
-            screen.blit(img, (mouse_x - self.drag_offset[0], mouse_y - self.drag_offset[1]))
+            drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
+                                  mouse_y - self.drag_offset[1], 80, 120)
+            pygame.draw.rect(screen, (200, 200, 200), drag_rect)
+            # Draw minion name
+            font = pygame.font.Font(None, 24)
+            text = font.render(self.dragged_card.name, True, (0, 0, 0))
+            text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
+                                            mouse_y - self.drag_offset[1] + 60))
+            screen.blit(text, text_rect)
+
 class MapMenu(Screen):
     def __init__(self, switch_screen, screen_ref):
         super().__init__()
