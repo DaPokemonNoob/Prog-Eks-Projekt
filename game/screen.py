@@ -157,6 +157,7 @@ class PlayMenu(Screen):
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
+        self.is_player_turn = True
 
         from card_data import someGuy, someCoolGuy, knight
         from card_classes import BoardState, Hero
@@ -164,8 +165,11 @@ class PlayMenu(Screen):
         self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
         
         self.minion_deck = [someGuy(), someCoolGuy(), knight(), someGuy(), someCoolGuy(), knight()]
+        self.enemy_deck = [someGuy(), someCoolGuy(), knight(), someGuy(), someCoolGuy(), knight()]
         self.hand = []
         self.discard = []
+        self.enemy_hand = []
+        self.enemy_discard = []
 
         self.dragged_card = None
         self.drag_offset = (0, 0)
@@ -184,9 +188,40 @@ class PlayMenu(Screen):
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
             self.menu_button: lambda: self.switch_screen("main_menu"),
-            self.next_turn_button: self.draw_card
+            self.next_turn_button: self.end_turn
         }
         self.hand_card_rects = []
+
+    def end_turn(self):
+        self.draw_card()
+        self.is_player_turn = False
+        self.enemy_turn()
+
+    def enemy_turn(self):
+        # Draw a card for enemy
+        if len(self.enemy_deck) > 0 and len(self.enemy_hand) < 7:
+            enemy_minion = self.enemy_deck.pop(0)
+            self.enemy_hand.append(enemy_minion)
+        
+        # Place a minion if possible
+        if len(self.battle_state.enemy_front_row) < 3 and len(self.enemy_hand) > 0:
+            # Place first card from enemy hand
+            enemy_minion = self.enemy_hand.pop(0)
+            self.battle_state.add_minion(enemy_minion, True, True)
+        
+        # Attack with enemy minions
+        for minion in self.battle_state.enemy_front_row:
+            if not self.battle_state.player_front_row:
+                self.battle_state.player_hero.hp -= minion.attack
+            elif self.battle_state.player_front_row:
+                target = self.battle_state.player_front_row[0]
+                target.hp -= minion.attack
+                if target.hp <= 0:
+                    self.battle_state.player_front_row.remove(target)
+                    self.discard.append(target)
+        
+        self.is_player_turn = True
+    
 
     def draw_card(self):
         try:
@@ -245,18 +280,26 @@ class PlayMenu(Screen):
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
-        x = zone_rect.x + (zone_rect.width - 80) // 2  # Center cards horizontally
-        y = zone_rect.y + spacing  # Start from top
+        x = zone_rect.x + (zone_rect.width - 80) // 2
+        y = zone_rect.y + spacing
 
         for minion in row:
             minion.image = pygame.Rect(x, y, 80, 120)
-            # Draw gray box with name for placed minions
-            pygame.draw.rect(screen, (200, 200, 200), minion.image)
-            # Draw minion name
+            # Change color to red if minion is dying (hp <= 0)
+            color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 200)
+            pygame.draw.rect(screen, color, minion.image)
+            
+            # Draw minion name and stats
             font = pygame.font.Font(None, 24)
             text = font.render(minion.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(x + 40, y + 60))
+            text_rect = text.get_rect(center=(x + 40, y + 40))
             screen.blit(text, text_rect)
+            
+            # Add HP display
+            hp_text = font.render(f"HP: {minion.hp}", True, (0, 0, 0))
+            hp_rect = hp_text.get_rect(center=(x + 40, y + 80))
+            screen.blit(hp_text, hp_rect)
+            
             y += 120 + spacing
 
     def draw(self, screen):

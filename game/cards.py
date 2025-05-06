@@ -4,7 +4,7 @@ from typing import List, Tuple
 # Define a card as a tuple (rank, suit)
 Card = Tuple[str, str]
 
-"""class Deck:
+class Deck:
     def __init__(self):
         ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
         suits = ['♠', '♥', '♦', '♣']
@@ -19,4 +19,4 @@ Card = Tuple[str, str]
         return self.cards.pop(0)
     
     def __len__(self) -> int:
-        return len(self.cards)"""
+        return len(self.cards)
