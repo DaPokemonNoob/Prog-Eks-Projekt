@@ -6,6 +6,7 @@ import card_data as card
 from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
+from animations import play_card_draw_and_flip_animation
 
 width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
@@ -157,11 +158,16 @@ class OptionsMenu(Screen):
         screen.blit(pygame.font.Font("assets/font/impact.ttf", 60).render("BACK", True, "white"), (520, 575))
 
 class PlayMenu(Screen):
-    def __init__(self, switch_screen):
+    def __init__(self, switch_screen, clock):
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
+<<<<<<< HEAD
         self.is_player_turn = True
+=======
+        self.clock = clock
+        self.is_player_turn = True  # 'True' hvis det er spillerens tur, 'False' hvis det er modstanderens tur
+>>>>>>> d478f3e4b90fa612bbac7e94b9d288f9ccce8447
         
         self.battle_state = BoardState()
         self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
@@ -184,8 +190,12 @@ class PlayMenu(Screen):
         self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
         self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
 
+<<<<<<< HEAD
         # Load background
         self.background_image = pygame.image.load("assets/background/playscreen1.png").convert_alpha()
+=======
+        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+>>>>>>> d478f3e4b90fa612bbac7e94b9d288f9ccce8447
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
 
         # Setup buttons
@@ -200,6 +210,18 @@ class PlayMenu(Screen):
         self.hand_card_rects = []
 
     def end_turn(self):
+        # Indlæs kortbilleder
+        card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
+        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
+
+        # Definer positioner
+        deck_pos = (64, 525)  # Startposition (dækket)
+        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
+
+        # Spil animationen oven på PlayMenu med en forsinkelse på 1 sekund (1000 ms)
+        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
+
+        # Fortsæt med tur-logikken
         self.draw_card()
         self.is_player_turn = False
         self.enemy.perform_turn()

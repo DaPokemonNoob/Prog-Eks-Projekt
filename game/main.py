@@ -30,7 +30,7 @@ previous_screen = None
 
 screens = {
     "main_menu": MainMenu(switch_screen),
-    "play_menu": PlayMenu(switch_screen),
+    "play_menu": PlayMenu(switch_screen, clock),
     "options_menu": OptionsMenu(switch_screen, SCREEN),
     "map_menu": MapMenu(switch_screen, SCREEN),
     "pause_menu": PauseMenu(switch_screen)
