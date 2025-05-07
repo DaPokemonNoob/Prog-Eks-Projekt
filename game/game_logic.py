@@ -92,34 +92,29 @@ def can_attack_target(attacker, target, battle_state):
         return target.has_taunt
     return True  # No taunt minions, can attack any target
 
-def cast_spell(spell, target, battle_state, caster_discard):
-    """Cast a spell on a target."""
-    if not hasattr(target, 'hp'):
-        return False
-        
-    target.hp -= spell.attack
-    if minion_death(target, battle_state):
-        caster_discard.append(spell)
-        return True
-    return False
-
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    """Håndterer brug af et våben kort."""
-    weapon_used = False
+    """Håndterer brug af et våben kort og tracker durability."""
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
                 if taunt_check([battle_state.enemy_front_row, battle_state.enemy_back_row]) and not minion.has_taunt:
-                    break
+                    return False
                 
+                # Apply weapon damage
                 minion.hp -= weapon.attack
-                weapon_used = True
-                player_discard.append(weapon)
+                weapon.durability -= 1  # Reduce durability when weapon is used
+                
+                # Check if minion dies from the attack
                 minion_death(minion, battle_state, enemy_discard)
-                break
-        if weapon_used:
-            break
-    return weapon_used
+                
+                # Return weapon to hand if durability is 1 or more, otherwise discard it
+                if weapon.durability <= 0:
+                    player_discard.append(weapon)
+                else:
+                    pass
+                
+                return True
+    return False
 
 def use_minion(minion, mouse_x, mouse_y, battle_state, front_row_zone, back_row_zone):
     """Håndterer placering af en minion på brættet."""
