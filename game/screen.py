@@ -156,9 +156,7 @@ class OptionsMenu(Screen):
 
 class PlayMenu(Screen):
     def __init__(self, switch_screen, clock):
-        # Base initialization
         super().__init__()
-        self.bg_color = "blue"
         self.switch_screen = switch_screen
         self.clock = clock
               
@@ -182,7 +180,6 @@ class PlayMenu(Screen):
         self.initialize_card_collections()
         self.dragged_card = None
         self.drag_offset = (0, 0)
-        self.hand_card_rects = []
 
         # UI zones initialization
         self.initialize_play_zones()
@@ -197,11 +194,6 @@ class PlayMenu(Screen):
 
 
     def initialize_play_zones(self):
-        self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
-        self.player_back_row_zone = pygame.Rect(100, 25, 200, 450)
-        self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
-        self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
-
         # Setup play zones
         self.player_front_row_zone = pygame.Rect(440, 87, 200, 300)
         self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
@@ -400,27 +392,22 @@ class PlayMenu(Screen):
 
     def draw_hand(self, screen):
         self.hand_card_rects = []
-        x = 20
-        y = HEIGHT - 150
+        x, y = 370, 570
         for card in self.playerHand:
-            card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
-            
-            self.image_path = f"assets/playingCard/{card.pic}" if card.pic else None
-            self.image = pygame.image.load(self.image_path).convert_alpha()
-            self.image = pygame.transform.scale(self.image, (CARD_WIDTH, CARD_HEIGHT))
-            screen.blit(self.image, (x, y))
+            rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
+            if card.pic:
+                image = pygame.image.load(f"assets/playingCard/{card.pic}").convert_alpha()
+                image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
+                screen.blit(image, (x, y))
             
             font = pygame.font.Font(None, 24)
-            text = font.render(str(card.manaCost), True, (255, 255, 255))
-            text_rect = text.get_rect(center=(x + 85, y + 17))
-            screen.blit(text, text_rect)
+            screen.blit(font.render(str(card.manaCost), True, (255, 255, 255)), (x + 85, y + 17))
             
+            # Bruges ikke lige nu
             if hasattr(card, 'category') and card.category != 'minion':
-                type_text = font.render(card.category.upper(), True, (0, 0, 0))
-                type_rect = type_text.get_rect(center=(x + 40, y + 30))
-                screen.blit(type_text, type_rect)
+                screen.blit(font.render(card.category.upper(), True, (0, 0, 0)), (x + 40, y + 30))
             
-            self.hand_card_rects.append(card_rect)
+            self.hand_card_rects.append(rect)
             x += 100
 
     def draw_dragged_card(self, screen):
@@ -430,7 +417,6 @@ class PlayMenu(Screen):
             drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
                                   mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
             pygame.draw.rect(screen, color, drag_rect)
-            font = pygame.font.Font(None, 24)
             text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
             text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
                                             mouse_y - self.drag_offset[1] + 60))
