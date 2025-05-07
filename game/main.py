@@ -1,15 +1,13 @@
 import pygame, sys
 import os
-from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu
+from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, SCREEN
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 
 # starter pygame
 pygame.init()
 
-width, height = 1280, 720
-SCREEN = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
-pygame.display.set_caption("test")
+pygame.display.set_caption("Arcane Clash")
 
 # map ting
 font = pygame.font.Font(None, 36)
