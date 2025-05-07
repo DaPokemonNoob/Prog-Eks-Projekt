@@ -6,8 +6,7 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, 
-                       can_attack_target, TurnManager, use_weapon, use_minion, use_spell)
+from game_logic import (TurnManager, use_weapon, use_minion, use_spell)
 
 # intialiser screen
 WIDTH, HEIGHT = 1280, 720
@@ -323,24 +322,6 @@ class PlayMenu(Screen):
             insert_pos = i + 1
         self.playerHand.insert(insert_pos, self.dragged_card)
         self.dragged_card = None
-
-    # Card Management Methods
-    def draw_card(self):
-        if len(self.playerDeckPile) > 0 and len(self.playerHand) < 7:
-            minion = self.playerDeckPile.pop(0)
-            self.playerHand.append(minion)
-        else:
-            print("No more cards to draw or hand is full")
-
-
-    def has_taunt_minion(self, rows):
-        for row in rows:
-            for minion in row:
-                if (hasattr(minion, 'effect') and minion.effect and 
-                    'Taunt' in minion.effect and 
-                    (minion.name != 'Knight' or minion.is_front_row)):
-                    return True
-        return False
 
     # Drawing Methods
     def draw(self, screen):

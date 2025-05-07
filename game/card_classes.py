@@ -1,5 +1,4 @@
 import pygame
-from game_logic import perform_attack, add_minion_to_board
 
 # Card superclass:
 class Card:
@@ -45,12 +44,6 @@ class Minion(Card):
         if self.check_hover() and pygame.mouse.get_pressed()[0]:
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
-
-    # funktion til at minion angriber
-    def perform_attack(self, target, battle_state):
-        if self.is_selected_for_attack and target:
-            perform_attack(self, target, battle_state)
-            self.is_selected_for_attack = False
 
     # funktion til at give alle minions på boardet +1 attack
     def buff_allies(self, battle_state):
