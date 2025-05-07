@@ -360,17 +360,21 @@ class PlayMenu(Screen):
 
         for minion in row:
             minion.image = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
-            color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
-            pygame.draw.rect(screen, color, minion.image)
+
+            if hasattr(minion, 'pic') and minion.pic:
+                image = pygame.image.load(f"assets/playingCard/{minion.pic}").convert_alpha()
+                image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
+                screen.blit(image, (x, y))
+            else:
+                # Fallback: farvet rektangel
+                color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
+                pygame.draw.rect(screen, color, minion.image)
             
             font = pygame.font.Font(None, 24)
-            text = font.render(minion.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(x + 40, y + 40))
-            screen.blit(text, text_rect)
+            screen.blit(font.render(str(minion.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
+            screen.blit(font.render(str(minion.attack), True, (255, 255, 255)), (x + 11, y + 119))
+            screen.blit(font.render(str(minion.hp), True, (255, 255, 255)), (x + 81, y + 119))
             
-            hp_text = font.render(f"HP: {minion.hp}", True, (0, 0, 0))
-            hp_rect = hp_text.get_rect(center=(x + 40, y + 80))
-            screen.blit(hp_text, hp_rect)
             
             y += 120 + spacing
 
@@ -385,12 +389,16 @@ class PlayMenu(Screen):
                 screen.blit(image, (x, y))
             
             font = pygame.font.Font(None, 24)
-            screen.blit(font.render(str(card.manaCost), True, (255, 255, 255)), (x + 85, y + 17))
-            
-            # Bruges ikke lige nu
-            if hasattr(card, 'category') and card.category != 'minion':
-                screen.blit(font.render(card.category.upper(), True, (0, 0, 0)), (x + 40, y + 30))
-            
+            # ManaCost vises for alle kort
+            screen.blit(font.render(str(card.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
+
+            # Attack og HP kun for minions
+            if hasattr(card, "category") and card.category == "minion":
+                screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(card.hp), True, (255, 255, 255)), (x + 81, y + 119))
+            else:
+                None
+
             self.hand_card_rects.append(rect)
             x += 100
 
@@ -408,7 +416,15 @@ class PlayMenu(Screen):
             # Vis manaCost
             font = pygame.font.Font(None, 24)
             mana_text = font.render(str(self.dragged_card.manaCost), True, (255, 255, 255))
-            screen.blit(mana_text, (x + 85, y + 17))
+            screen.blit(mana_text, (x + 81, y + 9))
+
+            # Hvis kortet er en minion, vis også attack og hp
+            if hasattr(self.dragged_card, "category") and self.dragged_card.category == "minion":
+                attack_text = font.render(str(self.dragged_card.attack), True, (255, 255, 255))
+                screen.blit(attack_text, (x + 11, y + 119))
+
+                hp_text = font.render(str(self.dragged_card.hp), True, (255, 255, 255))
+                screen.blit(hp_text, (x + 81, y + 119))
 
     def get_card_color(self, card):
         if hasattr(card, 'category'):
