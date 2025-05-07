@@ -2,6 +2,7 @@ import pygame
 
 def play_card_draw_and_flip_animation(screen, clock, card_back, card_front, deck_pos, hand_pos, playmenu_draw_function, flip_speed=0.05, slide_speed=0.02, delay_after_flip=500):
     # Initialiser variabler
+    
     flip_progress = 0
     slide_progress = 0
     flip_started = False

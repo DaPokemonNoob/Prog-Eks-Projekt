@@ -2,8 +2,8 @@ from card_classes import Minion, Spell, Weapon, Hero
 import effects_data as effect
 
 # Minion kort:
-def someGuy():
-    return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None)
+def slimeling():
+    return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
     attack_bonus, hp_bonus = effect.increase(1, 0)
@@ -12,7 +12,7 @@ def someCoolGuy():
 def knight():
     armor_amount = effect.armor(2)
     has_taunt = effect.taunt()
-    return Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
+    return Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.", pic="knight.png")
     
 # Hero kort:
 def adventurer():   # Den hero spilleren bruger

@@ -29,6 +29,7 @@ class Minion(Card):
         self.image = None
         self.is_enemy = False
         self.is_front_row = False
+        self.pic = pic
         Minion.all_minions.append(self)
 
     def check_hover(self):

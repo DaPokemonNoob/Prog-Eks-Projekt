@@ -14,8 +14,8 @@ SCREEN = pygame.display.set_mode((width, height))
 suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 
 # Card size constants
-CARD_WIDTH = 80
-CARD_HEIGHT = 120
+CARD_WIDTH = 100
+CARD_HEIGHT = 140
 HERO_SCALE = 2
 HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
 HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
@@ -172,7 +172,7 @@ class PlayMenu(Screen):
         self.bg_color = "blue"
         self.switch_screen = switch_screen
         self.clock = clock
-        
+              
         # Game state initialization
         self.battle_state = BoardState()
         self.battle_state.player_hero = card.adventurer()    # Player hero
@@ -199,12 +199,14 @@ class PlayMenu(Screen):
         self.initialize_play_zones()
         self.initialize_ui_elements()
 
+        self.card_front = []
+
     def initialize_card_collections(self):
-        self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), 
-                              card.fireball(), card.fireball(), card.fireball(), card.sword()]
+        self.playerDeckPile = [card.slimeling(), card.knight()]
         random.shuffle(self.playerDeckPile)
         self.playerHand = []
         self.playerDiscard = []
+
 
     def initialize_play_zones(self):
         self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
@@ -362,45 +364,14 @@ class PlayMenu(Screen):
         self.playerHand.insert(insert_pos, self.dragged_card)
         self.dragged_card = None
 
-    def draw_minion_row(self, screen, row, zone_rect):
-        spacing = 20
-        x = zone_rect.x + (zone_rect.width - CARD_WIDTH) // 2
-        y = zone_rect.y + spacing
-
-        for minion in row:
-            minion.image = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
-            # Change color to red if minion is dying (hp <= 0) or yellow if selected for attack
-            if minion.hp <= 0:
-                color = (200, 0, 0)
-            elif minion.is_selected_for_attack:
-                color = (200, 200, 0)  # Yellow to indicate attack selection
-            else:
-                color = (200, 200, 200)
-            pygame.draw.rect(screen, color, minion.image)
-            
-            # Draw minion name and stats
-            font = pygame.font.Font(None, 24)
-            text = font.render(minion.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(x + 40, y + 40))
-            screen.blit(text, text_rect)
-            
-            # Add HP display
-            hp_text = font.render(f"HP: {minion.hp}", True, (0, 0, 0))
-            hp_rect = hp_text.get_rect(center=(x + 40, y + 80))
-            screen.blit(hp_text, hp_rect)
-            
-            y += CARD_HEIGHT + spacing
-
     # Card Management Methods
     def draw_card(self):
-        try:
-            if len(self.playerDeckPile) > 0 and len(self.playerHand) < 7:
-                minion = self.playerDeckPile.pop(0)
-                self.playerHand.append(minion)
-            else:
-                print("No more cards to draw or hand is full")
-        except IndexError:
-            print("No more cards to draw.")
+        if len(self.playerDeckPile) > 0 and len(self.playerHand) < 7:
+            minion = self.playerDeckPile.pop(0)
+            self.playerHand.append(minion)
+        else:
+            print("No more cards to draw or hand is full")
+
 
     def has_taunt_minion(self, rows):
         for row in rows:
@@ -410,21 +381,6 @@ class PlayMenu(Screen):
                     (minion.name != 'Knight' or minion.is_front_row)):
                     return True
         return False
-
-    # Turn Management Methods
-    def end_turn(self):
-        card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
-        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
-        deck_pos = (64, 525)
-        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)
-        
-        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
-                                        deck_pos, hand_pos, self.draw, delay_after_flip=1000)
-        
-        self.draw_card()
-        self.is_player_turn = False
-        self.enemy.perform_turn()
-        self.is_player_turn = True
 
     # Drawing Methods
     def draw(self, screen):
@@ -480,8 +436,11 @@ class PlayMenu(Screen):
         y = height - 150
         for card in self.playerHand:
             card_rect = pygame.Rect(x, y, 80, 120)
-            color = self.get_card_color(card)
-            pygame.draw.rect(screen, color, card_rect)
+            
+            self.image_path = f"assets/playingCard/{card.pic}" if card.pic else None
+            self.image = pygame.image.load(self.image_path).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (CARD_WIDTH, CARD_HEIGHT))
+            screen.blit(self.image, (x, y))
             
             font = pygame.font.Font(None, 24)
             text = font.render(card.name, True, (0, 0, 0))
@@ -517,32 +476,6 @@ class PlayMenu(Screen):
             else:
                 return (255, 200, 200)
         return (200, 200, 200)
-
-    # Event Handling
-    def handle_event(self, event):
-        super().handle_event(event)
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.handle_mouse_down(event)
-        elif event.type == pygame.MOUSEBUTTONUP:
-            self.handle_mouse_up(event)
-
-    def handle_mouse_down(self, event):
-        mouse_x, mouse_y = event.pos
-        for i, rect in enumerate(self.hand_card_rects):
-            if rect.collidepoint(mouse_x, mouse_y):
-                card = self.playerHand[i]
-                if hasattr(card, 'category') and (card.category == 'minion' or card.category == 'spell' or card.category == 'weapon'):
-                    self.dragged_card = self.playerHand.pop(i)
-                    self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
-                break
-
-        if not self.dragged_card:
-            for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row,
-                      self.battle_state.player_front_row, self.battle_state.player_back_row]:
-                for minion in row:
-                    if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                        self.battle_state.handle_minion_click(minion)
-                        break
 
     def handle_mouse_up(self, event):
         if self.dragged_card:

@@ -8,7 +8,7 @@ from game_logic import handle_minion_death, draw_card, add_minion_to_board, perf
 class Enemy:
     def __init__(self, battle_state: BoardState):
         self.battle_state = battle_state
-        self.deck_pile = [card.knight(), card.someGuy(), card.someCoolGuy(), card.knight()]
+        self.deck_pile = [card.knight(), card.slimeling(), card.someCoolGuy(), card.knight()]
         random.shuffle(self.deck_pile)
         self.hand = []
         self.discard = []
