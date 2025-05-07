@@ -529,9 +529,3 @@ class TreasureMenu(Screen):
         for button in self.buttons:
             button.run()
         self.draw_labels(screen)
-
-    def draw_labels(self, screen):
-        font = pygame.font.Font("assets/font/impact.ttf", 50)
-        text = font.render("TREASURE MENU", True, "white")
-        screen.blit(text, (width // 2 - text.get_width() // 2, height // 2 - text.get_height() // 2))
-
