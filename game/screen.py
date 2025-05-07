@@ -1,7 +1,6 @@
 import pygame
 import sys
 import os
-from playingCards import Deck
 import card_data as card
 from card_classes import BoardState, Hero
 from enemy import Enemy
@@ -10,6 +9,7 @@ from animations import play_card_draw_and_flip_animation
 from game_logic import (minion_death, draw_card, use_spell, 
                        use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
+# intialiser screen
 WIDTH, HEIGHT = 1280, 720
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -289,13 +289,13 @@ class PlayMenu(Screen):
                 mouse_x, mouse_y = event.pos
 
                 # Handle weapon attacks
-                if hasattr(self.dragged_card, 'category') and self.dragged_card.category == 'weapon':
-                    self.handle_weapon_drop(mouse_x, mouse_y)
+                if self.dragged_card.category == 'weapon':
+                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)
                     return
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
-                    self.handle_spell_drop(mouse_x, mouse_y)
+                    use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)
                     return
 
                 # Handle minion placement

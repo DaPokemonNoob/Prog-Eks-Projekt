@@ -86,7 +86,7 @@ class BoardState:
         
     # funktion til at tilføje en minion til boardet
     def add_minion(self, minion, is_enemy, is_front_row):
-        return add_minion_to_board(minion, self, is_enemy, is_front_row)
+        return (minion, self, is_enemy, is_front_row)
     
     # funktion til at håndtere klik på minions
     def handle_minion_click(self, clicked_minion):
