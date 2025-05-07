@@ -12,6 +12,13 @@ width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
 suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 
+# Card size constants
+CARD_WIDTH = 80
+CARD_HEIGHT = 120
+HERO_SCALE = 2
+HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
+HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
+
 def load_card_image(rank, suit):
     suit_name = suit_map[suit]
     filename = f"{rank}_of_{suit_name}.png"
@@ -164,10 +171,17 @@ class PlayMenu(Screen):
         self.switch_screen = switch_screen
         self.is_player_turn = True
         self.clock = clock
-        self.is_player_turn = True  # 'True' hvis det er spillerens tur, 'False' hvis det er modstanderens tur
         
         self.battle_state = BoardState()
-        self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
+        self.battle_state.player_hero = card.adventurer()  # Player hero
+        self.battle_state.enemy_hero = card.evilGuy()        # Enemy hero
+
+        # Hero card positions
+        self.player_hero_rect = pygame.Rect(20, height//2 - HERO_CARD_HEIGHT//2, 
+                                          HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
+        self.enemy_hero_rect = pygame.Rect(width - 20 - HERO_CARD_WIDTH, 
+                                         height//2 - HERO_CARD_HEIGHT//2,
+                                         HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         
         # Player deck and hand
         self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), card.fireball(), card.fireball(), card.fireball(), card.sword()]
@@ -182,10 +196,10 @@ class PlayMenu(Screen):
         self.drag_offset = (0, 0)
 
         # Setup play zones
-        self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
-        self.player_back_row_zone = pygame.Rect(100, 25, 200, 450)
-        self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
-        self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
+        self.player_front_row_zone = pygame.Rect(440, 87, 200, 300) # (x-position for top-venstre hjørne, y-position for top-venstre hjørne, bredde, højde)
+        self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
+        self.enemy_front_row_zone = pygame.Rect(640, 87, 200, 300)
+        self.enemy_back_row_zone = pygame.Rect(840, 25, 200, 450)
 
         # Load background
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
@@ -201,6 +215,22 @@ class PlayMenu(Screen):
             self.next_turn_button: self.end_turn
         }
         self.hand_card_rects = []
+
+    def draw_hero_card(self, screen, hero, rect, is_enemy=False):
+        # Draw card background
+        color = (200, 0, 0) if is_enemy else (0, 200, 0)  # Red for enemy, green for player
+        pygame.draw.rect(screen, color, rect)
+        
+        # Draw hero name
+        font = pygame.font.Font(None, int(24 * 1.8))  # Scaled up font
+        text = font.render(hero.name, True, (0, 0, 0))
+        text_rect = text.get_rect(center=(rect.centerx, rect.centery - rect.height//4))
+        screen.blit(text, text_rect)
+        
+        # Draw HP
+        hp_text = font.render(f"HP: {hero.hp}", True, (0, 0, 0))
+        hp_rect = hp_text.get_rect(center=(rect.centerx, rect.centery + rect.height//4))
+        screen.blit(hp_text, hp_rect)
 
     def end_turn(self):
         # Indlæs kortbilleder
@@ -366,11 +396,11 @@ class PlayMenu(Screen):
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
-        x = zone_rect.x + (zone_rect.width - 80) // 2
+        x = zone_rect.x + (zone_rect.width - CARD_WIDTH) // 2
         y = zone_rect.y + spacing
 
         for minion in row:
-            minion.image = pygame.Rect(x, y, 80, 120)
+            minion.image = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
             # Change color to red if minion is dying (hp <= 0) or yellow if selected for attack
             if minion.hp <= 0:
                 color = (200, 0, 0)
@@ -391,13 +421,17 @@ class PlayMenu(Screen):
             hp_rect = hp_text.get_rect(center=(x + 40, y + 80))
             screen.blit(hp_text, hp_rect)
             
-            y += 120 + spacing
+            y += CARD_HEIGHT + spacing
 
     def draw(self, screen):
         screen.blit(self.background_image, (0, 0))
         for button in self.buttons:
             button.run()
         self.draw_labels(screen)
+
+        # Draw hero cards
+        self.draw_hero_card(screen, self.battle_state.player_hero, self.player_hero_rect)
+        self.draw_hero_card(screen, self.battle_state.enemy_hero, self.enemy_hero_rect, True)
 
         # Draw row zones
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
@@ -415,7 +449,7 @@ class PlayMenu(Screen):
         x = 20
         y = height - 150
         for card in self.playerHand:
-            card_rect = pygame.Rect(x, y, 80, 120)
+            card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
             # Different colors for different card types
             if hasattr(card, 'category'):
                 if card.category == 'minion':
@@ -447,7 +481,7 @@ class PlayMenu(Screen):
         if self.dragged_card:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
-                                  mouse_y - self.drag_offset[1], 80, 120)
+                                  mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
             pygame.draw.rect(screen, (200, 200, 200), drag_rect)
             # Draw minion name
             font = pygame.font.Font(None, 24)

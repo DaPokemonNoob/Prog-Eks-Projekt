@@ -18,8 +18,8 @@ def knight():
 def adventurer(): # Den hero spilleren bruger
     return Hero("Adventurer", attack=1, hp=15)
 
-def demon():      # Den hero fjenden bruger
-    return Hero("Demon", attack=1, hp=15)
+def evilGuy():      # Den hero fjenden bruger
+    return Hero("Evil Guy", attack=1, hp=15)
 
 # Spell kort:
 def fireball():
