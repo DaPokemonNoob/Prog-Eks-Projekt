@@ -37,7 +37,7 @@ screens = {
     "treasure_menu": TreasureMenu(switch_screen)
 }
 
-switch_screen("main_menu")
+switch_screen("map_menu")
 
 # === Main loop ===
 running = True
