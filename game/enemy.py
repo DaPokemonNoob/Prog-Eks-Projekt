@@ -3,7 +3,7 @@ import pygame
 import card_data as card
 import effects_data as effect
 from card_classes import BoardState
-from game_logic import handle_minion_death, draw_card, add_minion_to_board, perform_attack
+from game_logic import minion_death, draw_card, add_minion_to_board, perform_attack
 
 class Enemy:
     def __init__(self, battle_state: BoardState):

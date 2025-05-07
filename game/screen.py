@@ -7,7 +7,8 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import handle_minion_death, draw_card, has_taunt_minion, cast_spell, use_weapon, can_attack_target, TurnManager
+from game_logic import (minion_death, draw_card, has_taunt_minion, cast_spell, 
+                       use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
 width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
@@ -299,41 +300,12 @@ class PlayMenu(Screen):
 
                 # Handle weapon attacks
                 if hasattr(self.dragged_card, 'category') and self.dragged_card.category == 'weapon':
-                    weapon_used = False
-                    # Check if we're targeting an enemy minion
-                    for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
-                        for minion in row:
-                            if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                                if can_attack_target(minion, minion, self.battle_state):
-                                    if use_weapon(self.dragged_card, minion, self.battle_state, self.playerDiscard, self.enemy.discard):
-                                        weapon_used = True
-                                        self.dragged_card = None
-                                        break
-                        if weapon_used:
-                            break
-                    
-                    # If weapon wasn't used, return it to hand
-                    if not weapon_used:
-                        self._return_card_to_hand(mouse_x)
+                    self.handle_weapon_drop(mouse_x, mouse_y)
                     return
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
-                    spell_cast = False
-                    # Check if we're targeting an enemy minion
-                    for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
-                        for minion in row:
-                            if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                                if cast_spell(self.dragged_card, minion, self.battle_state, self.playerDiscard):
-                                    spell_cast = True
-                                    self.dragged_card = None
-                                    break
-                        if spell_cast:
-                            break
-                    
-                    # If spell wasn't cast, return it to hand
-                    if not spell_cast:
-                        self._return_card_to_hand(mouse_x)
+                    self.handle_spell_drop(mouse_x, mouse_y)
                     return
 
                 # Handle minion placement
@@ -550,72 +522,21 @@ class PlayMenu(Screen):
             
             if hasattr(self.dragged_card, 'category'):
                 if self.dragged_card.category == 'weapon':
-                    self.handle_weapon_drop(mouse_x, mouse_y)
+                    if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.dragged_card = None
+                    else:
+                        self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'spell':
-                    self.handle_spell_drop(mouse_x, mouse_y)
+                    if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.dragged_card = None
+                    else:
+                        self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'minion':
-                    self.handle_minion_drop(mouse_x, mouse_y)
-
-    def handle_weapon_drop(self, mouse_x, mouse_y):
-        weapon_used = False
-        for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
-            for minion in row:
-                if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                    if self.has_taunt_minion([self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]) and not (
-                        hasattr(minion, 'effect') and minion.effect and 'Taunt' in minion.effect and (
-                        minion.name != 'Knight' or minion.is_front_row)):
-                        break
-                    
-                    minion.hp -= self.dragged_card.attack
-                    if minion.hp <= 0:
-                        if minion.is_front_row:
-                            self.battle_state.enemy_front_row.remove(minion)
-                        else:
-                            self.battle_state.enemy_back_row.remove(minion)
-                        self.enemy.discard.append(minion)
-                    weapon_used = True
-                    self.playerDiscard.append(self.dragged_card)
-                    self.dragged_card = None
-                    break
-            if weapon_used:
-                break
-        
-        if not weapon_used:
-            self.return_card_to_hand(mouse_x)
-
-    def handle_spell_drop(self, mouse_x, mouse_y):
-        spell_cast = False
-        for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
-            for minion in row:
-                if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                    minion.hp -= self.dragged_card.attack
-                    if minion.hp <= 0:
-                        if minion.is_front_row:
-                            self.battle_state.enemy_front_row.remove(minion)
-                        else:
-                            self.battle_state.enemy_back_row.remove(minion)
-                        self.enemy.discard.append(minion)
-                    spell_cast = True
-                    self.playerDiscard.append(self.dragged_card)
-                    self.dragged_card = None
-                    break
-            if spell_cast:
-                break
-        
-        if not spell_cast:
-            self.return_card_to_hand(mouse_x)
-
-    def handle_minion_drop(self, mouse_x, mouse_y):
-        if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
-            if self.battle_state.add_minion(self.dragged_card, False, True):
-                self.dragged_card = None
-                return
-        elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
-            if self.battle_state.add_minion(self.dragged_card, False, False):
-                self.dragged_card = None
-                return
-        
-        self.return_card_to_hand(mouse_x)
+                    if use_minion(self.dragged_card, mouse_x, mouse_y, self.battle_state, 
+                                self.player_front_row_zone, self.player_back_row_zone):
+                        self.dragged_card = None
+                    else:
+                        self.return_card_to_hand(mouse_x)
 
     def return_card_to_hand(self, mouse_x):
         insert_pos = 0
