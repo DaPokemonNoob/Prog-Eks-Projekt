@@ -267,16 +267,6 @@ class PlayMenu(Screen):
                 hp_text = font.render(str(self.dragged_card.hp), True, (255, 255, 255))
                 screen.blit(hp_text, (x + 81, y + 119))
 
-    def get_card_color(self, card):
-        if hasattr(card, 'category'):
-            if card.category == 'minion':
-                return (200, 200, 200)
-            elif card.category == 'spell':
-                return (150, 150, 255)
-            elif card.category == 'weapon':
-                return (255, 200, 200)
-        return (200, 200, 200)
-
     def handle_mouse_up(self, event):
         if self.dragged_card:
             mouse_x, mouse_y = event.pos
