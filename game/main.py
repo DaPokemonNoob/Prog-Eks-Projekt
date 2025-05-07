@@ -1,7 +1,6 @@
 import pygame, sys
-from cards import Deck
 import os
-from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu
+from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 
 # starter pygame
@@ -18,16 +17,23 @@ map_data = generate_map()
 assign_level_positions(map_data)
 
 def switch_screen(name):
-    global current_screen
-    current_screen = screens[name]
+    global current_screen, previous_screen
+    if name == "resume":
+        current_screen = previous_screen
+    else:
+        if current_screen != screens.get("pause_menu"):
+            previous_screen = current_screen
+        current_screen = screens[name]
 
 current_screen = None
+previous_screen = None
 
 screens = {
     "main_menu": MainMenu(switch_screen),
-    "play_menu": PlayMenu(switch_screen),
+    "play_menu": PlayMenu(switch_screen, clock),
     "options_menu": OptionsMenu(switch_screen, SCREEN),
-    "map_menu": MapMenu(switch_screen, SCREEN)
+    "map_menu": MapMenu(switch_screen, SCREEN),
+    "pause_menu": PauseMenu(switch_screen)
 }
 
 switch_screen("main_menu")
@@ -40,17 +46,25 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        current_screen.handle_event(event)
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                map_data = generate_map() # genererer et nyt kort når R trykkes
+            if event.key == pygame.K_ESCAPE and current_screen in [screens["play_menu"], screens["map_menu"]]:
+                switch_screen("pause_menu")
+            elif event.key == pygame.K_r:
+                map_data = generate_map()
                 Level.current_level = None
                 assign_level_positions(map_data)
+        current_screen.handle_event(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
             handle_click(mouse_pos, map_data)
 
-    current_screen.draw(SCREEN)
-    if current_screen == screens['map_menu']:
-        draw_map(map_data, SCREEN, font) # tegner kortet
+    # Draw the current screen
+    if current_screen == screens["pause_menu"]:
+        previous_screen.draw(SCREEN)  # Draw the game state in the background
+        current_screen.draw(SCREEN)   # Draw the pause menu overlay
+    else:
+        current_screen.draw(SCREEN)
+        if current_screen == screens["map_menu"]:
+            draw_map(map_data, SCREEN, font)
+    
     pygame.display.update()
     clock.tick(60)
