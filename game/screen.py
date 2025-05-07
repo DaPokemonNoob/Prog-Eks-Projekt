@@ -554,7 +554,7 @@ class HealMenu(Screen):
 
     def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
         # Draw background
@@ -570,7 +570,7 @@ class BattleMenu(Screen):
 
     def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
         # Draw background
@@ -586,7 +586,7 @@ class ShopMenu(Screen):
 
     def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
         # Draw background
@@ -602,7 +602,7 @@ class BossMenu(Screen):
 
     def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
         # Draw background
