@@ -1,5 +1,5 @@
+# Handle the death of a minion or hero by removing it from the board and optionally adding it to a discard pile.
 def handle_minion_death(minion, battle_state, discard_pile=None):
-    """Handle the death of a minion or hero by removing it from the board and optionally adding it to a discard pile."""
     if minion.hp <= 0:
         # Handle Hero deaths differently from Minions
         if not hasattr(minion, 'is_enemy'):  # This is a Hero

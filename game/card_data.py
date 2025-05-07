@@ -15,7 +15,7 @@ def knight():
     return Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
     
 # Hero kort:
-def adventurer(): # Den hero spilleren bruger
+def adventurer():   # Den hero spilleren bruger
     return Hero("Adventurer", attack=1, hp=15)
 
 def evilGuy():      # Den hero fjenden bruger

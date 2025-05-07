@@ -172,36 +172,23 @@ class PlayMenu(Screen):
         self.bg_color = "blue"
         self.switch_screen = switch_screen
         self.clock = clock
-<<<<<<< HEAD
         
+        # Game state initialization
         self.battle_state = BoardState()
         self.battle_state.player_hero = card.adventurer()    # Player hero
         self.battle_state.enemy_hero = card.evilGuy()        # Enemy hero
 
-        # Hero card positioner
+        # Hero card positioner - keep heroes on the sides
         self.player_hero_rect = pygame.Rect(20, height//2 - HERO_CARD_HEIGHT//2, 
                                           HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         self.enemy_hero_rect = pygame.Rect(width - 20 - HERO_CARD_WIDTH, 
                                          height//2 - HERO_CARD_HEIGHT//2,
                                          HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         
-        # Player deck and hand
-        self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), card.fireball(), card.fireball(), card.fireball(), card.sword()]
-        random.shuffle(self.playerDeckPile)
-        self.playerHand = []
-        self.playerDiscard = []
-        
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
         self.turn_manager = TurnManager(self, self.enemy)
-=======
-        self.is_player_turn = True
-
-        # Game state initialization
-        self.battle_state = BoardState()
-        self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
-        self.enemy = Enemy(self.battle_state)
-
+        
         # Card management initialization
         self.initialize_card_collections()
         self.dragged_card = None
@@ -218,7 +205,6 @@ class PlayMenu(Screen):
         random.shuffle(self.playerDeckPile)
         self.playerHand = []
         self.playerDiscard = []
->>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
 
     def initialize_play_zones(self):
         self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
@@ -226,7 +212,6 @@ class PlayMenu(Screen):
         self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
         self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
 
-<<<<<<< HEAD
         # Setup play zones
         self.player_front_row_zone = pygame.Rect(440, 87, 200, 300)
         self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
@@ -234,9 +219,7 @@ class PlayMenu(Screen):
         self.enemy_back_row_zone = pygame.Rect(840, 25, 200, 450)
 
         # Load background
-=======
     def initialize_ui_elements(self):
->>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
         
@@ -250,7 +233,6 @@ class PlayMenu(Screen):
             self.menu_button: lambda: self.switch_screen("main_menu"),
             self.next_turn_button: self.end_turn
         }
-<<<<<<< HEAD
         self.hand_card_rects = []
 
     def draw_hero_card(self, screen, hero, rect, is_enemy=False):
@@ -408,7 +390,6 @@ class PlayMenu(Screen):
             screen.blit(hp_text, hp_rect)
             
             y += CARD_HEIGHT + spacing
-=======
 
     # Card Management Methods
     def draw_card(self):
@@ -444,27 +425,33 @@ class PlayMenu(Screen):
         self.is_player_turn = False
         self.enemy.perform_turn()
         self.is_player_turn = True
->>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
 
     # Drawing Methods
     def draw(self, screen):
+        # Draw background
         screen.blit(self.background_image, (0, 0))
-        for button in self.buttons:
-            button.run()
-        self.draw_labels(screen)
         
+        # Draw heroes
+        self.draw_hero_card(screen, self.battle_state.player_hero, self.player_hero_rect)
+        self.draw_hero_card(screen, self.battle_state.enemy_hero, self.enemy_hero_rect, True)
+        
+        # Draw play zones
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
         pygame.draw.rect(screen, (200, 100, 100), self.enemy_front_row_zone, 2)
         pygame.draw.rect(screen, (200, 100, 100), self.enemy_back_row_zone, 2)
 
+        # Draw minion rows
         self.draw_minion_row(screen, self.battle_state.player_front_row, self.player_front_row_zone)
         self.draw_minion_row(screen, self.battle_state.player_back_row, self.player_back_row_zone)
         self.draw_minion_row(screen, self.battle_state.enemy_front_row, self.enemy_front_row_zone)
         self.draw_minion_row(screen, self.battle_state.enemy_back_row, self.enemy_back_row_zone)
 
+        # Draw hand and buttons
         self.draw_hand(screen)
         self.draw_dragged_card(screen)
+        for button in self.buttons:
+            button.run()
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
@@ -516,7 +503,7 @@ class PlayMenu(Screen):
                                   mouse_y - self.drag_offset[1], 80, 120)
             pygame.draw.rect(screen, (200, 200, 200), drag_rect)
             font = pygame.font.Font(None, 24)
-            text = font.render(self.dragged_card.name, True, (0, 0, 0))
+            text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
             text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
                                             mouse_y - self.drag_offset[1] + 60))
             screen.blit(text, text_rect)
@@ -585,7 +572,7 @@ class PlayMenu(Screen):
                             self.battle_state.enemy_front_row.remove(minion)
                         else:
                             self.battle_state.enemy_back_row.remove(minion)
-                        self.enemy.enemyDiscard.append(minion)
+                        self.enemy.discard.append(minion)
                     weapon_used = True
                     self.playerDiscard.append(self.dragged_card)
                     self.dragged_card = None
@@ -607,7 +594,7 @@ class PlayMenu(Screen):
                             self.battle_state.enemy_front_row.remove(minion)
                         else:
                             self.battle_state.enemy_back_row.remove(minion)
-                        self.enemy.enemyDiscard.append(minion)
+                        self.enemy.discard.append(minion)
                     spell_cast = True
                     self.playerDiscard.append(self.dragged_card)
                     self.dragged_card = None
