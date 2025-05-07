@@ -294,18 +294,21 @@ class PlayMenu(Screen):
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
-                    use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)
-                    return
+                    if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.dragged_card = None
+                        return
 
                 # Handle minion placement
                 elif self.dragged_card.category == 'minion':
                     if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
+                            self.battle_state.player_front_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
                     elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, False):
+                            self.battle_state.player_back_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
