@@ -23,6 +23,7 @@ class Minion(Card):
     def __init__(self, name, manaCost, attack, hp, effect, pic=None):
         super().__init__('minion', name, manaCost, effect, pic)
         self.attack = attack
+        self.base_attack = attack  # Store the original attack value
         self.hp = hp
         self.effect = effect
         self.is_selected_for_attack = False
@@ -30,6 +31,7 @@ class Minion(Card):
         self.is_enemy = False
         self.is_front_row = False
         self._has_taunt = False
+        self.on_summon = lambda battle_state: None  # Default empty on_summon handler
         Minion.all_minions.append(self)
 
     @property
@@ -56,6 +58,15 @@ class Minion(Card):
         if self.is_selected_for_attack and target:
             perform_attack(self, target, battle_state)
             self.is_selected_for_attack = False
+
+    def buff_allies(self, battle_state):
+        """Apply buff effect to all friendly minions on board"""
+        if self.name == "Some Cool Guy":
+            rows = [battle_state.player_front_row, battle_state.player_back_row] if not self.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
+            for row in rows:
+                for minion in row:
+                    if minion != self:  # Don't buff self again
+                        minion.attack += 1
 
 # Spell subclass:
 class Spell(Card):

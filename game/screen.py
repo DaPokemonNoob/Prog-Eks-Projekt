@@ -201,8 +201,7 @@ class PlayMenu(Screen):
         self.initialize_ui_elements()
 
     def initialize_card_collections(self):
-        self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), 
-                              card.fireball(), card.fireball(), card.fireball(), card.sword()]
+        self.playerDeckPile = [card.fireball(), card.fireball(), card.fireball(), card.sword(), card.someCoolGuy(), card.knight(), card.chaosCrystal()]
         random.shuffle(self.playerDeckPile)
         self.playerHand = []
         self.playerDiscard = []
