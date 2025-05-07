@@ -10,22 +10,12 @@ from animations import play_card_draw_and_flip_animation
 from game_logic import (minion_death, draw_card, 
                        use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
-<<<<<<< HEAD
-# konstanter til screen initialisering
 WIDTH, HEIGHT = 1280, 720
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-
-# konstanter til kortstørrelser
-CARD_WIDTH = 80
-CARD_HEIGHT = 120
-=======
-width, height = 1280, 720
-SCREEN = pygame.display.set_mode((width, height))
 
 # Card size constants
 CARD_WIDTH = 100
 CARD_HEIGHT = 140
->>>>>>> edf5dd2dc3e4969da00114fd6b4d99b28821ba09
 HERO_SCALE = 2
 HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
 HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
@@ -198,6 +188,7 @@ class PlayMenu(Screen):
         self.initialize_play_zones()
         self.initialize_ui_elements()
 
+    # denne funktion initialiserer spillerens dæk
     def initialize_card_collections(self):
         self.playerDeckPile = [card.knight(), card.slimeling()]
         random.shuffle(self.playerDeckPile)
@@ -264,16 +255,6 @@ class PlayMenu(Screen):
 
         # Existing end turn animation and logic
         card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
-<<<<<<< HEAD
-        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
-        deck_pos = (64, 525)
-        hand_pos = (WIDTH // 2 - card_back.get_width() // 2, HEIGHT // 2 - card_back.get_height() // 2)
-        
-        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
-                                        deck_pos, hand_pos, self.draw, delay_after_flip=1000)
-        
-        self.draw_card()
-=======
 
         # Dynamisk indlæsning af card_front baseret på card.pic
         card = self.playerDeckPile[0] if self.playerDeckPile else None  # Eksempel: Tag det øverste kort fra bunken
@@ -287,14 +268,13 @@ class PlayMenu(Screen):
 
         # Definer positioner
         deck_pos = (64, 525)  # Startposition (dækket)
-        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
+        hand_pos = (WIDTH // 2 - card_back.get_width() // 2, HEIGHT // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
 
         # Spil animationen oven på PlayMenu
         if card_front:
             play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
 
         # End turn using turn manager
->>>>>>> edf5dd2dc3e4969da00114fd6b4d99b28821ba09
         self.turn_manager.end_player_turn()
 
     def handle_event(self, event):
@@ -349,24 +329,6 @@ class PlayMenu(Screen):
                     return True
         return False
 
-<<<<<<< HEAD
-    # Turn Management Methods
-    def end_turn(self):
-        card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
-        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
-        deck_pos = (64, 525)
-        hand_pos = (WIDTH // 2 - card_back.get_width() // 2, HEIGHT // 2 - card_back.get_height() // 2)
-        
-        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
-                                        deck_pos, hand_pos, self.draw, delay_after_flip=1000)
-        
-        self.draw_card()
-        self.is_player_turn = False
-        self.enemy.perform_turn()
-        self.is_player_turn = True
-
-=======
->>>>>>> edf5dd2dc3e4969da00114fd6b4d99b28821ba09
     # Drawing Methods
     def draw(self, screen):
         # Draw background
@@ -438,7 +400,7 @@ class PlayMenu(Screen):
                 screen.blit(type_text, type_rect)
             
             self.hand_card_rects.append(card_rect)
-            x += 90
+            x += 100
 
     def draw_dragged_card(self, screen):
         if self.dragged_card:

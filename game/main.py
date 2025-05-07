@@ -6,10 +6,10 @@ from level import generate_map, assign_level_positions, draw_map, handle_click, 
 # starter pygame
 pygame.init()
 
-width, height = 1280, 720
-SCREEN = pygame.display.set_mode((width, height))
+WIDTH, HEIGHT = 1280, 720
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
-pygame.display.set_caption("test")
+pygame.display.set_caption("Arcane Clash")
 
 # map ting
 font = pygame.font.Font(None, 36)

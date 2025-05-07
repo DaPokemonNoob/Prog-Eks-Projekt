@@ -19,11 +19,11 @@ class Hero(Card):
 
 # Minion subclass:
 class Minion(Card):
-    all_minions = []  # Class variable to track all minions
+    all_minions = []  # index med alle minions der spilles
     def __init__(self, name, manaCost, attack, hp, effect, pic=None):
         super().__init__('minion', name, manaCost, effect, pic)
         self.attack = attack
-        self.base_attack = attack  # Store the original attack value
+        self.base_attack = attack
         self.hp = hp
         self.effect = effect
         self.is_selected_for_attack = False
@@ -32,23 +32,27 @@ class Minion(Card):
         self.is_front_row = False
         self.pic = pic
         self._has_taunt = False
-        self.on_summon = lambda battle_state: None  # Default empty on_summon handler
+        self.on_summon = lambda battle_state: None
         Minion.all_minions.append(self)
 
+    # funktion til at checke om musen er over en minion på boardet
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
 
+    # funktion til at select en minion til at angribe
     def selected(self):
         if self.check_hover() and pygame.mouse.get_pressed()[0]:
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
+    # funktion til at minion angriber
     def perform_attack(self, target, battle_state):
         if self.is_selected_for_attack and target:
             perform_attack(self, target, battle_state)
             self.is_selected_for_attack = False
 
+    # funktion til at give alle minions på boardet +1 attack
     def buff_allies(self, battle_state):
         """Apply buff effect to all friendly minions on board"""
         if self.name == "Some Cool Guy":
@@ -72,6 +76,7 @@ class Weapon(Card):
         self.attack = attack
         self.durability = durability
 
+# klasse der tracker minions på boardet
 class BoardState:
     def __init__(self):
         self.enemy_front_row = []  # max 2 minions
@@ -79,9 +84,11 @@ class BoardState:
         self.player_front_row = [] # max 2 minions
         self.player_back_row = []  # max 3 minions
         
+    # funktion til at tilføje en minion til boardet
     def add_minion(self, minion, is_enemy, is_front_row):
         return add_minion_to_board(minion, self, is_enemy, is_front_row)
     
+    # funktion til at håndtere klik på minions
     def handle_minion_click(self, clicked_minion):
         selected_minion = None
         for row in [self.player_front_row, self.player_back_row]:
@@ -91,7 +98,6 @@ class BoardState:
                     break
             if selected_minion:
                 break
-                
         if clicked_minion.is_enemy and selected_minion:
             selected_minion.perform_attack(clicked_minion, self)
             return True

@@ -1,6 +1,5 @@
-# funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard pile.
+# funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
 def minion_death(minion, battle_state, discard_pile=None):
-    """Håndterer når en minion dør. Fjerner minion fra boardet og lægger i discard pile."""
     if minion.hp <= 0:
         if minion.is_enemy:
             if minion.is_front_row:
@@ -12,32 +11,33 @@ def minion_death(minion, battle_state, discard_pile=None):
                 battle_state.player_front_row.remove(minion)
             else:
                 battle_state.player_back_row.remove(minion)
-                
+        # discarder minion hvis dens hp <= 0
         if discard_pile is not None:
             discard_pile.append(minion)
         return True
     return False
 
+# håndterer hero death
 def hero_death(hero, battle_state):
-    """Håndterer når en hero dør."""
     pass
 
+# trækker et kort hvis det er muligt
 def draw_card(deck, hand, max_hand_size=7):
-    """Draw a card from deck to hand if possible."""
     if len(deck) > 0 and len(hand) < max_hand_size:
         card = deck.pop(0)
         hand.append(card)
         return True
     return False
 
+# håndterer tilføjelse af minion til boardet
 def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
-    """Add a minion to the specified row on the board."""
     target_row = None
     if is_enemy:
         target_row = battle_state.enemy_front_row if is_front_row else battle_state.enemy_back_row
     else:
         target_row = battle_state.player_front_row if is_front_row else battle_state.player_back_row
-        
+    
+    # hvis første række, max antal minions er 2, hvis ikke første række, er det anden række, og derfor max antal minion er 3
     max_minions = 2 if is_front_row else 3
     if len(target_row) < max_minions:
         target_row.append(minion)
@@ -50,48 +50,49 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
         return True
     return False
 
+# håndterer når en minion angriber noget
 def perform_attack(attacker, target, battle_state, discard_pile=None):
-    """Handle combat between two units."""
-    # Check if we can attack this target (taunt rules)
+    # checker for taunt
     if hasattr(target, 'is_enemy') and not can_attack_target(attacker, target, battle_state):
         return False
         
-    # Deal damage
+    # gør skade
     target.hp -= attacker.attack
-    if hasattr(target, 'attack'):  # If target can counter-attack
+    if hasattr(target, 'attack'):  # tager også selv skade
         attacker.hp -= target.attack
     
-    # Check for deaths
-    if hasattr(target, 'is_enemy'):  # Target is a minion
+    # Checker for minion death
+    if hasattr(target, 'is_enemy'):  # Target er en minion
         minion_death(target, battle_state, discard_pile)
-    else:  # Target is a hero
+    else:  # Target er en hero
         if target.hp <= 0:
             hero_death(target, battle_state)
             
-    if hasattr(attacker, 'is_enemy'):  # Only check minion death for minions
+    if hasattr(attacker, 'is_enemy'):  # kun check for minion death hvis det er en minion der bliver angrebet
         minion_death(attacker, battle_state, discard_pile)
     
     return True
 
+# checker om en fjendtlig minion har taunt
 def taunt_check(rows):
-    """Check if there are any minions with taunt in the given rows."""
     for row in rows:
         for minion in row:
             if minion.has_taunt:
                 return True
     return False
 
+# checker om minion kan angribe (baseret på taunt_check())
 def can_attack_target(attacker, target, battle_state):
-    """Check if a target can be attacked based on taunt rules."""
-    if not target.is_enemy:  # Can't attack friendly units
+    if not target.is_enemy:  # kan ikke angribe egne minions
         return False
         
     has_taunt = taunt_check([battle_state.enemy_front_row, battle_state.enemy_back_row])
     if has_taunt:
-        # If there's a taunt minion, can only attack units with taunt
+        # kan kun angribe minions med taunt hvis en fjendlig minion har taunt
         return target.has_taunt
-    return True  # No taunt minions, can attack any target
+    return True  # kan angribe alle fjender hvis ingen fjendlig minion har taunt
 
+# funktion for brug af 'weapon' kort
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
     """Håndterer brug af et våben kort og tracker durability."""
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
@@ -100,14 +101,14 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
                 if taunt_check([battle_state.enemy_front_row, battle_state.enemy_back_row]) and not minion.has_taunt:
                     return False
                 
-                # Apply weapon damage
+                # gør skade på fjendlig minion og reducer durability med 1
                 minion.hp -= weapon.attack
-                weapon.durability -= 1  # Reduce durability when weapon is used
+                weapon.durability -= 1
                 
-                # Check if minion dies from the attack
+                # checker om minion dør efter angrebet
                 minion_death(minion, battle_state, enemy_discard)
                 
-                # Return weapon to hand if durability is 1 or more, otherwise discard it
+                # retuner 'weapon' kort til hånden hvis durability er 1 eller derover
                 if weapon.durability <= 0:
                     player_discard.append(weapon)
                 else:
@@ -116,17 +117,17 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
                 return True
     return False
 
+# funktion for brug af 'minion' kort
 def use_minion(minion, mouse_x, mouse_y, battle_state, front_row_zone, back_row_zone):
-    """Håndterer placering af en minion på brættet."""
     if front_row_zone.collidepoint(mouse_x, mouse_y):
         return battle_state.add_minion(minion, False, True)
     elif back_row_zone.collidepoint(mouse_x, mouse_y):
         return battle_state.add_minion(minion, False, False)
     return False
 
+# funktion for brug af 'spell' kort
 def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    """Håndterer brug af et spell kort."""
-    # Hvis spell'en har en custom effekt, brug den
+    # Hvis spell har en custom effekt, brug den
     if hasattr(spell, 'use_effect'):
         if spell.use_effect(battle_state, spell, enemy_discard, player_discard):
             player_discard.append(spell)
@@ -147,25 +148,25 @@ def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_disca
             break
     return spell_used
 
+# class for håndtering af hvis tur det er
 class TurnManager:
-    """Manages game turns and tracks whose turn it is."""
     def __init__(self, player_screen, enemy):
-        self.is_player_turn = True
+        self.is_player_turn = True # True = spillerens tur, False = fjendens tur
         self.player_screen = player_screen
         self.enemy = enemy
 
+    # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
-        """End the player's turn and start enemy turn."""
-        # Draw a card for next turn
+        # trækker et kort fra bunken
         draw_card(self.player_screen.playerDeckPile, self.player_screen.playerHand)
         self.is_player_turn = False
         self.enemy.perform_turn()
         self.is_player_turn = True
 
+    # funktion der checker om spilleren må spille et kort (ikke implementeret endnu)
     def can_play_card(self, card):
-        """Check if a card can be played (correct turn, enough mana, etc)."""
-        return self.is_player_turn  # For now just check turn, can add mana check later
+        return self.is_player_turn
 
+    # funktion der checker hvis tur det er
     def get_current_player(self):
-        """Get who's turn it currently is."""
         return "player" if self.is_player_turn else "enemy"

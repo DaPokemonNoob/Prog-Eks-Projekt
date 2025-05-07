@@ -4,7 +4,7 @@ from game_logic import minion_death, hero_death
 
 # Minion kort:
 def slimeling():
-    return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None, pic="slimeling.png")
+    return Minion("Slimeling", manaCost=2, attack=2, hp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
     minion = Minion("Some Cool Guy", manaCost=5, attack=4, hp=6, 
@@ -15,7 +15,6 @@ def someCoolGuy():
             for other_minion in row:
                 if other_minion != minion:  # Don't buff self
                     other_minion.attack += 1
-                    
     minion.on_summon = custom_on_summon
     return minion
 
@@ -34,11 +33,10 @@ def evilGuy():      # Den hero fjenden bruger
 
 # Spell kort:
 def fireball():
-    return Spell("Fireball", manaCost=4, attack=2)
+    return Spell("Fireball", manaCost=3, attack=2)
 
 def chaosCrystal():
     spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.")
-    
     def custom_spell_effect(battle_state, spell, enemy_discard, player_discard):
         import random
         # Samler alle mulige targets (minions og heroes)
