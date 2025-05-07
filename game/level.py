@@ -64,7 +64,7 @@ def handle_click(mouse_pos, map_levels):
                 # levelet kunne klikkes, så gør det til det nuværende level
                 Level.set_current_level(level)
                 print(f"Moved to level {level.id}")
-                return True
+                return True and level.encounter_type
     return False
 
 def generate_map(level_count=6):
@@ -165,7 +165,6 @@ def draw_map(map_levels, screen, font):
         for level in level_group:
             color = {
                 "battle": (255, 0, 0),
-                "treasure": (255, 255, 0),
                 "shop": (0, 0, 255),
                 "heal": (0, 255, 0),
                 "boss": (255, 0, 255)
