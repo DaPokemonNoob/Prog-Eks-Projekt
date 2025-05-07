@@ -36,7 +36,8 @@ def fireball():
     return Spell("Fireball", manaCost=3, attack=2)
 
 def chaosCrystal():
-    spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.")
+    spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
+    
     def custom_spell_effect(battle_state, spell, enemy_discard, player_discard):
         import random
         # Samler alle mulige targets (minions og heroes)
@@ -49,11 +50,11 @@ def chaosCrystal():
         possible_targets.append(battle_state.player_hero)
         
         # Fjern døde targets
-        possible_targets = [target for target in possible_targets if target.hp >= 0]
+        possible_targets = [target for target in possible_targets if target.hp > 0]
         
         if possible_targets:
             # Aktiver 5 gange med random target hver gang
-            for i in range(spell.activationTimes):
+            for _ in range(spell.activationTimes):
                 if possible_targets:  # Check igen i tilfælde af at nogle targets er døde
                     target = random.choice(possible_targets)
                     target.hp -= spell.attack
@@ -65,6 +66,7 @@ def chaosCrystal():
                         hero_death(target, battle_state)
             return True
         return False
+        
     spell.use_effect = custom_spell_effect
     return spell
 
