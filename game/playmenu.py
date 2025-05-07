@@ -19,43 +19,29 @@ class PlayMenu(Screen):
         self.battle_state.player_hero = card.adventurer()    # Player hero
         self.battle_state.enemy_hero = card.evilGuy()        # Enemy hero
 
-        # Hero card positioner - keep heroes on the sides
-        self.player_hero_rect = pygame.Rect(20, HEIGHT//2 - HERO_CARD_HEIGHT//2, 
-                                          HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
-        self.enemy_hero_rect = pygame.Rect(WIDTH - 20 - HERO_CARD_WIDTH, 
-                                         HEIGHT//2 - HERO_CARD_HEIGHT//2,
-                                         HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
+        # Laver hero og enemy hero kort (Position: x,y og Størrelse: bredde, højde)
+        self.player_hero_rect = pygame.Rect(20, HEIGHT//2 - HERO_CARD_HEIGHT//2, HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
+        self.enemy_hero_rect = pygame.Rect(WIDTH - 20 - HERO_CARD_WIDTH, HEIGHT//2 - HERO_CARD_HEIGHT//2, HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
         self.turn_manager = TurnManager(self, self.enemy)
-        
-        # Card management initialization
-        self.initialize_card_collections()
+
+    # denne funktion initialiserer spillerens dæk
+        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal()]    # Spillerens dæk
+        random.shuffle(self.playerDeckPile)
+        self.playerHand = []                                                            #Laver en tom liste til kortene i spillerens hånd
+        self.playerDiscard = []                                                         #Laver en tom liste til kortene i spillerens discard pile
+
         self.dragged_card = None
         self.drag_offset = (0, 0)
 
-        # UI zones initialization
-        self.initialize_play_zones()
-        self.initialize_ui_elements()
-
-    # denne funktion initialiserer spillerens dæk
-    def initialize_card_collections(self):
-        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal()]
-        random.shuffle(self.playerDeckPile)
-        self.playerHand = []
-        self.playerDiscard = []
-
-
-    def initialize_play_zones(self):
         # Setup play zones
         self.player_front_row_zone = pygame.Rect(440, 87, 200, 300)
         self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
         self.enemy_front_row_zone = pygame.Rect(640, 87, 200, 300)
         self.enemy_back_row_zone = pygame.Rect(840, 25, 200, 450)
 
-        # Load background
-    def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
         
