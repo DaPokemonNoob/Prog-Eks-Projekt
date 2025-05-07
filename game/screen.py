@@ -12,7 +12,6 @@ from game_logic import (minion_death, draw_card, cast_spell,
 
 width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
-suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 
 # Card size constants
 CARD_WIDTH = 100
@@ -20,17 +19,6 @@ CARD_HEIGHT = 140
 HERO_SCALE = 2
 HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
 HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
-
-def load_card_image(rank, suit):
-    suit_name = suit_map[suit]
-    filename = f"{rank}_of_{suit_name}.png"
-    path = os.path.join("assets", "card", filename)
-    try:
-        image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (100, 140))
-    except pygame.error as e:
-        print(f"Failed to load {path}: {e}")
-        return None
 
 class Button:
     def __init__(self, pos, color, size, image_path=None, hover_image_path=None):
@@ -200,8 +188,6 @@ class PlayMenu(Screen):
         self.initialize_play_zones()
         self.initialize_ui_elements()
 
-        self.card_front = []
-
     def initialize_card_collections(self):
         self.playerDeckPile = [card.knight(), card.slimeling()]
         random.shuffle(self.playerDeckPile)
@@ -257,14 +243,24 @@ class PlayMenu(Screen):
     def end_turn(self):
         # Indlæs kortbilleder
         card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
-        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
+
+        # Dynamisk indlæsning af card_front baseret på card.pic
+        card = self.playerDeckPile[0] if self.playerDeckPile else None  # Eksempel: Tag det øverste kort fra bunken
+        card_front = None
+        if card and card.pic:
+            card_front_path = f"assets/playingCard/{card.pic}"
+            card_front = pygame.image.load(card_front_path).convert_alpha()
+
+        else:
+            print("No card or card.pic is missing!")
 
         # Definer positioner
         deck_pos = (64, 525)  # Startposition (dækket)
         hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
 
         # Spil animationen oven på PlayMenu
-        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
+        if card_front:
+            play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
 
         # End turn using turn manager
         self.turn_manager.end_player_turn()
@@ -383,11 +379,11 @@ class PlayMenu(Screen):
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
-        x = zone_rect.x + (zone_rect.width - 80) // 2
+        x = zone_rect.x + (zone_rect.width - CARD_WIDTH) // 2
         y = zone_rect.y + spacing
 
         for minion in row:
-            minion.image = pygame.Rect(x, y, 80, 120)
+            minion.image = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
             color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
             pygame.draw.rect(screen, color, minion.image)
             
@@ -407,7 +403,7 @@ class PlayMenu(Screen):
         x = 20
         y = height - 150
         for card in self.playerHand:
-            card_rect = pygame.Rect(x, y, 80, 120)
+            card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
             
             self.image_path = f"assets/playingCard/{card.pic}" if card.pic else None
             self.image = pygame.image.load(self.image_path).convert_alpha()
@@ -432,7 +428,7 @@ class PlayMenu(Screen):
             color = self.get_card_color(self.dragged_card)
             mouse_x, mouse_y = pygame.mouse.get_pos()
             drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
-                                  mouse_y - self.drag_offset[1], 80, 120)
+                                  mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
             pygame.draw.rect(screen, color, drag_rect)
             font = pygame.font.Font(None, 24)
             text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
