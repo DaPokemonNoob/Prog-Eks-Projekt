@@ -53,19 +53,18 @@ while running:
                 switch_screen("pause_menu")
             elif event.key == pygame.K_r:
                 map_data = generate_map()
-                Level.current_level = None
-                assign_level_positions(map_data)
         current_screen.handle_event(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
-            encounter_type = handle_click(mouse_pos, map_data)
-            if encounter_type == "battle":
-                switch_screen("battle_menu")
-            elif encounter_type == "shop":
-                switch_screen("shop_menu")
-            elif encounter_type == "heal":
-                switch_screen("heal_menu")
-            elif encounter_type == "boss":
-               switch_screen("boss_menu")
+            if current_screen == screens["map_menu"]:
+                encounter_type = handle_click(mouse_pos, map_data)
+                if encounter_type == "battle":
+                    switch_screen("battle_menu")
+                elif encounter_type == "shop":
+                    switch_screen("shop_menu")
+                elif encounter_type == "heal":
+                    switch_screen("heal_menu")
+                elif encounter_type == "boss":
+                    switch_screen("boss_menu")
 
 
     # Draw the current screen
