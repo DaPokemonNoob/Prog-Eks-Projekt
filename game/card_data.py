@@ -3,8 +3,8 @@ import effects_data as effect
 from game_logic import minion_death, hero_death
 
 # Minion kort:
-def someGuy():
-    return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None)
+def slimeling():
+    return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
     minion = Minion("Some Cool Guy", manaCost=5, attack=4, hp=6, 
@@ -21,7 +21,7 @@ def someCoolGuy():
 
 def knight():
     armor_amount = effect.armor(2)
-    minion = Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.")
+    minion = Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
     minion.has_taunt = True
     return minion
     
