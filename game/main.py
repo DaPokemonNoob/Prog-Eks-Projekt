@@ -27,7 +27,6 @@ def switch_screen(name):
 
 current_screen = None
 previous_screen = None
-
 screens = {
     "main_menu": MainMenu(switch_screen),
     "play_menu": PlayMenu(switch_screen, clock),
