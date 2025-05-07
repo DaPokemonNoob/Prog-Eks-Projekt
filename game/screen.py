@@ -99,7 +99,7 @@ class MainMenu(Screen):
         self.buttons = [self.play_button, self.options_button, self.quit_button]
 
         self.actions = {
-            self.play_button: lambda: self.switch_screen("play_menu"), #AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+            self.play_button: lambda: self.switch_screen("play_menu"),
             self.options_button: lambda: self.switch_screen("options_menu"),
             self.quit_button: lambda: sys.exit()
         }
@@ -289,23 +289,26 @@ class PlayMenu(Screen):
 
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
-                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)
+                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)   
                     return
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
-                    use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)
-                    return
+                    if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.dragged_card = None
+                        return
 
                 # Handle minion placement
                 elif self.dragged_card.category == 'minion':
                     if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
+                            self.battle_state.player_front_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
                     elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, False):
+                            self.battle_state.player_back_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
@@ -481,7 +484,7 @@ class PauseMenu(Screen):
     
     def draw(self, screen):
         # lav semi-transparent overlay
-        overlay = pygame.Surface((1280, 720))
+        overlay = pygame.Surface((WIDTH, HEIGHT))
         overlay.fill((0, 0, 0))
         overlay.set_alpha(128)
         screen.blit(overlay, (0, 0))
