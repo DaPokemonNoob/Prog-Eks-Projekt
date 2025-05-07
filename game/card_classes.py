@@ -1,4 +1,5 @@
 import pygame
+from game_logic import perform_attack, minion_death, hero_death
 
 # Card superclass:
 class Card:
@@ -30,7 +31,7 @@ class Minion(Card):
         self.is_enemy = False
         self.is_front_row = False
         self.pic = pic
-        self._has_taunt = False
+        self.has_taunt = False
         self.on_summon = lambda battle_state: None
         Minion.all_minions.append(self)
 
@@ -38,6 +39,12 @@ class Minion(Card):
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
+
+# funktion til at minion angriber
+    def perform_attack(self, target, battle_state):
+        if self.is_selected_for_attack and target:
+            perform_attack(self, target, battle_state)
+            self.is_selected_for_attack = False
 
     # funktion til at select en minion til at angribe
     def selected(self):
