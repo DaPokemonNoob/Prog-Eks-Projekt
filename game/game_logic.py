@@ -1,5 +1,3 @@
-from screen import handle_mouse_up
-
 # funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
 def minion_death(minion, battle_state, discard_pile=None):
     if minion.hp <= 0:
