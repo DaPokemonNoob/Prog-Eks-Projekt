@@ -63,15 +63,24 @@ def perform_attack(attacker, target, battle_state, discard_pile=None):
     if hasattr(attacker, 'is_enemy'):  # Only check minion death for minions
         minion_death(attacker, battle_state, discard_pile)
 
-def has_taunt_minion(rows):
-    """Check if there are any valid taunt minions in the given rows."""
+def taunt_check(rows):
+    """Check if there are any minions with taunt in the given rows."""
     for row in rows:
         for minion in row:
-            if (hasattr(minion, 'effect') and minion.effect and 
-                'Taunt' in minion.effect and 
-                (minion.name != 'Knight' or minion.is_front_row)):  # Only count Knight's taunt if in front row
+            if minion.has_taunt:
                 return True
     return False
+
+def can_attack_target(attacker, target, battle_state):
+    """Check if a target can be attacked based on taunt rules."""
+    if not target.is_enemy:  # Can't attack friendly units
+        return False
+        
+    has_taunt = taunt_check([battle_state.enemy_front_row, battle_state.enemy_back_row])
+    if has_taunt:
+        # If there's a taunt minion, can only attack units with taunt
+        return target.has_taunt
+    return True  # No taunt minions, can attack any target
 
 def cast_spell(spell, target, battle_state, caster_discard):
     """Cast a spell on a target."""
@@ -94,19 +103,6 @@ def use_weapon(weapon, target, battle_state, caster_discard, enemy_discard):
         caster_discard.append(weapon)
         return True
     return False
-
-def can_attack_target(attacker, target, battle_state):
-    """Check if a target can be attacked based on taunt rules."""
-    if not target.is_enemy:  # Can't attack friendly units
-        return False
-        
-    has_taunt = has_taunt_minion([battle_state.enemy_front_row, battle_state.enemy_back_row])
-    if has_taunt:
-        # If there's a taunt minion, can only attack units with taunt
-        return (hasattr(target, 'effect') and target.effect and 
-                'Taunt' in target.effect and 
-                (target.name != 'Knight' or target.is_front_row))
-    return True  # No taunt minions, can attack any target
 
 def use_minion(minion, mouse_x, mouse_y, battle_state, player_front_row_zone, player_back_row_zone):
     """Håndterer placering af en minion på brættet."""
@@ -139,9 +135,7 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                if has_taunt_minion([battle_state.enemy_front_row, battle_state.enemy_back_row]) and not (
-                    hasattr(minion, 'effect') and minion.effect and 'Taunt' in minion.effect and (
-                    minion.name != 'Knight' or minion.is_front_row)):
+                if taunt_check([battle_state.enemy_front_row, battle_state.enemy_back_row]) and not minion.has_taunt:
                     break
                 
                 minion.hp -= weapon.attack

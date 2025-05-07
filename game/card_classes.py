@@ -29,7 +29,19 @@ class Minion(Card):
         self.image = None
         self.is_enemy = False
         self.is_front_row = False
+        self._has_taunt = False
         Minion.all_minions.append(self)
+
+    @property
+    def has_taunt(self):
+        """Check if minion has taunt effect. Knights only have taunt in front row."""
+        if self.name == "Knight":
+            return self._has_taunt and self.is_front_row
+        return self._has_taunt
+
+    @has_taunt.setter
+    def has_taunt(self, value):
+        self._has_taunt = value
 
     def check_hover(self):
         mouse_pos = pygame.mouse.get_pos()

@@ -7,7 +7,7 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, has_taunt_minion, cast_spell, 
+from game_logic import (minion_death, draw_card, cast_spell, 
                        use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
 width, height = 1280, 720
@@ -470,10 +470,11 @@ class PlayMenu(Screen):
 
     def draw_dragged_card(self, screen):
         if self.dragged_card:
+            color = self.get_card_color(self.dragged_card)
             mouse_x, mouse_y = pygame.mouse.get_pos()
             drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
                                   mouse_y - self.drag_offset[1], 80, 120)
-            pygame.draw.rect(screen, (200, 200, 200), drag_rect)
+            pygame.draw.rect(screen, color, drag_rect)
             font = pygame.font.Font(None, 24)
             text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
             text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
@@ -486,7 +487,7 @@ class PlayMenu(Screen):
                 return (200, 200, 200)
             elif card.category == 'spell':
                 return (150, 150, 255)
-            else:
+            elif card.category == 'weapon':
                 return (255, 200, 200)
         return (200, 200, 200)
 

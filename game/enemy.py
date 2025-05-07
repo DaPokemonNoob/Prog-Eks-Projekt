@@ -31,8 +31,18 @@ class Enemy:
                 enemy_minion = self.hand.pop(0)
                 add_minion_to_board(enemy_minion, self.battle_state, True, False)
         
-        # Enemy minion attacks
+        # Enemy minion attacks - first front row
         for attacking_minion in self.battle_state.enemy_front_row[:]:  # Create a copy of the list to iterate
+            if not self.battle_state.player_front_row:
+                # Attack enemy hero if no minions
+                perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
+            elif self.battle_state.player_front_row:
+                # Attack first player minion
+                target = self.battle_state.player_front_row[0]
+                perform_attack(attacking_minion, target, self.battle_state, self.discard)
+
+        # Then back row attacks
+        for attacking_minion in self.battle_state.enemy_back_row[:]:
             if not self.battle_state.player_front_row:
                 # Attack enemy hero if no minions
                 perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)

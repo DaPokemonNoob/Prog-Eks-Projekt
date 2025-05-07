@@ -11,8 +11,9 @@ def someCoolGuy():
 
 def knight():
     armor_amount = effect.armor(2)
-    has_taunt = effect.taunt()
-    return Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
+    minion = Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.")
+    minion.has_taunt = True
+    return minion
     
 # Hero kort:
 def adventurer():   # Den hero spilleren bruger
