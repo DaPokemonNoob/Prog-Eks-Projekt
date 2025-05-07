@@ -1,7 +1,7 @@
 from card_classes import Minion, Spell, Weapon, Hero
 import effects_data as effect
 
-# Eksempel på minion kort:
+# Minion kort:
 def someGuy():
     return Minion("Some Guy", manaCost=2, attack=2, hp=5, effect=None)
 
@@ -14,11 +14,14 @@ def knight():
     has_taunt = effect.taunt()
     return Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. If summoned in the 1st row: Taunt.")
     
-# Eksempel på Hero kort:
-def adventurer():
+# Hero kort:
+def adventurer(): # Den hero spilleren bruger
     return Hero("Adventurer", attack=1, hp=15)
 
-# Eksempel på spell kort:
+def demon():      # Den hero fjenden bruger
+    return Hero("Demon", attack=1, hp=15)
+
+# Spell kort:
 def fireball():
     return Spell("Fireball", manaCost=4, attack=2)
 
@@ -28,7 +31,7 @@ def chaosCrystal():
 def firestorm():
     return Spell("Firestorm", manaCost=5, attack=3, effect="Deals 3 damage to all Minions.")
 
-# Eksempel på weapon kort:
+# Weapon kort:
 def sword():
     return Weapon("Sword", manaCost=3, attack=3, durability=2)
 

@@ -287,7 +287,7 @@ class PlayMenu(Screen):
                                         self.battle_state.enemy_front_row.remove(minion)
                                     else:
                                         self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemy.enemyDiscard.append(minion)
+                                    self.enemy.discard.append(minion)
                                 weapon_used = True
                                 self.playerDiscard.append(self.dragged_card)
                                 self.dragged_card = None
@@ -322,7 +322,7 @@ class PlayMenu(Screen):
                                         self.battle_state.enemy_front_row.remove(minion)
                                     else:
                                         self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemy.enemyDiscard.append(minion)
+                                    self.enemy.discard.append(minion)
                                 spell_cast = True
                                 self.playerDiscard.append(self.dragged_card)
                                 self.dragged_card = None
