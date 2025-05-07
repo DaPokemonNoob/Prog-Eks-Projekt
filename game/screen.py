@@ -6,8 +6,8 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, use_spell, 
-                       use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
+from game_logic import (minion_death, draw_card, 
+                       can_attack_target, TurnManager, use_weapon, use_minion, use_spell)
 
 # intialiser screen
 WIDTH, HEIGHT = 1280, 720
@@ -311,9 +311,9 @@ class PlayMenu(Screen):
                             return
 
                 # If card wasn't used, return to hand
-                self._return_card_to_hand(mouse_x)
+                self.return_card_to_hand(mouse_x)
 
-    def _return_card_to_hand(self, mouse_x):
+    def return_card_to_hand(self, mouse_x):
         """Helper method to return a card to the player's hand."""
         insert_pos = 0
         for i, rect in enumerate(self.hand_card_rects):
@@ -534,50 +534,66 @@ class PauseMenu(Screen):
 
 # map menus (treasure, shop, heal)
 
-class TreasureMenu(Screen):
+class HealMenu(Screen):
     def __init__(self, switch_screen):
         super().__init__()
         self.switch_screen = switch_screen
-        self.bg_color = None  # We'll use a transparent overlay instead
+        self.bg_color = "green"
         self.buttons = []  # Initialize with an empty list of buttons
+        self.initialize_ui_elements()
+
+    def initialize_ui_elements(self):
+        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
-        # lav semi-transparent overlay
-        treasure_overlay = pygame.Surface((1280, 720))
-        treasure_overlay.fill((0, 0, 0))
-        treasure_overlay.set_alpha(128)
-        screen.blit(treasure_overlay, (0, 0))
-        
-        # tegn knapper
-        for button in self.buttons:
-            button.run()
-        self.draw_labels(screen)
+        # Draw background
+        screen.fill(self.bg_color)
 
-class TreasureMenu(Screen):
+class BattleMenu(Screen):
     def __init__(self, switch_screen):
         super().__init__()
         self.switch_screen = switch_screen
-        self.bg_color = None  # We'll use a transparent overlay instead
+        self.bg_color = "red"
         self.buttons = []  # Initialize with an empty list of buttons
+        self.initialize_ui_elements()
+
+    def initialize_ui_elements(self):
+        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
-        # lav semi-transparent overlay
-        treasure_overlay = pygame.Surface((1280, 720))
-        treasure_overlay.fill((0, 0, 0))
-        treasure_overlay.set_alpha(128)
-        screen.blit(treasure_overlay, (0, 0))
-        
-        # tegn knapper
-        for button in self.buttons:
-            button.run()
-        self.draw_labels(screen)
+        # Draw background
+        screen.fill(self.bg_color)
 
-    def draw_labels(self, screen):
-        font = pygame.font.Font("assets/font/impact.ttf", 50)
-        if None in self.buttons:
-            treasure_text = font.render("You found a treasure!", True, "white")
-        treasure_text = font.render("", True, "white")
-        text_rect = treasure_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
-        screen.blit(treasure_text, text_rect)
+class ShopMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = "blue"
+        self.buttons = []  # Initialize with an empty list of buttons
+        self.initialize_ui_elements()
 
-        # Add more labels or buttons as needed
+    def initialize_ui_elements(self):
+        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+
+    def draw(self, screen):
+        # Draw background
+        screen.fill(self.bg_color)
+
+class BossMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = "purple"
+        self.buttons = []  # Initialize with an empty list of buttons
+        self.initialize_ui_elements()
+
+    def initialize_ui_elements(self):
+        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+
+    def draw(self, screen):
+        # Draw background
+        screen.fill(self.bg_color)
