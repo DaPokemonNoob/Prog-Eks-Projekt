@@ -7,7 +7,7 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, cast_spell, 
+from game_logic import (minion_death, draw_card, use_spell, 
                        use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
 width, height = 1280, 720
