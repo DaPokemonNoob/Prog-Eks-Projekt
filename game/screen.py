@@ -7,6 +7,7 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
+from game_logic import handle_minion_death, draw_card, has_taunt_minion, cast_spell, use_weapon, can_attack_target, TurnManager
 
 width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
@@ -169,14 +170,13 @@ class PlayMenu(Screen):
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
-        self.is_player_turn = True
         self.clock = clock
         
         self.battle_state = BoardState()
-        self.battle_state.player_hero = card.adventurer()  # Player hero
+        self.battle_state.player_hero = card.adventurer()    # Player hero
         self.battle_state.enemy_hero = card.evilGuy()        # Enemy hero
 
-        # Hero card positions
+        # Hero card positioner
         self.player_hero_rect = pygame.Rect(20, height//2 - HERO_CARD_HEIGHT//2, 
                                           HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         self.enemy_hero_rect = pygame.Rect(width - 20 - HERO_CARD_WIDTH, 
@@ -189,14 +189,15 @@ class PlayMenu(Screen):
         self.playerHand = []
         self.playerDiscard = []
         
-        # Create enemy instance
+        # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
+        self.turn_manager = TurnManager(self, self.enemy)
 
         self.dragged_card = None
         self.drag_offset = (0, 0)
 
         # Setup play zones
-        self.player_front_row_zone = pygame.Rect(440, 87, 200, 300) # (x-position for top-venstre hjørne, y-position for top-venstre hjørne, bredde, højde)
+        self.player_front_row_zone = pygame.Rect(440, 87, 200, 300)
         self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
         self.enemy_front_row_zone = pygame.Rect(640, 87, 200, 300)
         self.enemy_back_row_zone = pygame.Rect(840, 25, 200, 450)
@@ -241,36 +242,18 @@ class PlayMenu(Screen):
         deck_pos = (64, 525)  # Startposition (dækket)
         hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
 
-        # Spil animationen oven på PlayMenu med en forsinkelse på 1 sekund (1000 ms)
+        # Spil animationen oven på PlayMenu
         play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
 
-        # Fortsæt med tur-logikken
-        self.draw_card()
-        self.is_player_turn = False
-        self.enemy.perform_turn()
-        self.is_player_turn = True
-
-    def draw_card(self):
-        try:
-            if len(self.playerDeckPile) > 0 and len(self.playerHand) < 7:
-                minion = self.playerDeckPile.pop(0)
-                self.playerHand.append(minion)
-            else:
-                print("No more cards to draw or hand is full")
-        except IndexError:
-            print("No more cards to draw.")
-
-    def has_taunt_minion(self, rows):
-        for row in rows:
-            for minion in row:
-                if (hasattr(minion, 'effect') and minion.effect and 
-                    'Taunt' in minion.effect and 
-                    (minion.name != 'Knight' or minion.is_front_row)):  # Only count Knight's taunt if in front row
-                    return True
-        return False
+        # End turn using turn manager
+        self.turn_manager.end_player_turn()
 
     def handle_event(self, event):
         super().handle_event(event)
+
+        # Only handle card interactions if it's the player's turn
+        if not self.turn_manager.is_player_turn:
+            return
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
@@ -303,38 +286,17 @@ class PlayMenu(Screen):
                     for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
                         for minion in row:
                             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                                # Check for taunt minions in both rows
-                                has_taunt = self.has_taunt_minion([self.battle_state.enemy_front_row, self.battle_state.enemy_back_row])
-                                if has_taunt and not (hasattr(minion, 'effect') and minion.effect and 'Taunt' in minion.effect and (minion.name != 'Knight' or minion.is_front_row)):
-                                    # Can't attack non-taunt minion if there's a taunt minion
-                                    break
-                                
-                                # Apply weapon damage
-                                minion.hp -= self.dragged_card.attack
-                                # Check if minion died
-                                if minion.hp <= 0:
-                                    if minion.is_front_row:
-                                        self.battle_state.enemy_front_row.remove(minion)
-                                    else:
-                                        self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemy.discard.append(minion)
-                                weapon_used = True
-                                self.playerDiscard.append(self.dragged_card)
-                                self.dragged_card = None
-                                break
+                                if can_attack_target(minion, minion, self.battle_state):
+                                    if use_weapon(self.dragged_card, minion, self.battle_state, self.playerDiscard, self.enemy.discard):
+                                        weapon_used = True
+                                        self.dragged_card = None
+                                        break
                         if weapon_used:
                             break
                     
                     # If weapon wasn't used, return it to hand
                     if not weapon_used:
-                        insert_pos = 0
-                        for i, rect in enumerate(self.hand_card_rects):
-                            if mouse_x < rect.centerx:
-                                insert_pos = i
-                                break
-                            insert_pos = i + 1
-                        self.playerHand.insert(insert_pos, self.dragged_card)
-                        self.dragged_card = None
+                        self._return_card_to_hand(mouse_x)
                     return
 
                 # Handle spell casting
@@ -344,32 +306,16 @@ class PlayMenu(Screen):
                     for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
                         for minion in row:
                             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                                # Apply spell damage
-                                minion.hp -= self.dragged_card.attack
-                                # Check if minion died
-                                if minion.hp <= 0:
-                                    if minion.is_front_row:
-                                        self.battle_state.enemy_front_row.remove(minion)
-                                    else:
-                                        self.battle_state.enemy_back_row.remove(minion)
-                                    self.enemy.discard.append(minion)
-                                spell_cast = True
-                                self.playerDiscard.append(self.dragged_card)
-                                self.dragged_card = None
-                                break
+                                if cast_spell(self.dragged_card, minion, self.battle_state, self.playerDiscard):
+                                    spell_cast = True
+                                    self.dragged_card = None
+                                    break
                         if spell_cast:
                             break
                     
                     # If spell wasn't cast, return it to hand
                     if not spell_cast:
-                        insert_pos = 0
-                        for i, rect in enumerate(self.hand_card_rects):
-                            if mouse_x < rect.centerx:
-                                insert_pos = i
-                                break
-                            insert_pos = i + 1
-                        self.playerHand.insert(insert_pos, self.dragged_card)
-                        self.dragged_card = None
+                        self._return_card_to_hand(mouse_x)
                     return
 
                 # Handle minion placement
@@ -385,14 +331,18 @@ class PlayMenu(Screen):
                             return
 
                 # If card wasn't used, return to hand
-                insert_pos = 0
-                for i, rect in enumerate(self.hand_card_rects):
-                    if mouse_x < rect.centerx:
-                        insert_pos = i
-                        break
-                    insert_pos = i + 1
-                self.playerHand.insert(insert_pos, self.dragged_card)
-                self.dragged_card = None
+                self._return_card_to_hand(mouse_x)
+
+    def _return_card_to_hand(self, mouse_x):
+        """Helper method to return a card to the player's hand."""
+        insert_pos = 0
+        for i, rect in enumerate(self.hand_card_rects):
+            if mouse_x < rect.centerx:
+                insert_pos = i
+                break
+            insert_pos = i + 1
+        self.playerHand.insert(insert_pos, self.dragged_card)
+        self.dragged_card = None
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20

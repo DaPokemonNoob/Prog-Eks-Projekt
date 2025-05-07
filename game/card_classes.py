@@ -1,4 +1,5 @@
 import pygame
+from game_logic import perform_attack, add_minion_to_board
 
 # Card superclass:
 class Card:
@@ -24,10 +25,10 @@ class Minion(Card):
         self.attack = attack
         self.hp = hp
         self.effect = effect
-        self.is_selected_for_attack = False  # Renamed to clarify purpose
-        self.image = None  # This should be set when the minion is placed on the board
+        self.is_selected_for_attack = False
+        self.image = None
         self.is_enemy = False
-        self.is_front_row = False  # Once set, this cannot be changed (minions cannot move between rows)
+        self.is_front_row = False
         Minion.all_minions.append(self)
 
     def check_hover(self):
@@ -35,36 +36,13 @@ class Minion(Card):
         return self.image.collidepoint(mouse_pos)
 
     def selected(self):
-        # Selection is only used for attacking
         if self.check_hover() and pygame.mouse.get_pressed()[0]:
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
     def perform_attack(self, target, battle_state):
         if self.is_selected_for_attack and target:
-            # Deal damage to target
-            target.hp -= self.attack
-            # Take damage from target if it's a minion
-            if isinstance(target, Minion):
-                self.hp -= target.attack
-            # Handle minion death and automatic position shifting within the same row
-            if target.hp <= 0:
-                if target.is_enemy:
-                    if target.is_front_row:
-                        battle_state.enemy_front_row.remove(target)
-                    else:
-                        battle_state.enemy_back_row.remove(target)
-                else:
-                    if target.is_front_row:
-                        battle_state.player_front_row.remove(target)
-                    else:
-                        battle_state.player_back_row.remove(target)
-            if self.hp <= 0:
-                if self.is_front_row:
-                    battle_state.player_front_row.remove(self)
-                else:
-                    battle_state.player_back_row.remove(self)
-            # Deselect after attack
+            perform_attack(self, target, battle_state)
             self.is_selected_for_attack = False
 
 # Spell subclass:
@@ -86,27 +64,12 @@ class BoardState:
         self.enemy_back_row = []   # max 3 minions
         self.player_front_row = [] # max 2 minions
         self.player_back_row = []  # max 3 minions
-        self.enemy_hero = None
-        self.player_hero = None
         
     def add_minion(self, minion, is_enemy, is_front_row):
-        target_row = None
-        if is_enemy:
-            target_row = self.enemy_front_row if is_front_row else self.enemy_back_row
-        else:
-            target_row = self.player_front_row if is_front_row else self.player_back_row
-            
-        max_minions = 2 if is_front_row else 3
-        if len(target_row) < max_minions:
-            target_row.append(minion)
-            minion.is_enemy = is_enemy
-            minion.is_front_row = is_front_row
-            return True
-        return False
+        return add_minion_to_board(minion, self, is_enemy, is_front_row)
     
     def handle_minion_click(self, clicked_minion):
         selected_minion = None
-        # Find any currently selected minion
         for row in [self.player_front_row, self.player_back_row]:
             for minion in row:
                 if minion.is_selected_for_attack:
@@ -116,11 +79,9 @@ class BoardState:
                 break
                 
         if clicked_minion.is_enemy and selected_minion:
-            # Attack enemy minion
             selected_minion.perform_attack(clicked_minion, self)
             return True
         elif not clicked_minion.is_enemy:
-            # Select/deselect player minion
             if selected_minion and selected_minion != clicked_minion:
                 selected_minion.is_selected_for_attack = False
             clicked_minion.selected()
