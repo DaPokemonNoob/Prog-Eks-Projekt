@@ -2,14 +2,14 @@
 def minion_death(minion, battle_state, discard_pile=None):
     if minion.hp <= 0:
         if minion.is_enemy:
-            if minion.is_front_row:
+            if minion in battle_state.enemy_front_row:
                 battle_state.enemy_front_row.remove(minion)
-            else:
+            elif minion in battle_state.enemy_back_row:
                 battle_state.enemy_back_row.remove(minion)
         else:  # Hvis ikke is_enemy, så er det en spiller-minion
-            if minion.is_front_row:
+            if minion in battle_state.player_front_row:
                 battle_state.player_front_row.remove(minion)
-            else:
+            elif minion in battle_state.player_back_row:
                 battle_state.player_back_row.remove(minion)
         # discarder minion hvis dens hp <= 0
         if discard_pile is not None:
