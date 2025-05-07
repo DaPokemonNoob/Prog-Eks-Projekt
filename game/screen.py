@@ -189,7 +189,7 @@ class PlayMenu(Screen):
         self.initialize_ui_elements()
 
     def initialize_card_collections(self):
-        self.playerDeckPile = [card.knight(), card.slimeling()]
+        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal()]
         random.shuffle(self.playerDeckPile)
         self.playerHand = []
         self.playerDiscard = []
@@ -250,17 +250,16 @@ class PlayMenu(Screen):
         if card and card.pic:
             card_front_path = f"assets/playingCard/{card.pic}"
             card_front = pygame.image.load(card_front_path).convert_alpha()
-
         else:
             print("No card or card.pic is missing!")
 
         # Definer positioner
-        deck_pos = (64, 525)  # Startposition (dækket)
-        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
+        draw_animation_start = (64, 525)  # Startposition (dækket)
+        draw_animation_end = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
 
         # Spil animationen oven på PlayMenu
         if card_front:
-            play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
+            play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, draw_animation_start, draw_animation_end, self.draw, delay_after_flip=1000)
 
         # End turn using turn manager
         self.turn_manager.end_player_turn()
@@ -400,8 +399,8 @@ class PlayMenu(Screen):
 
     def draw_hand(self, screen):
         self.hand_card_rects = []
-        x = 20
-        y = height - 150
+        x = 370
+        y = height - 170
         for card in self.playerHand:
             card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
             
@@ -411,8 +410,8 @@ class PlayMenu(Screen):
             screen.blit(self.image, (x, y))
             
             font = pygame.font.Font(None, 24)
-            text = font.render(card.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(x + 40, y + 60))
+            text = font.render(str(card.manaCost), True, (255, 255, 255))
+            text_rect = text.get_rect(center=(x + 85, y + 17))
             screen.blit(text, text_rect)
             
             if hasattr(card, 'category') and card.category != 'minion':

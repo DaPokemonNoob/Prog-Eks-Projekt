@@ -37,7 +37,7 @@ def fireball():
     return Spell("Fireball", manaCost=4, attack=2)
 
 def chaosCrystal():
-    spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.")
+    spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
     
     def custom_spell_effect(battle_state, spell, enemy_discard, player_discard):
         import random
