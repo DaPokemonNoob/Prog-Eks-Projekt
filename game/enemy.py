@@ -1,3 +1,4 @@
+import random
 import pygame
 import card_data as card
 import effects_data as effect
@@ -7,6 +8,7 @@ class Enemy:
     def __init__(self, battle_state: BoardState):
         self.battle_state = battle_state
         self.deck_pile = [card.knight(), card.someGuy(), card.someCoolGuy(), card.knight()]
+        random.shuffle(self.deck_pile)
         self.hand = []      # index af fjendens hånd. Den har ikke et specielt navn da den bliver initialiseret separat fra spillerens hånd
         self.discard = []   # index af fjendens discard pile. Den har ikke et specielt navn da den bliver initialiseret separat fra spillerens discard pile
 

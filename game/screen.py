@@ -12,6 +12,13 @@ width, height = 1280, 720
 SCREEN = pygame.display.set_mode((width, height))
 suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
 
+# Card size constants
+CARD_WIDTH = 80
+CARD_HEIGHT = 120
+HERO_SCALE = 2
+HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
+HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
+
 def load_card_image(rank, suit):
     suit_name = suit_map[suit]
     filename = f"{rank}_of_{suit_name}.png"
