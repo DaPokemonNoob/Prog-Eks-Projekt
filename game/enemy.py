@@ -15,7 +15,7 @@ class Enemy:
 
     def draw_card(self):
         return draw_card(self.deck_pile, self.hand)
-
+# kill yourself github, please i hate you
     def perform_turn(self):
         # Draw a card for the enemy
         self.draw_card()

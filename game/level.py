@@ -141,11 +141,6 @@ def generate_map(level_count=6):
 
     verificer_map(map_levels)
 
-    for i, level_group in enumerate(map_levels):
-        print(f"\nLevel {i}:")
-        for level in level_group:
-            next_level_ids = [next_level.id for next_level in level.next_level]
-            print(f"{level.id} ({level.encounter_type}) -> connects to: {next_level_ids}")
 
     return map_levels # returnerer listen af leveler
 
