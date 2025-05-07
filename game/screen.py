@@ -203,7 +203,7 @@ class PlayMenu(Screen):
         self.card_front = []
 
     def initialize_card_collections(self):
-        self.playerDeckPile = [card.slimeling(), card.knight()]
+        self.playerDeckPile = [card.knight(), card.slimeling()]
         random.shuffle(self.playerDeckPile)
         self.playerHand = []
         self.playerDiscard = []

@@ -43,11 +43,19 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
         target_row.append(minion)
         minion.is_enemy = is_enemy
         minion.is_front_row = is_front_row
+        
+        # Activate any summon effects the minion might have
+        minion.on_summon(battle_state)
+            
         return True
     return False
 
 def perform_attack(attacker, target, battle_state, discard_pile=None):
     """Handle combat between two units."""
+    # Check if we can attack this target (taunt rules)
+    if hasattr(target, 'is_enemy') and not can_attack_target(attacker, target, battle_state):
+        return False
+        
     # Deal damage
     target.hp -= attacker.attack
     if hasattr(target, 'attack'):  # If target can counter-attack
@@ -62,6 +70,8 @@ def perform_attack(attacker, target, battle_state, discard_pile=None):
             
     if hasattr(attacker, 'is_enemy'):  # Only check minion death for minions
         minion_death(attacker, battle_state, discard_pile)
+    
+    return True
 
 def taunt_check(rows):
     """Check if there are any minions with taunt in the given rows."""
@@ -93,42 +103,6 @@ def cast_spell(spell, target, battle_state, caster_discard):
         return True
     return False
 
-def use_weapon(weapon, target, battle_state, caster_discard, enemy_discard):
-    """Use a weapon on a target."""
-    if not hasattr(target, 'hp'):
-        return False
-        
-    target.hp -= weapon.attack
-    if minion_death(target, battle_state, enemy_discard):
-        caster_discard.append(weapon)
-        return True
-    return False
-
-def use_minion(minion, mouse_x, mouse_y, battle_state, player_front_row_zone, player_back_row_zone):
-    """Håndterer placering af en minion på brættet."""
-    if player_front_row_zone.collidepoint(mouse_x, mouse_y):
-        if battle_state.add_minion(minion, False, True):
-            return True
-    elif player_back_row_zone.collidepoint(mouse_x, mouse_y):
-        if battle_state.add_minion(minion, False, False):
-            return True
-    return False
-
-def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    """Håndterer brug af et spell kort."""
-    spell_cast = False
-    for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
-        for minion in row:
-            if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                minion.hp -= spell.attack
-                spell_cast = True
-                player_discard.append(spell)
-                minion_death(minion, battle_state, enemy_discard)
-                break
-        if spell_cast:
-            break
-    return spell_cast
-
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
     """Håndterer brug af et våben kort."""
     weapon_used = False
@@ -146,6 +120,37 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
         if weapon_used:
             break
     return weapon_used
+
+def use_minion(minion, mouse_x, mouse_y, battle_state, front_row_zone, back_row_zone):
+    """Håndterer placering af en minion på brættet."""
+    if front_row_zone.collidepoint(mouse_x, mouse_y):
+        return battle_state.add_minion(minion, False, True)
+    elif back_row_zone.collidepoint(mouse_x, mouse_y):
+        return battle_state.add_minion(minion, False, False)
+    return False
+
+def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
+    """Håndterer brug af et spell kort."""
+    # Hvis spell'en har en custom effekt, brug den
+    if hasattr(spell, 'use_effect'):
+        if spell.use_effect(battle_state, spell, enemy_discard, player_discard):
+            player_discard.append(spell)
+            return True
+        return False
+
+    # Normal spell håndtering for andre spells
+    spell_used = False
+    for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
+        for minion in row:
+            if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
+                minion.hp -= spell.attack
+                spell_used = True
+                player_discard.append(spell)
+                minion_death(minion, battle_state, enemy_discard)
+                break
+        if spell_used:
+            break
+    return spell_used
 
 class TurnManager:
     """Manages game turns and tracks whose turn it is."""
