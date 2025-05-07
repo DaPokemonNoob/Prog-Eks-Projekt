@@ -411,16 +411,20 @@ class PlayMenu(Screen):
             x += 100
 
     def draw_dragged_card(self, screen):
-        if self.dragged_card:
-            color = self.get_card_color(self.dragged_card)
+        if self.dragged_card and self.dragged_card.pic:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
-                                  mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
-            pygame.draw.rect(screen, color, drag_rect)
-            text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
-                                            mouse_y - self.drag_offset[1] + 60))
-            screen.blit(text, text_rect)
+            x = mouse_x - self.drag_offset[0]
+            y = mouse_y - self.drag_offset[1]
+
+            # Indlæs og skaler kortets billede
+            image = pygame.image.load(f"assets/playingCard/{self.dragged_card.pic}").convert_alpha()
+            image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
+            screen.blit(image, (x, y))
+
+            # Vis manaCost
+            font = pygame.font.Font(None, 24)
+            mana_text = font.render(str(self.dragged_card.manaCost), True, (255, 255, 255))
+            screen.blit(mana_text, (x + 85, y + 17))
 
     def get_card_color(self, card):
         if hasattr(card, 'category'):
