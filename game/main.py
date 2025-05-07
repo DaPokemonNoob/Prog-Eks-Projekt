@@ -1,6 +1,7 @@
 import pygame, sys
-import os
-from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, SCREEN
+from settings import *
+from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, SCREEN
+from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 
 # starter pygame
