@@ -6,8 +6,8 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, use_spell, 
-                       use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
+from game_logic import (minion_death, draw_card, 
+                       can_attack_target, TurnManager, use_weapon, use_minion, use_spell)
 
 # intialiser screen
 WIDTH, HEIGHT = 1280, 720
@@ -311,9 +311,9 @@ class PlayMenu(Screen):
                             return
 
                 # If card wasn't used, return to hand
-                self._return_card_to_hand(mouse_x)
+                self.return_card_to_hand(mouse_x)
 
-    def _return_card_to_hand(self, mouse_x):
+    def return_card_to_hand(self, mouse_x):
         """Helper method to return a card to the player's hand."""
         insert_pos = 0
         for i, rect in enumerate(self.hand_card_rects):
@@ -411,16 +411,20 @@ class PlayMenu(Screen):
             x += 100
 
     def draw_dragged_card(self, screen):
-        if self.dragged_card:
-            color = self.get_card_color(self.dragged_card)
+        if self.dragged_card and self.dragged_card.pic:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
-                                  mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
-            pygame.draw.rect(screen, color, drag_rect)
-            text = pygame.font.Font(None, 24).render(self.dragged_card.name, True, (0, 0, 0))
-            text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
-                                            mouse_y - self.drag_offset[1] + 60))
-            screen.blit(text, text_rect)
+            x = mouse_x - self.drag_offset[0]
+            y = mouse_y - self.drag_offset[1]
+
+            # Indlæs og skaler kortets billede
+            image = pygame.image.load(f"assets/playingCard/{self.dragged_card.pic}").convert_alpha()
+            image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
+            screen.blit(image, (x, y))
+
+            # Vis manaCost
+            font = pygame.font.Font(None, 24)
+            mana_text = font.render(str(self.dragged_card.manaCost), True, (255, 255, 255))
+            screen.blit(mana_text, (x + 85, y + 17))
 
     def get_card_color(self, card):
         if hasattr(card, 'category'):
