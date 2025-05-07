@@ -6,8 +6,8 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, use_spell, 
-                       use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
+from game_logic import (minion_death, draw_card, 
+                       can_attack_target, TurnManager, use_weapon, use_minion, use_spell)
 
 # intialiser screen
 WIDTH, HEIGHT = 1280, 720
@@ -319,9 +319,9 @@ class PlayMenu(Screen):
                             return
 
                 # If card wasn't used, return to hand
-                self._return_card_to_hand(mouse_x)
+                self.return_card_to_hand(mouse_x)
 
-    def _return_card_to_hand(self, mouse_x):
+    def return_card_to_hand(self, mouse_x):
         """Helper method to return a card to the player's hand."""
         insert_pos = 0
         for i, rect in enumerate(self.hand_card_rects):
