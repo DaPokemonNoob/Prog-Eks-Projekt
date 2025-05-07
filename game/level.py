@@ -68,7 +68,7 @@ def handle_click(mouse_pos, map_levels):
     return False
 
 def generate_map(level_count=6):
-    encounter_types = ["battle", "treasure", "shop", "heal"] # de forskellige typer af encounters
+    encounter_types = ["battle", "battle", "battle", "shop", "heal"] # de forskellige typer af encounters
     level_id_counter = 0 # initialiserer id tælleren til håndtering af leveler
     map_levels = [] # opretter en tom liste til at gemme leveler
 
@@ -105,6 +105,38 @@ def generate_map(level_count=6):
             level_to_change = random.choice(not_fighting_levels) # vælger et tilfældigt level der ikke er en battle encounter
             level_to_change.encounter_type = "battle" # ændrer encounter type til battle
             not_fighting_levels.remove(level_to_change) # fjerner level fra listen af ikke-kamp levels
+
+    shop_levels = sum(1 for level in all_levels if level.encounter_type == "shop") # tæller antallet af shop encounters
+    if shop_levels <= 1: # hvis der er færre end 2 shop encounters, tilføj flere
+        shop_levels_needed = 2 - shop_levels
+        not_shop_levels = [level for level in all_levels if level.encounter_type != "shop"]
+        for _ in range(shop_levels_needed):
+            level_to_change = random.choice(not_shop_levels)
+            level_to_change.encounter_type = "shop" # ændrer encounter type til shop
+            not_shop_levels.remove(level_to_change) # fjerner level fra listen af ikke-shop levels
+
+    if shop_levels >= 6: # hvis der er flere end 6 shop encounters, fjern nogle
+        shop_levels_to_remove = shop_levels - 5
+        for _ in range(shop_levels_to_remove):
+            level_to_change = random.choice([level for level in all_levels if level.encounter_type == "shop"])
+            level_to_change.encounter_type = "battle" # ændrer encounter type til battle
+            all_levels.remove(level_to_change) # fjerner level fra listen af shop levels
+
+    heal_levels = sum(1 for level in all_levels if level.encounter_type == "heal") # tæller antallet af heal encounters
+    if heal_levels <= 1: # hvis der er færre end 2 heal encounters, tilføj flere
+        heal_levels_needed = 2 - heal_levels
+        not_heal_levels = [level for level in all_levels if level.encounter_type != "heal"]
+        for _ in range(heal_levels_needed):
+            level_to_change = random.choice(not_heal_levels)
+            level_to_change.encounter_type = "heal" # ændrer encounter type til heal
+            not_heal_levels.remove(level_to_change) # fjerner level fra listen af ikke-heal levels
+
+    if heal_levels >= 6: # hvis der er flere end 6 heal encounters, fjern nogle
+        heal_levels_to_remove = heal_levels - 5
+        for _ in range(heal_levels_to_remove):
+            level_to_change = random.choice([level for level in all_levels if level.encounter_type == "heal"])
+            level_to_change.encounter_type = "battle"
+            all_levels.remove(level_to_change) # fjerner level fra listen af heal levels
         
 
     verificer_map(map_levels)
@@ -138,9 +170,9 @@ def draw_map(map_levels, screen, font):
         for level in level_group:
             color = {
                 "battle": (255, 0, 0),
-                "treasure": (0, 255, 0),
+                "treasure": (255, 255, 0),
                 "shop": (0, 0, 255),
-                "heal": (255, 255, 0),
+                "heal": (0, 255, 0),
                 "boss": (255, 0, 255)
             }.get(level.encounter_type, (255, 255, 255))
 

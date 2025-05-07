@@ -167,10 +167,12 @@ class OptionsMenu(Screen):
 
 class PlayMenu(Screen):
     def __init__(self, switch_screen, clock):
+        # Base initialization
         super().__init__()
         self.bg_color = "blue"
         self.switch_screen = switch_screen
         self.clock = clock
+<<<<<<< HEAD
         
         self.battle_state = BoardState()
         self.battle_state.player_hero = card.adventurer()    # Player hero
@@ -192,10 +194,39 @@ class PlayMenu(Screen):
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
         self.turn_manager = TurnManager(self, self.enemy)
+=======
+        self.is_player_turn = True
 
+        # Game state initialization
+        self.battle_state = BoardState()
+        self.battle_state.player_hero = Hero("Adventurer", attack=1, hp=15)
+        self.enemy = Enemy(self.battle_state)
+
+        # Card management initialization
+        self.initialize_card_collections()
         self.dragged_card = None
         self.drag_offset = (0, 0)
+        self.hand_card_rects = []
 
+        # UI zones initialization
+        self.initialize_play_zones()
+        self.initialize_ui_elements()
+
+    def initialize_card_collections(self):
+        self.playerDeckPile = [card.fireball(), card.someCoolGuy(), card.fireball(), 
+                              card.fireball(), card.fireball(), card.fireball(), card.sword()]
+        random.shuffle(self.playerDeckPile)
+        self.playerHand = []
+        self.playerDiscard = []
+>>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
+
+    def initialize_play_zones(self):
+        self.player_front_row_zone = pygame.Rect(300, 87, 200, 300)
+        self.player_back_row_zone = pygame.Rect(100, 25, 200, 450)
+        self.enemy_front_row_zone = pygame.Rect(780, 87, 200, 300)
+        self.enemy_back_row_zone = pygame.Rect(980, 25, 200, 450)
+
+<<<<<<< HEAD
         # Setup play zones
         self.player_front_row_zone = pygame.Rect(440, 87, 200, 300)
         self.player_back_row_zone = pygame.Rect(240, 25, 200, 450)
@@ -203,18 +234,23 @@ class PlayMenu(Screen):
         self.enemy_back_row_zone = pygame.Rect(840, 25, 200, 450)
 
         # Load background
+=======
+    def initialize_ui_elements(self):
+>>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (width, height))
-
-        # Setup buttons
+        
         self.menu_button = Button((100, 100), "red", (200, 50))
-        self.next_turn_button = Button((993, 587), "gray", (240, 128), image_path="assets/button/end_turn.png", hover_image_path="assets/button/end_turn_hover.png")
+        self.next_turn_button = Button((993, 587), "gray", (240, 128), 
+                                     image_path="assets/button/end_turn.png", 
+                                     hover_image_path="assets/button/end_turn_hover.png")
 
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
             self.menu_button: lambda: self.switch_screen("main_menu"),
             self.next_turn_button: self.end_turn
         }
+<<<<<<< HEAD
         self.hand_card_rects = []
 
     def draw_hero_card(self, screen, hero, rect, is_enemy=False):
@@ -372,18 +408,51 @@ class PlayMenu(Screen):
             screen.blit(hp_text, hp_rect)
             
             y += CARD_HEIGHT + spacing
+=======
 
+    # Card Management Methods
+    def draw_card(self):
+        try:
+            if len(self.playerDeckPile) > 0 and len(self.playerHand) < 7:
+                minion = self.playerDeckPile.pop(0)
+                self.playerHand.append(minion)
+            else:
+                print("No more cards to draw or hand is full")
+        except IndexError:
+            print("No more cards to draw.")
+
+    def has_taunt_minion(self, rows):
+        for row in rows:
+            for minion in row:
+                if (hasattr(minion, 'effect') and minion.effect and 
+                    'Taunt' in minion.effect and 
+                    (minion.name != 'Knight' or minion.is_front_row)):
+                    return True
+        return False
+
+    # Turn Management Methods
+    def end_turn(self):
+        card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
+        card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
+        deck_pos = (64, 525)
+        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)
+        
+        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
+                                        deck_pos, hand_pos, self.draw, delay_after_flip=1000)
+        
+        self.draw_card()
+        self.is_player_turn = False
+        self.enemy.perform_turn()
+        self.is_player_turn = True
+>>>>>>> 1d0788aa11105f8f423599b36c58548cb5c877dd
+
+    # Drawing Methods
     def draw(self, screen):
         screen.blit(self.background_image, (0, 0))
         for button in self.buttons:
             button.run()
         self.draw_labels(screen)
-
-        # Draw hero cards
-        self.draw_hero_card(screen, self.battle_state.player_hero, self.player_hero_rect)
-        self.draw_hero_card(screen, self.battle_state.enemy_hero, self.enemy_hero_rect, True)
-
-        # Draw row zones
+        
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
         pygame.draw.rect(screen, (200, 100, 100), self.enemy_front_row_zone, 2)
@@ -394,31 +463,44 @@ class PlayMenu(Screen):
         self.draw_minion_row(screen, self.battle_state.enemy_front_row, self.enemy_front_row_zone)
         self.draw_minion_row(screen, self.battle_state.enemy_back_row, self.enemy_back_row_zone)
 
-        # Draw hand
+        self.draw_hand(screen)
+        self.draw_dragged_card(screen)
+
+    def draw_minion_row(self, screen, row, zone_rect):
+        spacing = 20
+        x = zone_rect.x + (zone_rect.width - 80) // 2
+        y = zone_rect.y + spacing
+
+        for minion in row:
+            minion.image = pygame.Rect(x, y, 80, 120)
+            color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
+            pygame.draw.rect(screen, color, minion.image)
+            
+            font = pygame.font.Font(None, 24)
+            text = font.render(minion.name, True, (0, 0, 0))
+            text_rect = text.get_rect(center=(x + 40, y + 40))
+            screen.blit(text, text_rect)
+            
+            hp_text = font.render(f"HP: {minion.hp}", True, (0, 0, 0))
+            hp_rect = hp_text.get_rect(center=(x + 40, y + 80))
+            screen.blit(hp_text, hp_rect)
+            
+            y += 120 + spacing
+
+    def draw_hand(self, screen):
         self.hand_card_rects = []
         x = 20
         y = height - 150
         for card in self.playerHand:
-            card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
-            # Different colors for different card types
-            if hasattr(card, 'category'):
-                if card.category == 'minion':
-                    color = (200, 200, 200)  # Light gray for minions
-                elif card.category == 'spell':
-                    color = (150, 150, 255)  # Light blue for spells
-                else:
-                    color = (255, 200, 200)  # Light red for other card types
-            else:
-                color = (200, 200, 200)
+            card_rect = pygame.Rect(x, y, 80, 120)
+            color = self.get_card_color(card)
             pygame.draw.rect(screen, color, card_rect)
             
-            # Draw card name
             font = pygame.font.Font(None, 24)
             text = font.render(card.name, True, (0, 0, 0))
             text_rect = text.get_rect(center=(x + 40, y + 60))
             screen.blit(text, text_rect)
             
-            # Show card type if not a minion
             if hasattr(card, 'category') and card.category != 'minion':
                 type_text = font.render(card.category.upper(), True, (0, 0, 0))
                 type_rect = type_text.get_rect(center=(x + 40, y + 30))
@@ -427,18 +509,137 @@ class PlayMenu(Screen):
             self.hand_card_rects.append(card_rect)
             x += 90
 
-        # Draw dragged card
+    def draw_dragged_card(self, screen):
         if self.dragged_card:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             drag_rect = pygame.Rect(mouse_x - self.drag_offset[0], 
-                                  mouse_y - self.drag_offset[1], CARD_WIDTH, CARD_HEIGHT)
+                                  mouse_y - self.drag_offset[1], 80, 120)
             pygame.draw.rect(screen, (200, 200, 200), drag_rect)
-            # Draw minion name
             font = pygame.font.Font(None, 24)
             text = font.render(self.dragged_card.name, True, (0, 0, 0))
             text_rect = text.get_rect(center=(mouse_x - self.drag_offset[0] + 40, 
                                             mouse_y - self.drag_offset[1] + 60))
             screen.blit(text, text_rect)
+
+    def get_card_color(self, card):
+        if hasattr(card, 'category'):
+            if card.category == 'minion':
+                return (200, 200, 200)
+            elif card.category == 'spell':
+                return (150, 150, 255)
+            else:
+                return (255, 200, 200)
+        return (200, 200, 200)
+
+    # Event Handling
+    def handle_event(self, event):
+        super().handle_event(event)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.handle_mouse_down(event)
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.handle_mouse_up(event)
+
+    def handle_mouse_down(self, event):
+        mouse_x, mouse_y = event.pos
+        for i, rect in enumerate(self.hand_card_rects):
+            if rect.collidepoint(mouse_x, mouse_y):
+                card = self.playerHand[i]
+                if hasattr(card, 'category') and (card.category == 'minion' or card.category == 'spell' or card.category == 'weapon'):
+                    self.dragged_card = self.playerHand.pop(i)
+                    self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
+                break
+
+        if not self.dragged_card:
+            for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row,
+                      self.battle_state.player_front_row, self.battle_state.player_back_row]:
+                for minion in row:
+                    if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
+                        self.battle_state.handle_minion_click(minion)
+                        break
+
+    def handle_mouse_up(self, event):
+        if self.dragged_card:
+            mouse_x, mouse_y = event.pos
+            
+            if hasattr(self.dragged_card, 'category'):
+                if self.dragged_card.category == 'weapon':
+                    self.handle_weapon_drop(mouse_x, mouse_y)
+                elif self.dragged_card.category == 'spell':
+                    self.handle_spell_drop(mouse_x, mouse_y)
+                elif self.dragged_card.category == 'minion':
+                    self.handle_minion_drop(mouse_x, mouse_y)
+
+    def handle_weapon_drop(self, mouse_x, mouse_y):
+        weapon_used = False
+        for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
+            for minion in row:
+                if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
+                    if self.has_taunt_minion([self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]) and not (
+                        hasattr(minion, 'effect') and minion.effect and 'Taunt' in minion.effect and (
+                        minion.name != 'Knight' or minion.is_front_row)):
+                        break
+                    
+                    minion.hp -= self.dragged_card.attack
+                    if minion.hp <= 0:
+                        if minion.is_front_row:
+                            self.battle_state.enemy_front_row.remove(minion)
+                        else:
+                            self.battle_state.enemy_back_row.remove(minion)
+                        self.enemy.enemyDiscard.append(minion)
+                    weapon_used = True
+                    self.playerDiscard.append(self.dragged_card)
+                    self.dragged_card = None
+                    break
+            if weapon_used:
+                break
+        
+        if not weapon_used:
+            self.return_card_to_hand(mouse_x)
+
+    def handle_spell_drop(self, mouse_x, mouse_y):
+        spell_cast = False
+        for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row]:
+            for minion in row:
+                if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
+                    minion.hp -= self.dragged_card.attack
+                    if minion.hp <= 0:
+                        if minion.is_front_row:
+                            self.battle_state.enemy_front_row.remove(minion)
+                        else:
+                            self.battle_state.enemy_back_row.remove(minion)
+                        self.enemy.enemyDiscard.append(minion)
+                    spell_cast = True
+                    self.playerDiscard.append(self.dragged_card)
+                    self.dragged_card = None
+                    break
+            if spell_cast:
+                break
+        
+        if not spell_cast:
+            self.return_card_to_hand(mouse_x)
+
+    def handle_minion_drop(self, mouse_x, mouse_y):
+        if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
+            if self.battle_state.add_minion(self.dragged_card, False, True):
+                self.dragged_card = None
+                return
+        elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
+            if self.battle_state.add_minion(self.dragged_card, False, False):
+                self.dragged_card = None
+                return
+        
+        self.return_card_to_hand(mouse_x)
+
+    def return_card_to_hand(self, mouse_x):
+        insert_pos = 0
+        for i, rect in enumerate(self.hand_card_rects):
+            if mouse_x < rect.centerx:
+                insert_pos = i
+                break
+            insert_pos = i + 1
+        self.playerHand.insert(insert_pos, self.dragged_card)
+        self.dragged_card = None
+
 
 class MapMenu(Screen):
     def __init__(self, switch_screen, screen_ref):
@@ -502,3 +703,53 @@ class PauseMenu(Screen):
             
             # skriv tekst
             screen.blit(text, text_rect)
+
+# map menus (treasure, shop, heal)
+
+class TreasureMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = None  # We'll use a transparent overlay instead
+        self.buttons = []  # Initialize with an empty list of buttons
+
+    def draw(self, screen):
+        # lav semi-transparent overlay
+        treasure_overlay = pygame.Surface((1280, 720))
+        treasure_overlay.fill((0, 0, 0))
+        treasure_overlay.set_alpha(128)
+        screen.blit(treasure_overlay, (0, 0))
+        
+        # tegn knapper
+        for button in self.buttons:
+            button.run()
+        self.draw_labels(screen)
+
+class TreasureMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = None  # We'll use a transparent overlay instead
+        self.buttons = []  # Initialize with an empty list of buttons
+
+    def draw(self, screen):
+        # lav semi-transparent overlay
+        treasure_overlay = pygame.Surface((1280, 720))
+        treasure_overlay.fill((0, 0, 0))
+        treasure_overlay.set_alpha(128)
+        screen.blit(treasure_overlay, (0, 0))
+        
+        # tegn knapper
+        for button in self.buttons:
+            button.run()
+        self.draw_labels(screen)
+
+    def draw_labels(self, screen):
+        font = pygame.font.Font("assets/font/impact.ttf", 50)
+        if None in self.buttons:
+            treasure_text = font.render("You found a treasure!", True, "white")
+        treasure_text = font.render("", True, "white")
+        text_rect = treasure_text.get_rect(center=(width // 2, height // 2 - 100))
+        screen.blit(treasure_text, text_rect)
+
+        # Add more labels or buttons as needed

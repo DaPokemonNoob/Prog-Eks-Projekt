@@ -1,6 +1,6 @@
 import pygame, sys
 import os
-from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu
+from screen import MainMenu, PlayMenu, OptionsMenu, MapMenu, PauseMenu, TreasureMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 
 # starter pygame
@@ -33,7 +33,8 @@ screens = {
     "play_menu": PlayMenu(switch_screen, clock),
     "options_menu": OptionsMenu(switch_screen, SCREEN),
     "map_menu": MapMenu(switch_screen, SCREEN),
-    "pause_menu": PauseMenu(switch_screen)
+    "pause_menu": PauseMenu(switch_screen),
+    "treasure_menu": TreasureMenu(switch_screen)
 }
 
 switch_screen("main_menu")
