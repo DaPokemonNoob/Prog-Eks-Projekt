@@ -7,30 +7,19 @@ from card_classes import BoardState, Hero
 from enemy import Enemy
 import random
 from animations import play_card_draw_and_flip_animation
-from game_logic import (minion_death, draw_card, cast_spell, 
+from game_logic import (minion_death, draw_card, 
                        use_weapon, can_attack_target, TurnManager, use_minion, use_spell)
 
-width, height = 1280, 720
-SCREEN = pygame.display.set_mode((width, height))
-suit_map = {'♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs'}
+# konstanter til screen initialisering
+WIDTH, HEIGHT = 1280, 720
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# Card size constants
+# konstanter til kortstørrelser
 CARD_WIDTH = 80
 CARD_HEIGHT = 120
 HERO_SCALE = 2
 HERO_CARD_WIDTH = int(CARD_WIDTH * HERO_SCALE)
 HERO_CARD_HEIGHT = int(CARD_HEIGHT * HERO_SCALE)
-
-def load_card_image(rank, suit):
-    suit_name = suit_map[suit]
-    filename = f"{rank}_of_{suit_name}.png"
-    path = os.path.join("assets", "card", filename)
-    try:
-        image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (100, 140))
-    except pygame.error as e:
-        print(f"Failed to load {path}: {e}")
-        return None
 
 class Button:
     def __init__(self, pos, color, size, image_path=None, hover_image_path=None):
@@ -180,10 +169,10 @@ class PlayMenu(Screen):
         self.battle_state.enemy_hero = card.evilGuy()        # Enemy hero
 
         # Hero card positioner - keep heroes on the sides
-        self.player_hero_rect = pygame.Rect(20, height//2 - HERO_CARD_HEIGHT//2, 
+        self.player_hero_rect = pygame.Rect(20, HEIGHT//2 - HERO_CARD_HEIGHT//2, 
                                           HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
-        self.enemy_hero_rect = pygame.Rect(width - 20 - HERO_CARD_WIDTH, 
-                                         height//2 - HERO_CARD_HEIGHT//2,
+        self.enemy_hero_rect = pygame.Rect(WIDTH - 20 - HERO_CARD_WIDTH, 
+                                         HEIGHT//2 - HERO_CARD_HEIGHT//2,
                                          HERO_CARD_WIDTH, HERO_CARD_HEIGHT)
         
         # Create enemy instance and turn manager
@@ -221,7 +210,7 @@ class PlayMenu(Screen):
         # Load background
     def initialize_ui_elements(self):
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (width, height))
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
         
         self.menu_button = Button((100, 100), "red", (200, 50))
         self.next_turn_button = Button((993, 587), "gray", (240, 128), 
@@ -251,19 +240,28 @@ class PlayMenu(Screen):
         hp_rect = hp_text.get_rect(center=(rect.centerx, rect.centery + rect.height//4))
         screen.blit(hp_text, hp_rect)
 
+    def check_enemy_defeat(self):
+        """Check if all enemy minions are dead and the enemy hero is defeated"""
+        enemy_minions_alive = len(self.battle_state.enemy_front_row) + len(self.battle_state.enemy_back_row) > 0
+        enemy_hero_alive = self.battle_state.enemy_hero.hp > 0
+        return not enemy_minions_alive and not enemy_hero_alive
+
     def end_turn(self):
-        # Indlæs kortbilleder
+        # Check for enemy defeat before ending turn
+        if self.check_enemy_defeat():
+            self.switch_screen("treasure_menu")  # Switch to treasure menu on victory
+            return
+
+        # Existing end turn animation and logic
         card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
         card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
-
-        # Definer positioner
-        deck_pos = (64, 525)  # Startposition (dækket)
-        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)  # Slutposition (hånden)
-
-        # Spil animationen oven på PlayMenu
-        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, deck_pos, hand_pos, self.draw, delay_after_flip=1000)
-
-        # End turn using turn manager
+        deck_pos = (64, 525)
+        hand_pos = (WIDTH // 2 - card_back.get_width() // 2, HEIGHT // 2 - card_back.get_height() // 2)
+        
+        play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
+                                        deck_pos, hand_pos, self.draw, delay_after_flip=1000)
+        
+        self.draw_card()
         self.turn_manager.end_player_turn()
 
     def handle_event(self, event):
@@ -274,62 +272,29 @@ class PlayMenu(Screen):
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = event.pos
-            # Check for card clicks in hand first
-            for i, rect in enumerate(self.hand_card_rects):
-                if rect.collidepoint(mouse_x, mouse_y):
-                    card = self.playerHand[i]
-                    if hasattr(card, 'category') and (card.category == 'minion' or card.category == 'spell' or card.category == 'weapon'):
-                        self.dragged_card = self.playerHand.pop(i)
-                        self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
-                    break
-
             # Only check minions if we didn't grab a card
             if not self.dragged_card:
                 for row in [self.battle_state.enemy_front_row, self.battle_state.enemy_back_row,
                           self.battle_state.player_front_row, self.battle_state.player_back_row]:
                     for minion in row:
-                        if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
+                        if minion.image and minion.image.collidepoint(event.pos[0], event.pos[1]):
                             self.battle_state.handle_minion_click(minion)
                             break
-
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if self.dragged_card:
-                mouse_x, mouse_y = event.pos
-
-                # Handle weapon attacks
-                if hasattr(self.dragged_card, 'category') and self.dragged_card.category == 'weapon':
-                    self.handle_weapon_drop(mouse_x, mouse_y)
-                    return
-
-                # Handle spell casting
-                elif self.dragged_card.category == 'spell':
-                    self.handle_spell_drop(mouse_x, mouse_y)
-                    return
-
-                # Handle minion placement
-                elif self.dragged_card.category == 'minion':
-                    if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
+            else:
+                if self.dragged_card.category == 'minion':
+                    if self.player_front_row_zone.collidepoint(event.pos[0], event.pos[1]):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
                             self.dragged_card = None
                             return
-
-                    elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
-                        if self.battle_state.add_minion(self.dragged_card, False, False):
-                            self.dragged_card = None
-                            return
-
-                # If card wasn't used, return to hand
-                self._return_card_to_hand(mouse_x)
+                self._return_card_to_hand(event.pos[0])
 
     def _return_card_to_hand(self, mouse_x):
         """Helper method to return a card to the player's hand."""
-        insert_pos = 0
+        insert_pos = len(self.playerHand)  # Default to end of hand
         for i, rect in enumerate(self.hand_card_rects):
             if mouse_x < rect.centerx:
                 insert_pos = i
                 break
-            insert_pos = i + 1
         self.playerHand.insert(insert_pos, self.dragged_card)
         self.dragged_card = None
 
@@ -387,7 +352,7 @@ class PlayMenu(Screen):
         card_back = pygame.image.load("assets/playingCard/test.png").convert_alpha()
         card_front = pygame.image.load("assets/playingCard/knight.png").convert_alpha()
         deck_pos = (64, 525)
-        hand_pos = (width // 2 - card_back.get_width() // 2, height // 2 - card_back.get_height() // 2)
+        hand_pos = (WIDTH // 2 - card_back.get_width() // 2, HEIGHT // 2 - card_back.get_height() // 2)
         
         play_card_draw_and_flip_animation(SCREEN, self.clock, card_back, card_front, 
                                         deck_pos, hand_pos, self.draw, delay_after_flip=1000)
@@ -448,7 +413,7 @@ class PlayMenu(Screen):
     def draw_hand(self, screen):
         self.hand_card_rects = []
         x = 20
-        y = height - 150
+        y = HEIGHT - 150
         for card in self.playerHand:
             card_rect = pygame.Rect(x, y, 80, 120)
             color = self.get_card_color(card)
@@ -565,7 +530,7 @@ class PauseMenu(Screen):
         # Knap variabler
         button_width = 550
         button_height = 100
-        center_x = width // 2 - button_width // 2
+        center_x = WIDTH // 2 - button_width // 2
         
         self.resume_button = Button((center_x, 200), "red", (button_width, button_height))
         self.main_menu_button = Button((center_x, 350), "red", (button_width, button_height))
@@ -657,7 +622,7 @@ class TreasureMenu(Screen):
         if None in self.buttons:
             treasure_text = font.render("You found a treasure!", True, "white")
         treasure_text = font.render("", True, "white")
-        text_rect = treasure_text.get_rect(center=(width // 2, height // 2 - 100))
+        text_rect = treasure_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
         screen.blit(treasure_text, text_rect)
 
         # Add more labels or buttons as needed

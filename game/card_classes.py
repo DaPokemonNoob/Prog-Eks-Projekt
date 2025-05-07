@@ -80,6 +80,7 @@ class Weapon(Card):
     def __init__(self, name, manaCost, attack, durability, pic=None):
         super().__init__('weapon', name, manaCost, effect=None, pic=pic)
         self.attack = attack
+        self.durability = durability
 
 class BoardState:
     def __init__(self):
