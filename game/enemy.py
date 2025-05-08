@@ -15,7 +15,7 @@ class Enemy:
         self.discard = []
 
     def draw_card(self):
-        return draw_card(self.deck_pile, self.hand)
+        return draw_card(self.deck_pile, self.hand, self.discard)
 
     def perform_turn(self, screen, clock, playmenu_draw_function):
         # fjenden trækker et kort hver tur
