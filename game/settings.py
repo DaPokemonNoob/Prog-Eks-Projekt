@@ -1,11 +1,13 @@
 import pygame
 
+# pygame initialisering
 WIDTH, HEIGHT = 1280, 720
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Arcane Clash")
 clock = pygame.time.Clock()
 FPS = 60
 
-# Card size constants
+# kort størrelses konstanter
 CARD_WIDTH = 100
 CARD_HEIGHT = 140
 HERO_SCALE = 2
