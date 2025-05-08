@@ -1,6 +1,9 @@
 from card_classes import Minion, Spell, Weapon, Hero
 import effects_data as effect
-from game_logic import minion_death, hero_death
+from game_logic import minion_death, hero_death, enemy_death
+import random
+
+# det var meningen at teksten i 'effect' skulle vises på skærmen, men det blev ikke implementeret
 
 # -----Minion kort-----:
 def slimeling():
@@ -10,11 +13,11 @@ def slimeling():
 def someCoolGuy():
     minion = Minion("Some Cool Guy", mana_cost=5, attack=4, max_hp=6, 
                     effect="When summoned: increase all ally Minions attack by 1.")
-    def custom_on_summon(battle_state):
+    def custom_on_summon(battle_state): # nogle minions har en speciel summon effekt som bliver defineret under miononens definition
         rows = [battle_state.player_front_row, battle_state.player_back_row] if not minion.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
         for row in rows:
             for other_minion in row:
-                if other_minion != minion:  # ikke buff self
+                if other_minion != minion:  # ikke buff sig selv
                     other_minion.attack += 1
     minion.on_summon = custom_on_summon
     return minion
@@ -45,8 +48,8 @@ def fireball():
 def chaosCrystal():
     spell = Spell("Chaos Crystal", mana_cost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
     
+    # funktion der udfører effekten af kortet
     def custom_spell_effect(battle_state, spell, enemy_discard, player_discard):
-        import random
         # samler alle mulige targets (minions og heroes) i et array
         possible_targets = []
         possible_targets.extend(battle_state.enemy_front_row + battle_state.enemy_back_row+ 
@@ -69,6 +72,7 @@ def chaosCrystal():
                             possible_targets.remove(target)
                     elif target.current_hp <= 0:     # hvis target ikke er en minion, så tjek for Hero død
                         hero_death(target, battle_state)
+                        enemy_death(target, battle_state)
             return True
         return False
         
