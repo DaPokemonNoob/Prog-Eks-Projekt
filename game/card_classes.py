@@ -12,23 +12,23 @@ class Card:
 
 # Hero subclass:
 class Hero(Card):
-    def __init__(self, name, attack, maxHp, is_enemy=False, pic=None):
+    def __init__(self, name, attack, max_hp, is_enemy=False, pic=None):
         super().__init__('hero', name, manaCost=0, effect=None, pic=pic)
         self.attack = attack
-        self.maxHp = maxHp
-        self.currentHp = maxHp
+        self.max_hp = max_hp
+        self.current_hp = max_hp
         self.is_enemy = is_enemy
         self.has_taunt = False
 
 # Minion subclass:
 class Minion(Card):
     all_minions = []  # index med alle minions der spilles
-    def __init__(self, name, manaCost, attack, maxHp, effect, pic=None):
+    def __init__(self, name, manaCost, attack, max_hp, effect, pic=None):
         super().__init__('minion', name, manaCost, effect, pic)
         self.attack = attack
         self.base_attack = attack
-        self.maxHp = maxHp
-        self.currentHp = maxHp
+        self.max_hp = max_hp
+        self.current_hp = max_hp
         self.effect = effect
         self.is_selected_for_attack = False
         self.image = None
@@ -91,7 +91,25 @@ class BoardState:
         
     # funktion til at tilføje en minion til boardet
     def add_minion(self, minion, is_enemy, is_front_row):
-        return (minion, self, is_enemy, is_front_row)
+        target_row = None
+        if is_enemy:
+            target_row = self.enemy_front_row if is_front_row else self.enemy_back_row
+        else:
+            target_row = self.player_front_row if is_front_row else self.player_back_row
+            
+        # Check max minions
+        max_minions = 2 if is_front_row else 3
+        if len(target_row) < max_minions:
+            minion.is_enemy = is_enemy
+            minion.is_front_row = is_front_row
+            minion.has_taunt = False  # Reset taunt before on_summon
+            target_row.append(minion)
+            
+            # Call on_summon effect after setting properties
+            if minion.on_summon:
+                minion.on_summon(self)
+            return True
+        return False
     
     # funktion til at håndtere klik på minions
     def handle_minion_click(self, clicked_minion):

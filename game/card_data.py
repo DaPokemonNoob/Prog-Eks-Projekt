@@ -4,10 +4,10 @@ from game_logic import minion_death, hero_death
 
 # Minion kort:
 def slimeling():
-    return Minion("Slimeling", manaCost=2, attack=2, maxHp=5, effect=None, pic="slimeling.png")
+    return Minion("Slimeling", manaCost=2, attack=2, max_hp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
-    minion = Minion("Some Cool Guy", manaCost=5, attack=4, maxHp=6, 
+    minion = Minion("Some Cool Guy", manaCost=5, attack=4, max_hp=6, 
                     effect="When summoned: increase all ally Minions attack by 1.")
     def custom_on_summon(battle_state):
         rows = [battle_state.player_front_row, battle_state.player_back_row] if not minion.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
@@ -20,7 +20,7 @@ def someCoolGuy():
 
 def knight():
     armor_amount = effect.armor(2)
-    minion = Minion("Knight", manaCost=3, attack=1, maxHp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
+    minion = Minion("Knight", manaCost=3, attack=1, max_hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
     def custom_on_summon(battle_state):
         if minion.is_front_row:
             minion.has_taunt = True
@@ -29,10 +29,10 @@ def knight():
     
 # Hero kort:
 def adventurer():   # Den hero spilleren bruger
-    return Hero("Adventurer", attack=1, maxHp=15)
+    return Hero("Adventurer", attack=1, max_hp=1005)
 
 def evilGuy():      # Den hero fjenden bruger
-    return Hero("Evil Guy", attack=1, maxHp=15, is_enemy = True)
+    return Hero("Evil Guy", attack=1, max_hp=15, is_enemy = True)
 
 # Spell kort:
 def fireball():
@@ -53,19 +53,19 @@ def chaosCrystal():
         possible_targets.append(battle_state.player_hero)
         
         # Fjern døde targets
-        possible_targets = [target for target in possible_targets if target.currentHp > 0]
+        possible_targets = [target for target in possible_targets if target.current_hp > 0]
         
         if possible_targets:
             # Aktiver 5 gange med random target hver gang
             for _ in range(spell.activationTimes):
                 if possible_targets:  # Check igen i tilfælde af at nogle targets er døde
                     target = random.choice(possible_targets)
-                    target.currentHp -= spell.attack
+                    target.current_hp -= spell.attack
                     # Tjek for død efter hver aktivering
                     if hasattr(target, 'is_enemy'):  # Er det en minion
                         if minion_death(target, battle_state, enemy_discard if target.is_enemy else player_discard):
                             possible_targets.remove(target)
-                    elif target.currentHp <= 0:  # Er det en hero
+                    elif target.current_hp <= 0:  # Er det en hero
                         hero_death(target, battle_state)
             return True
         return False

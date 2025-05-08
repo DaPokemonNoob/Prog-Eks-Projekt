@@ -1,6 +1,6 @@
 # funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
 def minion_death(minion, battle_state, discard_pile=None):
-    if minion.currentHp <= 0:
+    if minion.current_hp <= 0:
         if minion.is_enemy:
             if minion in battle_state.enemy_front_row:
                 battle_state.enemy_front_row.remove(minion)
@@ -19,7 +19,7 @@ def minion_death(minion, battle_state, discard_pile=None):
 
 # håndterer hero death
 def hero_death(hero, battle_state):
-    if hero.hp <= 0:
+    if hero.current_hp <= 0:
         # Get the actual board state from the PlayMenu object if needed
         if hasattr(battle_state, 'battle_state'):
             battle_state = battle_state.battle_state
@@ -33,7 +33,7 @@ def hero_death(hero, battle_state):
     return False
 
 def enemy_death(enemy, battle_state):
-    if enemy.hp <= 0:
+    if enemy.current_hp <= 0:
         # Get the actual board state from the PlayMenu object if needed
         if hasattr(battle_state, 'battle_state'):
             battle_state = battle_state.battle_state
@@ -65,19 +65,25 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
     # hvis første række, max antal minions er 2, hvis ikke første række, er det anden række, og derfor max antal minion er 3
     max_minions = 2 if is_front_row else 3
     if len(target_row) < max_minions:
-        target_row.append(minion)
         minion.is_enemy = is_enemy
         minion.is_front_row = is_front_row
+        minion.has_taunt = False  # Reset taunt status before on_summon
+        target_row.append(minion)
         
         # Activate any summon effects the minion might have
-        minion.on_summon(battle_state)
+        if minion.on_summon:
+            minion.on_summon(battle_state)
             
         return True
     return False
 
 # håndterer når en minion angriber noget
 def perform_attack(attacker, target, battle_state, discard_pile=None):
-    # Check if target is an enemy
+    # First check if target is valid based on taunt rules
+    if not can_attack_target(attacker, target, battle_state):
+        return False
+        
+    # Check if target is an enemy (do this after taunt check)
     if hasattr(target, 'is_enemy'):
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe allierede
             return False
@@ -85,20 +91,16 @@ def perform_attack(attacker, target, battle_state, discard_pile=None):
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egen hero
             return False
             
-    # checker for taunt
-    if hasattr(target, 'is_enemy') and not can_attack_target(attacker, target, battle_state):
-        return False
-        
     # gør skade
-    target.currentHp -= attacker.attack
+    target.current_hp -= attacker.attack
     if hasattr(target, 'attack'):  # tager også selv skade
-        attacker.currentHp -= target.attack
+        attacker.current_hp -= target.attack
     
     # Checker for minion death
     if hasattr(target, 'is_enemy'):  # Target er en minion
         minion_death(target, battle_state, discard_pile)
     else:  # Target er en hero
-        if target.currentHp <= 0:
+        if target.current_hp <= 0:
             hero_death(target, battle_state)
     if hasattr(attacker, 'is_enemy'):  # kun check for minion death hvis det er en minion der bliver angrebet
         minion_death(attacker, battle_state, discard_pile)
@@ -121,26 +123,39 @@ def taunt_check(battle_state, attacker):
 
 # checker om minion kan angribe (baseret på taunt_check())
 def can_attack_target(attacker, target, battle_state):
+    # Check for valid target first
     if hasattr(target, 'is_enemy'):  # if target is a minion
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egne minions
             return False
     else:  # if target is a hero
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egen hero
             return False
-            
-    # Tjek for taunt
-    has_taunt = taunt_check(battle_state, attacker)
     
-    # Hvis target er en hero
-    if not hasattr(target, 'is_enemy'):
-        # Kan kun angribe hero hvis ingen fjendlig minion har taunt
-        return not has_taunt
+    # Get the appropriate rows to check for taunt based on who's attacking
+    if attacker.is_enemy:  # If enemy is attacking, check player rows
+        rows_to_check = [battle_state.player_front_row, battle_state.player_back_row]
+    else:  # If player is attacking, check enemy rows
+        rows_to_check = [battle_state.enemy_front_row, battle_state.enemy_back_row]
         
-    # Hvis vi når hertil er target en minion
-    if has_taunt:
-        # kan kun angribe minions med taunt hvis en fjendlig minion har taunt
+    # Check if there are any taunt minions
+    has_taunt = False
+    for row in rows_to_check:
+        for minion in row:
+            if minion.has_taunt:
+                has_taunt = True
+                break
+        if has_taunt:
+            break
+            
+    # If there's no taunt, can attack anything
+    if not has_taunt:
+        return True
+        
+    # If there is taunt, can only attack taunt minions
+    if hasattr(target, 'is_enemy'):  # If target is a minion
         return target.has_taunt
-    return True  # kan angribe alle fjender hvis ingen fjendlig minion har taunt
+    else:  # If target is a hero
+        return False  # Can't attack hero if there's taunt
 
 # funktion for brug af 'weapon' kort
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
@@ -156,7 +171,7 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
                     return False
                 
                 # gør skade på fjendlig minion og reducer durability med 1
-                minion.currentHp -= weapon.attack
+                minion.current_hp -= weapon.attack
                 weapon.durability -= 1
                 
                 # checker om minion dør efter angrebet
@@ -193,7 +208,7 @@ def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_disca
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                minion.currentHp -= spell.attack
+                minion.current_hp -= spell.attack
                 spell_used = True
                 player_discard.append(spell)
                 minion_death(minion, battle_state, enemy_discard)

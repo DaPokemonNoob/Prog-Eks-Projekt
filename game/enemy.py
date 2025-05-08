@@ -3,7 +3,7 @@ import pygame
 import card_data as card
 import effects_data as effect
 from card_classes import BoardState
-from game_logic import minion_death, draw_card, add_minion_to_board, perform_attack
+from game_logic import minion_death, draw_card, add_minion_to_board, perform_attack, can_attack_target
 
 class Enemy:
     def __init__(self, battle_state: BoardState):
@@ -33,41 +33,31 @@ class Enemy:
         
         # fjendens minions angriber - først angriber minions i første række
         for attacking_minion in self.battle_state.enemy_front_row[:]:  # copy af liste
-            # Find valid targets (minions with taunt or any target if no taunt)
-            valid_targets = []
-            has_taunt = any(minion.has_taunt for minion in self.battle_state.player_front_row + self.battle_state.player_back_row)
+            # Try to attack taunt minions first
+            attacked = False
             
-            if has_taunt:
-                # Only target minions with taunt
-                for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
-                    if target.has_taunt:
-                        valid_targets.append(target)
-            else:
-                # Can target any minion or hero
-                valid_targets.extend(self.battle_state.player_front_row)
-                valid_targets.extend(self.battle_state.player_back_row)
-                if not valid_targets:  # If no minions, can attack hero
-                    valid_targets.append(self.battle_state.player_hero)
+            # First try to attack player's minions
+            for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
+                if can_attack_target(attacking_minion, target, self.battle_state):
+                    perform_attack(attacking_minion, target, self.battle_state, self.discard)
+                    attacked = True
+                    break
                     
-            if valid_targets:
-                target = valid_targets[0]  # Attack first valid target
-                perform_attack(attacking_minion, target, self.battle_state, self.discard)
+            # If no valid minion targets (or no minions with taunt when taunt exists)
+            if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
 
         # anden række angriber bagefter med samme logik
         for attacking_minion in self.battle_state.enemy_back_row[:]:
-            valid_targets = []
-            has_taunt = any(minion.has_taunt for minion in self.battle_state.player_front_row + self.battle_state.player_back_row)
+            attacked = False
             
-            if has_taunt:
-                for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
-                    if target.has_taunt:
-                        valid_targets.append(target)
-            else:
-                valid_targets.extend(self.battle_state.player_front_row)
-                valid_targets.extend(self.battle_state.player_back_row)
-                if not valid_targets:
-                    valid_targets.append(self.battle_state.player_hero)
+            # First try to attack player's minions
+            for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
+                if can_attack_target(attacking_minion, target, self.battle_state):
+                    perform_attack(attacking_minion, target, self.battle_state, self.discard)
+                    attacked = True
+                    break
                     
-            if valid_targets:
-                target = valid_targets[0]
-                perform_attack(attacking_minion, target, self.battle_state, self.discard)
+            # If no valid minion targets (or no minions with taunt when taunt exists)
+            if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
