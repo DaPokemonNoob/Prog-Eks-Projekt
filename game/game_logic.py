@@ -85,7 +85,7 @@ def taunt_check(battle_state, attacker):
     # Check the appropriate rows based on who is attacking
     if attacker.is_enemy:  # If enemy is attacking, check player rows
         rows = [battle_state.player_front_row, battle_state.player_back_row]
-    else:  # If player is attacking, check enemy rows
+    else:  # If player/weapon is attacking, check enemy rows
         rows = [battle_state.enemy_front_row, battle_state.enemy_back_row]
         
     for row in rows:
@@ -120,10 +120,14 @@ def can_attack_target(attacker, target, battle_state):
 # funktion for brug af 'weapon' kort
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
     """Håndterer brug af et våben kort og tracker durability."""
+    # Check for taunt
+    has_taunt = taunt_check(battle_state, weapon)
+    
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                if taunt_check(battle_state, weapon) and not minion.has_taunt:
+                # If there's a taunt minion, can only attack taunt minions
+                if has_taunt and not minion.has_taunt:
                     return False
                 
                 # gør skade på fjendlig minion og reducer durability med 1
