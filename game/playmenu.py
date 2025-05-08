@@ -62,6 +62,9 @@ class PlayMenu(Screen):
         color = (200, 0, 0) if is_enemy else (0, 200, 0)  # Red for enemy, green for player
         pygame.draw.rect(screen, color, rect)
         
+        # Set the hero's image property to the rect for click detection
+        hero.image = rect
+        
         # Draw hero name
         font = pygame.font.Font(None, int(24 * 1.8))  # Scaled up font
         text = font.render(hero.name, True, (0, 0, 0))
@@ -143,7 +146,17 @@ class PlayMenu(Screen):
 
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
-                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)   
+                    if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        # Successfully used weapon
+                        if self.dragged_card.durability > 0:
+                            # If weapon still has durability, return to hand
+                            self.return_card_to_hand(mouse_x)
+                        else:
+                            # If no durability left, discard and clear dragged card
+                            self.dragged_card = None
+                    else:
+                        # Attack was not valid, return to hand
+                        self.return_card_to_hand(mouse_x)
                     return
 
                 # Handle spell casting

@@ -159,10 +159,21 @@ def can_attack_target(attacker, target, battle_state):
 
 # funktion for brug af 'weapon' kort
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    """Håndterer brug af et våben kort og tracker durability."""
     # Check for taunt
     has_taunt = taunt_check(battle_state, weapon)
     
+    # Check for enemy hero click first
+    if not has_taunt and battle_state.enemy_hero.image and battle_state.enemy_hero.image.collidepoint(mouse_x, mouse_y):
+        battle_state.enemy_hero.current_hp -= weapon.attack
+        weapon.durability -= 1
+        
+        # Check weapon durability - discard if 0 or below
+        if weapon.durability <= 0:
+            player_discard.append(weapon)
+        
+        return True
+    
+    # Then check enemy minions
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
@@ -177,11 +188,9 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
                 # checker om minion dør efter angrebet
                 minion_death(minion, battle_state, enemy_discard)
                 
-                # retuner 'weapon' kort til hånden hvis durability er 1 eller derover
+                # Check weapon durability - discard if 0 or below
                 if weapon.durability <= 0:
                     player_discard.append(weapon)
-                else:
-                    pass
                 
                 return True
     return False
@@ -203,19 +212,21 @@ def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_disca
             return True
         return False
 
+    # Check for enemy hero click first (spells can bypass taunt)
+    if battle_state.enemy_hero.image and battle_state.enemy_hero.image.collidepoint(mouse_x, mouse_y):
+        battle_state.enemy_hero.current_hp -= spell.attack
+        player_discard.append(spell)
+        return True
+
     # Normal spell håndtering for andre spells
-    spell_used = False
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
                 minion.current_hp -= spell.attack
-                spell_used = True
                 player_discard.append(spell)
                 minion_death(minion, battle_state, enemy_discard)
-                break
-        if spell_used:
-            break
-    return spell_used
+                return True
+    return False
 
 # class for håndtering af hvis tur det er
 class TurnManager:
