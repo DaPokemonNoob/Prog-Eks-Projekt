@@ -26,19 +26,23 @@ class Enemy:
         # prøver at placere minions
         if len(self.hand) > 0:
             # Filter cards that can be played with current mana
-            playable_cards = [card for card in self.hand if card.manaCost <= self.battle_state.turn_manager.current_mana]
+            remaining_mana = self.battle_state.turn_manager.current_mana
             
-            for card in playable_cards:
+            for card in self.hand[:]:  # copy af liste
+                if card.manaCost <= remaining_mana:
                 # prøver at fylde række 1 med minions (maks 2)
-                if len(self.battle_state.enemy_front_row) < 2:
-                    self.hand.remove(card)
-                    if add_minion_to_board(card, self.battle_state, True, True):
-                        self.battle_state.turn_manager.spend_mana(card.manaCost)
-                # prøver derefter at fylde række 2 med minions (maks 3)
-                elif len(self.battle_state.enemy_back_row) < 3:
-                    self.hand.remove(card)
-                    if add_minion_to_board(card, self.battle_state, True, False):
-                        self.battle_state.turn_manager.spend_mana(card.manaCost)
+                    if len(self.battle_state.enemy_front_row) < 2:
+                        if add_minion_to_board(card, self.battle_state, True, True):
+                            self.hand.remove(card)
+                            remaining_mana -= card.manaCost
+                            self.battle_state.turn_manager.spend_mana(card.manaCost)
+                            print(remaining_mana)
+                    # prøver derefter at fylde række 2 med minions (maks 3)
+                    elif len(self.battle_state.enemy_back_row) < 3:
+                        if add_minion_to_board(card, self.battle_state, True, False):
+                            self.hand.remove(card) 
+                            remaining_mana -= card.manaCost
+                            self.battle_state.turn_manager.spend_mana(card.manaCost)
         
         # fjendens minions angriber - først angriber minions i første række
         for attacking_minion in self.battle_state.enemy_front_row[:]:  # copy af liste
