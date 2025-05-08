@@ -13,6 +13,9 @@ class PlayMenu(Screen):
         super().__init__()
         self.switch_screen = switch_screen
         self.clock = clock
+
+        self.mana_full = pygame.image.load("assets/mana/mana_full.png").convert_alpha()
+        self.mana_empty = pygame.image.load("assets/mana/mana_empty.png").convert_alpha()
               
         # Game state initialization
         self.battle_state = BoardState()
@@ -140,7 +143,7 @@ class PlayMenu(Screen):
                           self.battle_state.player_front_row, self.battle_state.player_back_row]:
                     for minion in row:
                         if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                            self.battle_state.handle_minion_click(minion)
+                            self.battle_state.handle_minion_click(minion, playmenu_draw_function=self.draw)
                             break
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -233,9 +236,16 @@ class PlayMenu(Screen):
             button.run()
 
     def draw_mana(self, screen):
-        font = pygame.font.Font(None, 36)
-        mana_text = font.render(f"Mana: {self.turn_manager.current_mana}/{self.turn_manager.max_mana}", True, (0, 255, 255))
-        screen.blit(mana_text, (20, 20))
+        x, y = 980, 530  # Starting position
+        spacing = 5  # Space between mana icons
+        icon_width = self.mana_full.get_width()
+
+        for i in range(self.turn_manager.max_mana):
+            if i < self.turn_manager.current_mana:
+                icon = self.mana_full
+            else:
+                icon = self.mana_empty
+            screen.blit(icon, (x + i * (icon_width + spacing), y))
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20

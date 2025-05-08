@@ -2,6 +2,8 @@ import pygame
 
 WIDTH, HEIGHT = 1280, 720
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+FPS = 60
 
 # Card size constants
 CARD_WIDTH = 100
