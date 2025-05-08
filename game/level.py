@@ -64,7 +64,7 @@ def handle_click(mouse_pos, map_levels):
                 # levelet kunne klikkes, så gør det til det nuværende level
                 Level.set_current_level(level)
                 print(f"Moved to level {level.id}")
-                return True and level.encounter_type
+                return True and ("battle" if level.encounter_type == "boss" else level.encounter_type)
     return False
 
 def generate_map(level_count=6):

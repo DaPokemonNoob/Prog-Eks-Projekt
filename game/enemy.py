@@ -45,65 +45,68 @@ class Enemy:
                             remaining_mana -= card.mana_cost
                             self.battle_state.turn_manager.spend_mana(card.mana_cost)
         
-        # fjendens minions angriber - først angriber minions i første række
-        for attacking_minion in self.battle_state.enemy_front_row[:]:  # copy af liste
-            # Try to attack taunt minions first
+                # First try to attack player's minions
+        for attacking_minion in self.battle_state.enemy_front_row[:]:
             attacked = False
-            
             # First try to attack player's minions
             for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
                 if can_attack_target(attacking_minion, target, self.battle_state):
+                    # Load the minion's image for animation
+                    attacker_image = pygame.image.load(f"assets/playingCard/{attacking_minion.pic}").convert_alpha()
                     play_attack_animation(
                         screen,
                         clock,
-                        attacking_minion.position,  # Antag at minions har en position
-                        target.position,           # Antag at targets har en position
-                        attacking_minion.image,    # Antag at minions har et billede
+                        (attacking_minion.position[0], attacking_minion.position[1]),  # Use position tuple directly
+                        (target.position[0], target.position[1]),  # Use position tuple directly
+                        attacker_image,
                         playmenu_draw_function
                     )
                     perform_attack(attacking_minion, target, self.battle_state, self.discard)
                     attacked = True
                     break
-                    
-            # If no valid minion targets (or no minions with taunt when taunt exists)
+
+        # If no valid minion targets, attack hero
             if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                attacker_image = pygame.image.load(f"assets/playingCard/{attacking_minion.pic}").convert_alpha()
                 play_attack_animation(
                     screen,
                     clock,
-                    attacking_minion.position,
-                    self.battle_state.player_hero.position,
-                    attacking_minion.image,
+                    (attacking_minion.position[0], attacking_minion.position[1]),  # Use position tuple directly
+                    (self.battle_state.player_hero.position[0], self.battle_state.player_hero.position[1]),  # Use position tuple directly
+                    attacker_image,
                     playmenu_draw_function
                 )
                 perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
 
-        # anden række angriber bagefter med samme logik
+
         for attacking_minion in self.battle_state.enemy_back_row[:]:
             attacked = False
-            
             # First try to attack player's minions
-            for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
+            for target in self.battle_state.player_back_row + self.battle_state.player_back_row:
                 if can_attack_target(attacking_minion, target, self.battle_state):
+                    # Load the minion's image for animation
+                    attacker_image = pygame.image.load(f"assets/playingCard/{attacking_minion.pic}").convert_alpha()
                     play_attack_animation(
                         screen,
                         clock,
-                        attacking_minion.position,
-                        target.position,
-                        attacking_minion.image,
+                        (attacking_minion.position[0], attacking_minion.position[1]),  # Use position tuple directly
+                        (target.position[0], target.position[1]),  # Use position tuple directly
+                        attacker_image,
                         playmenu_draw_function
                     )
                     perform_attack(attacking_minion, target, self.battle_state, self.discard)
                     attacked = True
                     break
-                    
-            # If no valid minion targets (or no minions with taunt when taunt exists)
+
+        # If no valid minion targets, attack hero
             if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                attacker_image = pygame.image.load(f"assets/playingCard/{attacking_minion.pic}").convert_alpha()
                 play_attack_animation(
                     screen,
                     clock,
-                    attacking_minion.position,
-                    self.battle_state.player_hero.position,
-                    attacking_minion.image,
+                    (attacking_minion.position[0], attacking_minion.position[1]),  # Use position tuple directly
+                    (self.battle_state.player_hero.position[0], self.battle_state.player_hero.position[1]),  # Use position tuple directly
+                    attacker_image,
                     playmenu_draw_function
                 )
                 perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)

@@ -1,5 +1,6 @@
 import pygame
 from game_logic import perform_attack, minion_death, hero_death
+from settings import CARD_WIDTH, CARD_HEIGHT
 
 # Card superclass:
 class Card:
@@ -32,6 +33,7 @@ class Minion(Card):
         self.current_hp = max_hp
         self.effect = effect
         self.is_selected_for_attack = False
+        self.rect = pygame.Rect(0, 0, CARD_WIDTH, CARD_HEIGHT)
         self.image = pygame.image.load(f"assets/playingCard/{pic}").convert_alpha() if pic else None
         self.is_enemy = False
         self.is_front_row = False
