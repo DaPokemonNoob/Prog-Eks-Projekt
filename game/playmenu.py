@@ -153,6 +153,7 @@ class PlayMenu(Screen):
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
                     if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)  # Spend mana after successful weapon use
                         if self.dragged_card.durability <= 0:
                             self.playerDiscard.append(self.dragged_card)
                             self.dragged_card = None
@@ -165,7 +166,7 @@ class PlayMenu(Screen):
                 # Handle spell casting
                 if self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
-                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.playerDiscard.append(self.dragged_card)  # Add to discard pile
                         self.dragged_card = None
                     else:
@@ -183,7 +184,7 @@ class PlayMenu(Screen):
                             placed = True
                             
                     if placed:
-                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.dragged_card = None
                         return
 
@@ -267,7 +268,7 @@ class PlayMenu(Screen):
                     pygame.draw.rect(screen, (255, 215, 0), minion.image, 3)
             
             font = pygame.font.Font(None, 24)
-            screen.blit(font.render(str(minion.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
+            screen.blit(font.render(str(minion.mana_cost), True, (255, 255, 255)), (x + 81, y + 9))
             screen.blit(font.render(str(minion.attack), True, (255, 255, 255)), (x + 11, y + 119))
             screen.blit(font.render(str(minion.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
             
@@ -284,8 +285,8 @@ class PlayMenu(Screen):
                 screen.blit(image, (x, y))
             
             font = pygame.font.Font(None, 24)
-            # ManaCost vises for alle kort
-            screen.blit(font.render(str(card.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
+            # Mana_cost vises for alle kort
+            screen.blit(font.render(str(card.mana_cost), True, (255, 255, 255)), (x + 81, y + 9))
 
             # Attack og HP kun for minions
             if hasattr(card, "category") and card.category == "minion":
@@ -311,9 +312,9 @@ class PlayMenu(Screen):
             image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
             screen.blit(image, (x, y))
 
-            # Vis manaCost
+            # Vis mana_cost
             font = pygame.font.Font(None, 24)
-            mana_text = font.render(str(self.dragged_card.manaCost), True, (255, 255, 255))
+            mana_text = font.render(str(self.dragged_card.mana_cost), True, (255, 255, 255))
             screen.blit(mana_text, (x + 81, y + 9))
 
             # Hvis kortet er en minion, vis også attack og hp
@@ -333,17 +334,20 @@ class PlayMenu(Screen):
             if hasattr(self.dragged_card, 'category'):
                 if self.dragged_card.category == 'weapon':
                     if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)  # Spend mana after successful weapon use
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'minion':
                     if use_minion(self.dragged_card, mouse_x, mouse_y, self.battle_state, 
                                 self.player_front_row_zone, self.player_back_row_zone):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)

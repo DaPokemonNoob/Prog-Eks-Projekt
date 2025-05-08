@@ -264,6 +264,14 @@ class TurnManager:
 
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
+        # Reset all minions' rest state
+        for row in [self.player_screen.battle_state.player_front_row, 
+                   self.player_screen.battle_state.player_back_row,
+                   self.player_screen.battle_state.enemy_front_row,
+                   self.player_screen.battle_state.enemy_back_row]:
+            for minion in row:
+                minion.rest = False
+
         # trækker et kort fra bunken
         draw_card(self.play_menu.playerDeckPile, self.play_menu.playerHand)
         self.is_player_turn = False
@@ -276,7 +284,7 @@ class TurnManager:
 
     # funktion der checker om spilleren må spille et kort
     def can_play_card(self, card):
-        return self.is_player_turn and card.manaCost <= self.current_mana
+        return self.is_player_turn and card.mana_cost <= self.current_mana
 
     # funktion der håndterer mana når et kort bliver spillet
     def spend_mana(self, amount):

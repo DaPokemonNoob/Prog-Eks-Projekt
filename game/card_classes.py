@@ -3,17 +3,17 @@ from game_logic import perform_attack, minion_death, hero_death
 
 # Card superclass:
 class Card:
-    def __init__(self, category, name, manaCost, effect, pic=None):
+    def __init__(self, category, name, mana_cost, effect, pic=None):
         self.category = category
         self.name = name
-        self.manaCost = manaCost
+        self.mana_cost = mana_cost
         self.effect = effect
         self.pic = pic
 
 # Hero subclass:
 class Hero(Card):
     def __init__(self, name, attack, max_hp, is_enemy=False, pic=None):
-        super().__init__('hero', name, manaCost=0, effect=None, pic=pic)
+        super().__init__('hero', name, mana_cost=0, effect=None, pic=pic)
         self.attack = attack
         self.max_hp = max_hp
         self.current_hp = max_hp
@@ -24,9 +24,8 @@ class Hero(Card):
 
 # Minion subclass:
 class Minion(Card):
-    all_minions = []  # index med alle minions der spilles
-    def __init__(self, name, manaCost, attack, max_hp, effect, pic=None):
-        super().__init__('minion', name, manaCost, effect, pic)
+    def __init__(self, name, mana_cost, attack, max_hp, effect, pic=None):
+        super().__init__('minion', name, mana_cost, effect, pic)
         self.attack = attack
         self.base_attack = attack
         self.max_hp = max_hp
@@ -38,6 +37,7 @@ class Minion(Card):
         self.is_front_row = False
         self.pic = pic
         self.has_taunt = False
+        self.rest = True  # Minions start in rest state
         self.on_summon = lambda battle_state: None
         self.position = (0, 0)  # Default position, to be set when added to the board
         Minion.all_minions.append(self)
@@ -47,15 +47,18 @@ class Minion(Card):
         mouse_pos = pygame.mouse.get_pos()
         return self.image.collidepoint(mouse_pos)
 
-# funktion til at minion angriber
+    # funktion til at minion angriber
     def perform_attack(self, target, battle_state, playmenu_draw_function):
-        if self.is_selected_for_attack and target:
-            perform_attack(self, target, battle_state, playmenu_draw_function=playmenu_draw_function)
-            self.is_selected_for_attack = False
+        if self.is_selected_for_attack and target and not self.rest:  # Only allow attack if not resting
+            if perform_attack(self, target, battle_state, playmenu_draw_function=playmenu_draw_function):
+                self.is_selected_for_attack = False
+                self.rest = True  # Set to rest after successful attack
+                return True
+        return False
 
     # funktion til at select en minion til at angribe
     def selected(self):
-        if self.check_hover() and pygame.mouse.get_pressed()[0]:
+        if self.check_hover() and pygame.mouse.get_pressed()[0] and not self.rest:  # Only allow selection if not resting
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
@@ -71,15 +74,15 @@ class Minion(Card):
 
 # Spell subclass:
 class Spell(Card):
-    def __init__(self, name, manaCost, attack, activationTimes=1, effect=None, pic=None):
-        super().__init__('spell', name, manaCost, effect, pic)
+    def __init__(self, name, mana_cost, attack, activationTimes=1, effect=None, pic=None):
+        super().__init__('spell', name, mana_cost, effect, pic)
         self.attack = attack
         self.activationTimes = activationTimes
 
 # Weapon subclass:
 class Weapon(Card):
-    def __init__(self, name, manaCost, attack, durability, pic=None):
-        super().__init__('weapon', name, manaCost, effect=None, pic=pic)
+    def __init__(self, name, mana_cost, attack, durability, pic=None):
+        super().__init__('weapon', name, mana_cost, effect=None, pic=pic)
         self.attack = attack
         self.durability = durability
         self.is_enemy = False  # Weapons are always controlled by the player

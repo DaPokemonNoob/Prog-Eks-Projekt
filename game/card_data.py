@@ -4,10 +4,10 @@ from game_logic import minion_death, hero_death
 
 # Minion kort:
 def slimeling():
-    return Minion("Slimeling", manaCost=2, attack=2, max_hp=5, effect=None, pic="slimeling.png")
+    return Minion("Slimeling", mana_cost=2, attack=2, max_hp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
-    minion = Minion("Some Cool Guy", manaCost=5, attack=4, max_hp=6, 
+    minion = Minion("Some Cool Guy", mana_cost=5, attack=4, max_hp=6, 
                     effect="When summoned: increase all ally Minions attack by 1.")
     def custom_on_summon(battle_state):
         rows = [battle_state.player_front_row, battle_state.player_back_row] if not minion.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
@@ -20,7 +20,7 @@ def someCoolGuy():
 
 def knight():
     armor_amount = effect.armor(2)
-    minion = Minion("Knight", manaCost=3, attack=1, max_hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
+    minion = Minion("Knight", mana_cost=3, attack=1, max_hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
     def custom_on_summon(battle_state):
         if minion.is_front_row:
             minion.has_taunt = True
@@ -36,10 +36,10 @@ def evilGuy():      # Den hero fjenden bruger
 
 # Spell kort:
 def fireball():
-    return Spell("Fireball", manaCost=3, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
+    return Spell("Fireball", mana_cost=3, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
 
 def chaosCrystal():
-    spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
+    spell = Spell("Chaos Crystal", mana_cost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
     
     def custom_spell_effect(battle_state, spell, enemy_discard, player_discard):
         import random
@@ -74,10 +74,10 @@ def chaosCrystal():
     return spell
 
 def firestorm():
-    return Spell("Firestorm", manaCost=5, attack=3, effect="Deals 3 damage to all Minions.")
+    return Spell("Firestorm", mana_cost=5, attack=3, effect="Deals 3 damage to all Minions.")
 
 # Weapon kort:
 def sword():
-    return Weapon("Sword", manaCost=3, attack=3, durability=2, pic="sword.png")
+    return Weapon("Sword", mana_cost=3, attack=3, durability=2, pic="sword.png")
 
 
