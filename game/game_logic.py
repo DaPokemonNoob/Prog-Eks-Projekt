@@ -22,31 +22,31 @@ def minion_death(minion, battle_state, discard_pile=None):
     return False
 
 # håndterer hero death
-def hero_death(hero, play_menu):
+def hero_death(hero, battle_state):
     if hero.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object
-        battle_state = play_menu.battle_state
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
-
         return True
     return False
 
-def enemy_death(enemy, play_menu):
+def enemy_death(enemy, battle_state):
     if enemy.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object
-        battle_state = play_menu.battle_state
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
-
         return True
     return False
 
@@ -265,10 +265,10 @@ class TurnManager:
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
         # Reset all minions' rest state
-        for row in [self.play_menu.battle_state.player_front_row, 
-                   self.play_menu.battle_state.player_back_row,
-                   self.play_menu.battle_state.enemy_front_row,
-                   self.play_menu.battle_state.enemy_back_row]:
+        for row in [self.player_screen.battle_state.player_front_row, 
+                   self.player_screen.battle_state.player_back_row,
+                   self.player_screen.battle_state.enemy_front_row,
+                   self.player_screen.battle_state.enemy_back_row]:
             for minion in row:
                 minion.rest = False
 
@@ -297,29 +297,3 @@ class TurnManager:
     # funktion der checker hvis tur det er
     def get_current_player(self):
         return "player" if self.is_player_turn else "enemy"
-
-def battle_start(play_menu):
-    # Reset all board rows
-    play_menu.battle_state.player_front_row.clear()
-    play_menu.battle_state.player_back_row.clear()
-    play_menu.battle_state.enemy_front_row.clear()
-    play_menu.battle_state.enemy_back_row.clear()
-    
-    # Reset mana to 1
-    play_menu.turn_manager.max_mana = 1
-    play_menu.turn_manager.current_mana = play_menu.turn_manager.max_mana
-    
-    # Extend playerDeckPile with cards from playerDiscard and playerHand
-    play_menu.playerDeckPile.extend(play_menu.playerDiscard)
-    play_menu.playerDeckPile.extend(play_menu.playerHand)
-    # Clear playerDiscard and playerHand
-    play_menu.playerDiscard.clear()
-    play_menu.playerHand.clear()
-    # Shuffle playerDeckPile
-    import random
-    random.shuffle(play_menu.playerDeckPile)
-    # Draw 4 cards to playerHand
-    for _ in range(4):
-        if play_menu.playerDeckPile:
-            card = play_menu.playerDeckPile.pop(0)
-            play_menu.playerHand.append(card)
