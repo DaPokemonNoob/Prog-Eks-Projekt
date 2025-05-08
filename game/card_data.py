@@ -36,7 +36,7 @@ def evilGuy():      # Den hero fjenden bruger
 
 # Spell kort:
 def fireball():
-    return Spell("Fireball", manaCost=3, attack=2)
+    return Spell("Fireball", manaCost=3, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
 
 def chaosCrystal():
     spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
@@ -78,6 +78,6 @@ def firestorm():
 
 # Weapon kort:
 def sword():
-    return Weapon("Sword", manaCost=3, attack=3, durability=2)
+    return Weapon("Sword", manaCost=3, attack=3, durability=2, pic="sword.png")
 
 

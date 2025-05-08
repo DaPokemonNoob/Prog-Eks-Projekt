@@ -28,7 +28,7 @@ class PlayMenu(Screen):
         self.turn_manager = TurnManager(self, self.enemy)
 
     # denne funktion initialiserer spillerens dæk
-        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal()]    # Spillerens dæk
+        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal(), card.fireball(), card.sword()]    # Spillerens dæk
         random.shuffle(self.playerDeckPile)
         self.playerHand = []                                                            #Laver en tom liste til kortene i spillerens hånd
         self.playerDiscard = []                                                         #Laver en tom liste til kortene i spillerens discard pile
@@ -219,6 +219,7 @@ class PlayMenu(Screen):
                 image = pygame.image.load(f"assets/playingCard/{minion.pic}").convert_alpha()
                 image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
                 screen.blit(image, (x, y))
+
             else:
                 # Fallback: farvet rektangel
                 color = (200, 0, 0) if minion.currentHp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
@@ -250,6 +251,9 @@ class PlayMenu(Screen):
             if hasattr(card, "category") and card.category == "minion":
                 screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
                 screen.blit(font.render(str(card.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
+            elif hasattr(card, "category") and card.category == "weapon":
+                screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(card.durability), True, (255, 255, 255)), (x + 81, y + 119))
             else:
                 None
 
@@ -274,11 +278,13 @@ class PlayMenu(Screen):
 
             # Hvis kortet er en minion, vis også attack og hp
             if hasattr(self.dragged_card, "category") and self.dragged_card.category == "minion":
-                attack_text = font.render(str(self.dragged_card.attack), True, (255, 255, 255))
-                screen.blit(attack_text, (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.hp), True, (255, 255, 255)), (x + 81, y + 119))
 
-                hp_text = font.render(str(self.dragged_card.maxHp), True, (255, 255, 255))
-                screen.blit(hp_text, (x + 81, y + 119))
+            elif hasattr(self.dragged_card, "category") and self.dragged_card.category == "weapon":
+                screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.durability), True, (255, 255, 255)), (x + 81, y + 119)) 
+                        
 
     def handle_mouse_up(self, event):
         if self.dragged_card:
