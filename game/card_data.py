@@ -4,10 +4,10 @@ from game_logic import minion_death, hero_death
 
 # Minion kort:
 def slimeling():
-    return Minion("Slimeling", manaCost=2, attack=2, hp=5, effect=None, pic="slimeling.png")
+    return Minion("Slimeling", manaCost=2, attack=2, maxHp=5, effect=None, pic="slimeling.png")
 
 def someCoolGuy():
-    minion = Minion("Some Cool Guy", manaCost=5, attack=4, hp=6, 
+    minion = Minion("Some Cool Guy", manaCost=5, attack=4, maxHp=6, 
                     effect="When summoned: increase all ally Minions attack by 1.")
     def custom_on_summon(battle_state):
         rows = [battle_state.player_front_row, battle_state.player_back_row] if not minion.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
@@ -20,21 +20,23 @@ def someCoolGuy():
 
 def knight():
     armor_amount = effect.armor(2)
-    minion = Minion("Knight", manaCost=3, attack=1, hp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
-    if minion.is_front_row:
-        minion.has_taunt = True
+    minion = Minion("Knight", manaCost=3, attack=1, maxHp=7 + armor_amount, effect="When summoned: gain 2 armor. Has taunt if placed in front row.", pic="knight.png")
+    def custom_on_summon(battle_state):
+        if minion.is_front_row:
+            minion.has_taunt = True
+    minion.on_summon = custom_on_summon
     return minion
     
 # Hero kort:
 def adventurer():   # Den hero spilleren bruger
-    return Hero("Adventurer", attack=1, hp=15)
+    return Hero("Adventurer", attack=1, maxHp=15)
 
 def evilGuy():      # Den hero fjenden bruger
-    return Hero("Evil Guy", attack=1, hp=15)
+    return Hero("Evil Guy", attack=1, maxHp=15, is_enemy = True)
 
 # Spell kort:
 def fireball():
-    return Spell("Fireball", manaCost=3, attack=2)
+    return Spell("Fireball", manaCost=3, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
 
 def chaosCrystal():
     spell = Spell("Chaos Crystal", manaCost=2, attack=1, activationTimes=5, effect="Deals 5 damage randomly split among all Minions and Heroes.", pic ="chaoscrystal.png")
@@ -51,19 +53,19 @@ def chaosCrystal():
         possible_targets.append(battle_state.player_hero)
         
         # Fjern døde targets
-        possible_targets = [target for target in possible_targets if target.hp > 0]
+        possible_targets = [target for target in possible_targets if target.currentHp > 0]
         
         if possible_targets:
             # Aktiver 5 gange med random target hver gang
             for _ in range(spell.activationTimes):
                 if possible_targets:  # Check igen i tilfælde af at nogle targets er døde
                     target = random.choice(possible_targets)
-                    target.hp -= spell.attack
+                    target.currentHp -= spell.attack
                     # Tjek for død efter hver aktivering
                     if hasattr(target, 'is_enemy'):  # Er det en minion
                         if minion_death(target, battle_state, enemy_discard if target.is_enemy else player_discard):
                             possible_targets.remove(target)
-                    elif target.hp <= 0:  # Er det en hero
+                    elif target.currentHp <= 0:  # Er det en hero
                         hero_death(target, battle_state)
             return True
         return False
@@ -76,6 +78,6 @@ def firestorm():
 
 # Weapon kort:
 def sword():
-    return Weapon("Sword", manaCost=3, attack=3, durability=2)
+    return Weapon("Sword", manaCost=3, attack=3, durability=2, pic="sword.png")
 
 
