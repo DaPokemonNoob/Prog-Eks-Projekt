@@ -153,6 +153,7 @@ class PlayMenu(Screen):
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
                     if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)  # Spend mana after successful weapon use
                         if self.dragged_card.durability <= 0:
                             self.playerDiscard.append(self.dragged_card)
                             self.dragged_card = None
@@ -333,17 +334,20 @@ class PlayMenu(Screen):
             if hasattr(self.dragged_card, 'category'):
                 if self.dragged_card.category == 'weapon':
                     if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)  # Spend mana after successful weapon use
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)
                 elif self.dragged_card.category == 'minion':
                     if use_minion(self.dragged_card, mouse_x, mouse_y, self.battle_state, 
                                 self.player_front_row_zone, self.player_back_row_zone):
+                        self.turn_manager.spend_mana(self.dragged_card.mana_cost)
                         self.dragged_card = None
                     else:
                         self.return_card_to_hand(mouse_x)
