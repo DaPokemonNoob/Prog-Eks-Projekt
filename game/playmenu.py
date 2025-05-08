@@ -123,7 +123,7 @@ class PlayMenu(Screen):
             
             # Check for enemy hero clicks
             if self.enemy_hero_rect.collidepoint(mouse_x, mouse_y):
-                self.battle_state.handle_minion_click(self.battle_state.enemy_hero)
+                self.battle_state.handle_minion_click(self.battle_state.enemy_hero, playmenu_draw_function=self.draw)
                 return
                 
             # Check for card clicks in hand first
@@ -153,28 +153,24 @@ class PlayMenu(Screen):
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
                     if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
-                        # Successfully used weapon
-                        if self.dragged_card.durability > 0:
-                            # If weapon still has durability, return to hand
-                            self.return_card_to_hand(mouse_x)
-                        else:
-                            # If no durability left, discard and clear dragged card
+                        if self.dragged_card.durability <= 0:
+                            self.playerDiscard.append(self.dragged_card)
                             self.dragged_card = None
+                        else:
+                            self.return_card_to_hand(mouse_x)
                     else:
-                        # Attack was not valid, return to hand
-                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
-                        self.dragged_card = None
                         self.return_card_to_hand(mouse_x)
                     return
 
                 # Handle spell casting
-                elif self.dragged_card.category == 'spell':
+                if self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
                         self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.playerDiscard.append(self.dragged_card)  # Add to discard pile
                         self.dragged_card = None
-                        return
                     else:
                         self.return_card_to_hand(mouse_x)
+                    return
 
                 # Handle minion placement
                 elif self.dragged_card.category == 'minion':
