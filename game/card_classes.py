@@ -88,7 +88,11 @@ class BoardState:
         self.enemy_back_row = []   # max 3 minions
         self.player_front_row = [] # max 2 minions
         self.player_back_row = []  # max 3 minions
+        self.turn_manager = None
         
+    def set_turn_manager(self, turn_manager):
+        self.turn_manager = turn_manager
+
     # funktion til at tilføje en minion til boardet
     def add_minion(self, minion, is_enemy, is_front_row):
         target_row = None
