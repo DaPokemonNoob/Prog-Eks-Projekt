@@ -5,12 +5,15 @@ from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 from game_logic import hero_death, enemy_death
 import random
+from card_data import slimeling, knight, fireball, chaosCrystal
 
 # starter pygame
 pygame.init()
 
 clock = pygame.time.Clock()
 pygame.display.set_caption("Arcane Clash")
+
+all_cards = [slimeling(), knight(), fireball(), chaosCrystal()]
 
 # map ting
 font = pygame.font.Font(None, 36)
@@ -89,6 +92,11 @@ while running:
                     switch_screen("heal_menu")
                 elif encounter_type == "boss":
                     switch_screen("boss_menu")
+                elif encounter_type == "treasure":
+                    # Add a random card to the deck
+                    random_card = random.choice(all_cards)
+                    screens["play_menu"].playerDeckPile.append(random_card)
+                    print(f"Added {random_card.name} to deck!")
 
     if hero_death(screens["play_menu"].battle_state.player_hero, screens["play_menu"]):
         switch_screen("lose_menu")
