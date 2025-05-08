@@ -1,5 +1,5 @@
 from animations import play_attack_animation
-from settings import clock, SCREEN
+from settings import *
 import pygame
 
 # funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
@@ -73,6 +73,11 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
         minion.is_front_row = is_front_row
         minion.has_taunt = False  # Reset taunt status before on_summon
         target_row.append(minion)
+        
+        # Calculate position based on row and column
+        row_y = 100 if is_front_row else 200  # Example Y-coordinates for rows
+        column_x = 100 + len(target_row) * (CARD_WIDTH + 20)  # Example X-coordinates with spacing
+        minion.position = (column_x, row_y)  # Assign position to the minion
         
         # Activate any summon effects the minion might have
         if minion.on_summon:
@@ -248,10 +253,11 @@ def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_disca
 
 # class for håndtering af hvis tur det er
 class TurnManager:
-    def __init__(self, player_screen, enemy):
-        self.is_player_turn = True  # True = spillerens tur, False = fjendens tur
-        self.player_screen = player_screen
+    def __init__(self, play_menu, enemy, draw_function):
+        self.play_menu = play_menu
         self.enemy = enemy
+        self.draw_function = draw_function
+        self.is_player_turn = True  # True = spillerens tur, False = fjendens tur
         self.current_mana = 1  # Start with 1 mana
         self.max_mana = 1
         self.spent_mana = 0
@@ -259,9 +265,9 @@ class TurnManager:
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
         # trækker et kort fra bunken
-        draw_card(self.player_screen.playerDeckPile, self.player_screen.playerHand)
+        draw_card(self.play_menu.playerDeckPile, self.play_menu.playerHand)
         self.is_player_turn = False
-        self.enemy.perform_turn()
+        self.enemy.perform_turn(SCREEN, self.play_menu.clock, self.draw_function)
         self.is_player_turn = True
         # Increase mana for next turn
         self.max_mana = min(10, self.max_mana + 1)

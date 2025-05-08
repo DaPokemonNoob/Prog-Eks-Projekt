@@ -28,7 +28,7 @@ class PlayMenu(Screen):
         
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
-        self.turn_manager = TurnManager(self, self.enemy)
+        self.turn_manager = TurnManager(self, self.enemy, self.draw)
         self.battle_state.set_turn_manager(self.turn_manager)  # Set the turn manager on battle_state
 
     # denne funktion initialiserer spillerens dæk
