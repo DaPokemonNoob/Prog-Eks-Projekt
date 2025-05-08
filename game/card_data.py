@@ -39,7 +39,7 @@ def evilGuy():      # Den hero fjenden bruger
 
 # Spell kort:
 def fireball():
-    spell = Spell("Fireball", mana_cost=3, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
+    spell = Spell("Fireball", mana_cost=2, attack=2, effect="Deals 2 damage to targeted enemy", pic="fireball.png")
     return spell
 
 def chaosCrystal():
