@@ -21,7 +21,7 @@ class Enemy:
         self.draw_card()
         
         # Sort hand by mana cost to play cheaper cards first
-        self.hand.sort(key=lambda x: x.manaCost)
+        self.hand.sort(key=lambda x: x.mana_cost)
         
         # prøver at placere minions
         if len(self.hand) > 0:
