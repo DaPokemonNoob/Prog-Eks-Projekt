@@ -22,31 +22,31 @@ def minion_death(minion, battle_state, discard_pile=None):
     return False
 
 # håndterer hero death
-def hero_death(hero, battle_state):
+def hero_death(hero, play_menu):
     if hero.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object if needed
-        if hasattr(battle_state, 'battle_state'):
-            battle_state = battle_state.battle_state
+        # Get the actual board state from the PlayMenu object
+        battle_state = play_menu.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
+
         return True
     return False
 
-def enemy_death(enemy, battle_state):
+def enemy_death(enemy, play_menu):
     if enemy.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object if needed
-        if hasattr(battle_state, 'battle_state'):
-            battle_state = battle_state.battle_state
+        # Get the actual board state from the PlayMenu object
+        battle_state = play_menu.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
+
         return True
     return False
 

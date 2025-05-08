@@ -4,6 +4,7 @@ from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMe
 from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 from game_logic import hero_death, enemy_death
+import random
 
 # starter pygame
 pygame.init()
@@ -20,6 +21,21 @@ def switch_screen(name):
     global current_screen, previous_screen
     if name == "resume":
         current_screen = previous_screen
+    if name == "play_menu":
+        # Extend playerDeckPile with cards from playerDiscard and playerHand
+        screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerDiscard)
+        screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerHand)
+        # Clear playerDiscard and playerHand
+        screens["play_menu"].playerDiscard.clear()
+        screens["play_menu"].playerHand.clear()
+        # Shuffle playerDeckPile
+        random.shuffle(screens["play_menu"].playerDeckPile)
+        # Draw 4 cards to playerHand
+        for _ in range(4):
+            if screens["play_menu"].playerDeckPile:
+                card = screens["play_menu"].playerDeckPile.pop(0)
+                screens["play_menu"].playerHand.append(card)
+        current_screen = screens[name]
     else:
         if current_screen != screens.get("pause_menu"):
             previous_screen = current_screen
@@ -66,8 +82,6 @@ while running:
             if current_screen == screens["map_menu"]:
                 encounter_type = handle_click(mouse_pos, map_data)
                 if encounter_type == "battle":
-                    #reset fight
-                   # screens["play_menu"].battle_state.reset_battle()
                     switch_screen("play_menu")
                 elif encounter_type == "shop":
                     switch_screen("shop_menu")
