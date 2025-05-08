@@ -69,14 +69,14 @@ class PlayMenu(Screen):
         screen.blit(text, text_rect)
         
         # Draw HP
-        if hero.currentHp == hero.maxHp:
-            hp_text = font.render(f"HP: {hero.currentHp}", True, (0, 0, 0))
-        if hero.currentHp > hero.maxHp:
-            hp_text = font.render(f"HP: {hero.currentHp}", True, (0, 255, 0))
-        if hero.currentHp < hero.maxHp:
-            hp_text = font.render(f"HP: {hero.currentHp}", True, (150, 0, 0))
-        if hero.currentHp < 0:
-            hp_text = font.render(f"HP: {hero.currentHp}", True, (255, 0, 0))
+        if hero.current_hp == hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (0, 0, 0))
+        if hero.current_hp > hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (0, 255, 0))
+        if hero.current_hp < hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (150, 0, 0))
+        if hero.current_hp < 0:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (255, 0, 0))
         hp_rect = hp_text.get_rect(center=(rect.centerx, rect.centery + rect.height//4))
         screen.blit(hp_text, hp_rect)
 
@@ -156,13 +156,11 @@ class PlayMenu(Screen):
                 elif self.dragged_card.category == 'minion':
                     if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
-                            self.battle_state.player_front_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
                     elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, False):
-                            self.battle_state.player_back_row.append(self.dragged_card)
                             self.dragged_card = None
                             return
 
@@ -219,17 +217,21 @@ class PlayMenu(Screen):
                 image = pygame.image.load(f"assets/playingCard/{minion.pic}").convert_alpha()
                 image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
                 screen.blit(image, (x, y))
-
+                
+                # Draw taunt indicator
+                if minion.has_taunt:
+                    pygame.draw.rect(screen, (255, 215, 0), minion.image, 3)  # Gold border for taunt minions
             else:
                 # Fallback: farvet rektangel
-                color = (200, 0, 0) if minion.currentHp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
+                color = (200, 0, 0) if minion.current_hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
                 pygame.draw.rect(screen, color, minion.image)
+                if minion.has_taunt:
+                    pygame.draw.rect(screen, (255, 215, 0), minion.image, 3)
             
             font = pygame.font.Font(None, 24)
             screen.blit(font.render(str(minion.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
             screen.blit(font.render(str(minion.attack), True, (255, 255, 255)), (x + 11, y + 119))
-            screen.blit(font.render(str(minion.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
-            
+            screen.blit(font.render(str(minion.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
             
             y += 120 + spacing
 
@@ -250,7 +252,7 @@ class PlayMenu(Screen):
             # Attack og HP kun for minions
             if hasattr(card, "category") and card.category == "minion":
                 screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
-                screen.blit(font.render(str(card.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
+                screen.blit(font.render(str(card.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
             elif hasattr(card, "category") and card.category == "weapon":
                 screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
                 screen.blit(font.render(str(card.durability), True, (255, 255, 255)), (x + 81, y + 119))
@@ -279,7 +281,7 @@ class PlayMenu(Screen):
             # Hvis kortet er en minion, vis også attack og hp
             if hasattr(self.dragged_card, "category") and self.dragged_card.category == "minion":
                 screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
-                screen.blit(font.render(str(self.dragged_card.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
+                screen.blit(font.render(str(self.dragged_card.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
 
             elif hasattr(self.dragged_card, "category") and self.dragged_card.category == "weapon":
                 screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))

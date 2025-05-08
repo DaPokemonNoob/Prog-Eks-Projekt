@@ -4,5 +4,5 @@ def armor(amount):
 def taunt():
     return True
 
-def increase(attack, hp):
-    return attack, hp
+def increase(attack, current_hp):
+    return attack, current_hp
