@@ -1,8 +1,9 @@
 import pygame, sys
 from settings import *
-from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, SCREEN
+from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, WinMenu, LoseMenu, SCREEN
 from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
+from game_logic import hero_death, enemy_death
 
 # starter pygame
 pygame.init()
@@ -35,7 +36,9 @@ screens = {
     "heal_menu": HealMenu(switch_screen),
     "battle_menu": BattleMenu(switch_screen),
     "shop_menu": ShopMenu(switch_screen),
-    "boss_menu": BossMenu(switch_screen)
+    "boss_menu": BossMenu(switch_screen),
+    "win_menu": WinMenu(switch_screen),
+    "lose_menu": LoseMenu(switch_screen),
 
 }
 
@@ -67,6 +70,21 @@ while running:
                 elif encounter_type == "boss":
                     switch_screen("boss_menu")
 
+    if hero_death(screens["play_menu"].battle_state.player_hero, screens["play_menu"]):
+        switch_screen("lose_menu")
+        if current_screen == screens["lose_menu"]:
+            previous_screen = screens["play_menu"]
+            current_screen = screens["lose_menu"]
+            previous_screen.draw(SCREEN)
+            current_screen.draw(SCREEN)
+    
+    if enemy_death(screens["play_menu"].battle_state.enemy_hero, screens["play_menu"]):
+        switch_screen("win_menu")
+        if current_screen == screens["win_menu"]:
+            previous_screen = screens["play_menu"]
+            current_screen = screens["win_menu"]
+            previous_screen.draw(SCREEN)
+            current_screen.draw(SCREEN)
 
     # Draw the current screen
     if current_screen == screens["pause_menu"]:
