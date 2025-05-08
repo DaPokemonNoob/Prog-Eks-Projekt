@@ -27,22 +27,24 @@ def switch_screen(name):
 
 current_screen = None
 previous_screen = None
-screens = {
+screens = {}
+screens.update({
     "main_menu": MainMenu(switch_screen),
     "play_menu": PlayMenu(switch_screen, clock),
     "options_menu": OptionsMenu(switch_screen, SCREEN),
     "map_menu": MapMenu(switch_screen, SCREEN),
     "pause_menu": PauseMenu(switch_screen),
-    "heal_menu": HealMenu(switch_screen),
     "battle_menu": BattleMenu(switch_screen),
     "shop_menu": ShopMenu(switch_screen),
     "boss_menu": BossMenu(switch_screen),
     "win_menu": WinMenu(switch_screen),
     "lose_menu": LoseMenu(switch_screen),
 
-}
+})
 
-switch_screen("main_menu")
+screens.update({"heal_menu": HealMenu(switch_screen, screens["play_menu"].battle_state.player_hero)})
+
+switch_screen("map_menu")
 
 # === Main loop ===
 running = True
@@ -64,7 +66,9 @@ while running:
             if current_screen == screens["map_menu"]:
                 encounter_type = handle_click(mouse_pos, map_data)
                 if encounter_type == "battle":
-                    switch_screen("battle_menu")
+                    #reset fight
+                   # screens["play_menu"].battle_state.reset_battle()
+                    switch_screen("play_menu")
                 elif encounter_type == "shop":
                     switch_screen("shop_menu")
                 elif encounter_type == "heal":

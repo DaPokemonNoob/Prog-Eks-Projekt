@@ -56,7 +56,7 @@ class PlayMenu(Screen):
 
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
-            self.menu_button: lambda: self.switch_screen("main_menu"),
+            self.menu_button: lambda: self.switch_screen("map_menu"),
             self.next_turn_button: self.end_turn
         }
         self.hand_card_rects = []
