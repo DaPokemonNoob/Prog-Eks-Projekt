@@ -19,7 +19,32 @@ def minion_death(minion, battle_state, discard_pile=None):
 
 # håndterer hero death
 def hero_death(hero, battle_state):
-    pass
+    if hero.hp <= 0:
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
+            
+        # Clear the board
+        battle_state.player_front_row.clear()
+        battle_state.player_back_row.clear()
+        battle_state.enemy_front_row.clear()
+        battle_state.enemy_back_row.clear()
+        return True
+    return False
+
+def enemy_death(enemy, battle_state):
+    if enemy.hp <= 0:
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
+            
+        # Clear the board
+        battle_state.player_front_row.clear()
+        battle_state.player_back_row.clear()
+        battle_state.enemy_front_row.clear()
+        battle_state.enemy_back_row.clear()
+        return True
+    return False
 
 # trækker et kort hvis det er muligt
 def draw_card(deck, hand, max_hand_size=7):

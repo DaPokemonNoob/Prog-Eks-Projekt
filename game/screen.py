@@ -227,6 +227,45 @@ class BossMenu(Screen):
         # Draw background
         screen.fill(self.bg_color)
 
+# win/lose screens
+
+class WinMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = None  # Transparent background
+    
+    def draw(self, screen):
+        # Create semi-transparent overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT))
+        overlay.fill((0, 0, 0))
+        overlay.set_alpha(128)
+        screen.blit(overlay, (0, 0))
+        
+        # Draw "YOU LOSE" text
+        font = pygame.font.Font("assets/font/impact.ttf", 100)
+        text = font.render("YOU WIN!!!", True, "green")
+        text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
+        screen.blit(text, text_rect)
+class LoseMenu(Screen):
+    def __init__(self, switch_screen):
+        super().__init__()
+        self.switch_screen = switch_screen
+        self.bg_color = None  # Transparent background
+    
+    def draw(self, screen):
+        # Create semi-transparent overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT))
+        overlay.fill((0, 0, 0))
+        overlay.set_alpha(128)
+        screen.blit(overlay, (0, 0))
+        
+        # Draw "YOU LOSE" text
+        font = pygame.font.Font("assets/font/impact.ttf", 100)
+        text = font.render("YOU LOSE", True, "red")
+        text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
+        screen.blit(text, text_rect)
+
 class OptionsMenu(Screen):
     def __init__(self, switch_screen, screen_ref):
         super().__init__()
