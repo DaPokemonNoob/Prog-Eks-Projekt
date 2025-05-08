@@ -4,6 +4,7 @@ import card_data as card
 import effects_data as effect
 from card_classes import BoardState
 from game_logic import minion_death, draw_card, add_minion_to_board, perform_attack, can_attack_target
+from animations import play_attack_animation
 
 class Enemy:
     def __init__(self, battle_state: BoardState):
@@ -16,7 +17,7 @@ class Enemy:
     def draw_card(self):
         return draw_card(self.deck_pile, self.hand)
 
-    def perform_turn(self):
+    def perform_turn(self, screen, clock, playmenu_draw_function):
         # fjenden trækker et kort hver tur
         self.draw_card()
         
@@ -52,12 +53,28 @@ class Enemy:
             # First try to attack player's minions
             for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
                 if can_attack_target(attacking_minion, target, self.battle_state):
+                    play_attack_animation(
+                        screen,
+                        clock,
+                        attacking_minion.position,  # Antag at minions har en position
+                        target.position,           # Antag at targets har en position
+                        attacking_minion.image,    # Antag at minions har et billede
+                        playmenu_draw_function
+                    )
                     perform_attack(attacking_minion, target, self.battle_state, self.discard)
                     attacked = True
                     break
                     
             # If no valid minion targets (or no minions with taunt when taunt exists)
             if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                play_attack_animation(
+                    screen,
+                    clock,
+                    attacking_minion.position,
+                    self.battle_state.player_hero.position,
+                    attacking_minion.image,
+                    playmenu_draw_function
+                )
                 perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
 
         # anden række angriber bagefter med samme logik
@@ -67,10 +84,26 @@ class Enemy:
             # First try to attack player's minions
             for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
                 if can_attack_target(attacking_minion, target, self.battle_state):
+                    play_attack_animation(
+                        screen,
+                        clock,
+                        attacking_minion.position,
+                        target.position,
+                        attacking_minion.image,
+                        playmenu_draw_function
+                    )
                     perform_attack(attacking_minion, target, self.battle_state, self.discard)
                     attacked = True
                     break
                     
             # If no valid minion targets (or no minions with taunt when taunt exists)
             if not attacked and can_attack_target(attacking_minion, self.battle_state.player_hero, self.battle_state):
+                play_attack_animation(
+                    screen,
+                    clock,
+                    attacking_minion.position,
+                    self.battle_state.player_hero.position,
+                    attacking_minion.image,
+                    playmenu_draw_function
+                )
                 perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)

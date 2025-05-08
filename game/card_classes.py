@@ -19,6 +19,8 @@ class Hero(Card):
         self.current_hp = max_hp
         self.is_enemy = is_enemy
         self.has_taunt = False
+        self.position = (0, 0)  # Default position, to be set when the hero is initialized
+        self.image = pygame.image.load(f"assets/playingCard/{pic}").convert_alpha() if pic else None
 
 # Minion subclass:
 class Minion(Card):
@@ -30,13 +32,15 @@ class Minion(Card):
         self.current_hp = max_hp
         self.effect = effect
         self.is_selected_for_attack = False
-        self.image = None
+        self.image = pygame.image.load(f"assets/playingCard/{pic}").convert_alpha() if pic else None
         self.is_enemy = False
         self.is_front_row = False
         self.pic = pic
         self.has_taunt = False
         self.rest = True  # Minions start in rest state
         self.on_summon = lambda battle_state: None
+        self.position = (0, 0)  # Default position, to be set when added to the board
+        Minion.all_minions.append(self)
 
     # funktion til at checke om musen er over en minion på boardet
     def check_hover(self):
