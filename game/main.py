@@ -1,6 +1,6 @@
 import pygame, sys
 from settings import *
-from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMenu, ShopMenu, BossMenu, WinMenu, LoseMenu, SCREEN
+from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, ShopMenu, BossMenu, WinMenu, LoseMenu, SCREEN
 from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 from game_logic import hero_death, enemy_death
@@ -46,7 +46,6 @@ screens.update({
     "options_menu": OptionsMenu(switch_screen, SCREEN),
     "map_menu": MapMenu(switch_screen, SCREEN),
     "pause_menu": PauseMenu(switch_screen),
-    "battle_menu": BattleMenu(switch_screen),
     "shop_menu": ShopMenu(switch_screen),
     "boss_menu": BossMenu(switch_screen),
     "win_menu": WinMenu(switch_screen),

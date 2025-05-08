@@ -56,34 +56,36 @@ class Minion(Card):
 
     # funktion til at vælge en minion til at angribe
     def selected(self):
-        if self.check_hover() and pygame.mouse.get_pressed()[0] and not self.rest:  # Only allow selection if not resting
+        # tjekker om musen er over minion og om venstre museknap er trykket ned, er kun muligt hvis minion ikke rester
+        if self.check_hover() and pygame.mouse.get_pressed()[0] and not self.rest:  
             self.is_selected_for_attack = not self.is_selected_for_attack
             return self
 
     # funktion til at give alle minions på boardet +1 attack
     def buff_allies(self, battle_state):
-        """Apply buff effect to all friendly minions on board"""
-        if self.name == "Some Cool Guy":
+        # tjekker om minion er en speciel minion der giver buff til alle andre minions
+        if self.name == "Some Cool Guy": # Some Cool Guy er vores eneste specielle minion
+            # tjekker om minion er fjende eller spiller i hvert row
             rows = [battle_state.player_front_row, battle_state.player_back_row] if not self.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
             for row in rows:
                 for minion in row:
-                    if minion != self:  # don't buff self again
-                        minion.attack += 1
+                    if minion != self:     # buffer ikke sig selv
+                        minion.attack += 1 # giver +1 attack til alle andre minions
 
 # spell subclass:
 class Spell(Card):
     def __init__(self, name, mana_cost, attack, activationTimes=1, effect=None, pic=None):
         super().__init__('spell', name, mana_cost, effect, pic)
-        self.attack = attack
-        self.activationTimes = activationTimes
+        self.attack = attack                       # angrebskraft (f.eks. 3)
+        self.activationTimes = activationTimes     # antal gange spell kan aktiveres (f.eks. 1)
 
 # weapon subclass:
 class Weapon(Card):
     def __init__(self, name, mana_cost, attack, durability, pic=None):
         super().__init__('weapon', name, mana_cost, effect=None, pic=pic)
-        self.attack = attack
-        self.durability = durability
-        self.is_enemy = False  # Weapons are always controlled by the player
+        self.attack = attack                       # angrebskraft (f.eks. 3)
+        self.durability = durability               # holdbarhed (f.eks. 2) - hvor mange gange den kan bruges
+        self.is_enemy = False                      # boolean om våben er fjende eller spiller (True/False) - kun spilleren kan bruge våben
 
 # klasse der tracker minions på boardet
 class BoardState:
@@ -92,28 +94,29 @@ class BoardState:
         self.enemy_back_row = []   # max 3 minions
         self.player_front_row = [] # max 2 minions
         self.player_back_row = []  # max 3 minions
-        self.turn_manager = None
+        self.turn_manager = None   # holder styr på hvem der har turen
         
     def set_turn_manager(self, turn_manager):
+        # sætter turn manager til at holde styr på hvem der har turen
         self.turn_manager = turn_manager
 
     # funktion til at tilføje en minion til boardet
     def add_minion(self, minion, is_enemy, is_front_row):
-        target_row = None
-        if is_enemy:
+        target_row = None # target_row er den række hvor minionen skal tilføjes
+        if is_enemy: # tjekker om minionen er fjende eller spiller og sætter target_row derefter - front row bliver prioriteret af enemy
             target_row = self.enemy_front_row if is_front_row else self.enemy_back_row
         else:
             target_row = self.player_front_row if is_front_row else self.player_back_row
             
-        # Check max minions
+        # tjekker om der er plads til at tilføje minionen - max 2 minions i front row og max 3 minions i back row
         max_minions = 2 if is_front_row else 3
-        if len(target_row) < max_minions:
-            minion.is_enemy = is_enemy
-            minion.is_front_row = is_front_row
-            minion.has_taunt = False  # Reset taunt before on_summon
-            target_row.append(minion)
+        if len(target_row) < max_minions:       # tjekker om der er plads i target_row
+            minion.is_enemy = is_enemy          # sætter minionens is_enemy property
+            minion.is_front_row = is_front_row  # sætter minionens is_front_row property
+            minion.has_taunt = False            # Reset taunt før on_summon effect - failsafe til knight kortet
+            target_row.append(minion)           # tilføjer minionen til target_row
             
-            # Call on_summon effect after setting properties
+            # tjekker om minionen har en on_summon effekt og kalder den hvis den har
             if minion.on_summon:
                 minion.on_summon(self)
             return True
@@ -130,18 +133,19 @@ class BoardState:
             if selected_minion:
                 break
 
-        # If a hero was clicked
+        # hvis en hero blev klikket og der er en minion valgt til at angribe
         if isinstance(clicked_minion, Hero):
             if clicked_minion.is_enemy and selected_minion:
-                selected_minion.perform_attack(clicked_minion, self, playmenu_draw_function=playmenu_draw_function)
+                selected_minion.perform_attack(clicked_minion, self, playmenu_draw_function=playmenu_draw_function) # angriber fjende helten
                 return True
             return False
             
-        # If a minion was clicked
+        # hvis en minion blev klikket og der er en minion valgt til at angribe
         if clicked_minion.is_enemy and selected_minion:
             selected_minion.perform_attack(clicked_minion, self, playmenu_draw_function=playmenu_draw_function)
             return True
         elif not clicked_minion.is_enemy:
+            # hvis en player minion blev klikket og der er en minion valgt til at angribe, så bliver den klikkede player minion valgt til at angribe
             if selected_minion and selected_minion != clicked_minion:
                 selected_minion.is_selected_for_attack = False
             clicked_minion.selected()
