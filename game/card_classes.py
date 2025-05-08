@@ -79,6 +79,7 @@ class Weapon(Card):
         super().__init__('weapon', name, manaCost, effect=None, pic=pic)
         self.attack = attack
         self.durability = durability
+        self.is_enemy = False  # Weapons are always controlled by the player
 
 # klasse der tracker minions på boardet
 class BoardState:
