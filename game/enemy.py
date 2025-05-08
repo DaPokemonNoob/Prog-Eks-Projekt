@@ -21,24 +21,24 @@ class Enemy:
         self.draw_card()
         
         # Sort hand by mana cost to play cheaper cards first
-        self.hand.sort(key=lambda x: x.manaCost)
+        self.hand.sort(key=lambda x: x.mana_cost)
         
         # prøver at placere minions
         if len(self.hand) > 0:
             # Filter cards that can be played with current mana
-            playable_cards = [card for card in self.hand if card.manaCost <= self.battle_state.turn_manager.current_mana]
+            playable_cards = [card for card in self.hand if card.mana_cost <= self.battle_state.turn_manager.current_mana]
             
             for card in playable_cards:
                 # prøver at fylde række 1 med minions (maks 2)
                 if len(self.battle_state.enemy_front_row) < 2:
                     self.hand.remove(card)
                     if add_minion_to_board(card, self.battle_state, True, True):
-                        self.battle_state.turn_manager.spend_mana(card.manaCost)
+                        self.battle_state.turn_manager.spend_mana(card.mana_cost)
                 # prøver derefter at fylde række 2 med minions (maks 3)
                 elif len(self.battle_state.enemy_back_row) < 3:
                     self.hand.remove(card)
                     if add_minion_to_board(card, self.battle_state, True, False):
-                        self.battle_state.turn_manager.spend_mana(card.manaCost)
+                        self.battle_state.turn_manager.spend_mana(card.mana_cost)
         
         # fjendens minions angriber - først angriber minions i første række
         for attacking_minion in self.battle_state.enemy_front_row[:]:  # copy af liste
