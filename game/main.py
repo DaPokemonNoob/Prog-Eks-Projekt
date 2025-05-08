@@ -22,16 +22,16 @@ def switch_screen(name):
     if name == "resume":
         current_screen = previous_screen
     if name == "play_menu":
-        # Extend playerDeckPile with cards from playerDiscard and playerHand
+        # extend playerDeckPile med kort fra playerDiscard og playerHand
         screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerDiscard)
         screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerHand)
-        # Clear playerDiscard and playerHand
+        # clear playerDiscard og playerHand
         screens["play_menu"].playerDiscard.clear()
         screens["play_menu"].playerHand.clear()
-        # Shuffle playerDeckPile
+        # shuffle playerDeckPile
         random.shuffle(screens["play_menu"].playerDeckPile)
-        # Draw 4 cards to playerHand
-        for _ in range(4):
+        # træk 4 kort lige når kampen starter
+        for i in range(4):
             if screens["play_menu"].playerDeckPile:
                 card = screens["play_menu"].playerDeckPile.pop(0)
                 screens["play_menu"].playerHand.append(card)
