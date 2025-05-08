@@ -22,7 +22,6 @@ class Hero(Card):
 
 # Minion subclass:
 class Minion(Card):
-    all_minions = []  # index med alle minions der spilles
     def __init__(self, name, mana_cost, attack, max_hp, effect, pic=None):
         super().__init__('minion', name, mana_cost, effect, pic)
         self.attack = attack
@@ -38,7 +37,6 @@ class Minion(Card):
         self.has_taunt = False
         self.rest = True  # Minions start in rest state
         self.on_summon = lambda battle_state: None
-        Minion.all_minions.append(self)
 
     # funktion til at checke om musen er over en minion på boardet
     def check_hover(self):
