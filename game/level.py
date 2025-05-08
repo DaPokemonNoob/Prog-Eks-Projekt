@@ -81,14 +81,14 @@ def generate_map(level_count=6):
     
     # Add other random levels to first group
     for _ in range(num_first_levels - 1):
-        encounter_type = random.choice(["battle", "shop", "heal"])
+        encounter_type = random.choice(["battle", "shop", "heal", "treasure"])
         level = Level(level_id_counter, 0, encounter_type)
         first_group.append(level)
         level_id_counter += 1
     
     map_levels = [first_group]
     
-    encounter_types = ["battle", "battle", "battle", "shop", "heal"]
+    encounter_types = ["battle", "battle", "battle", "shop", "heal", "treasure"]
 
     # Create remaining levels
     for level_number in range(1, level_count):
@@ -185,6 +185,7 @@ def draw_map(map_levels, screen, font):
                 "battle": (255, 0, 0),
                 "shop": (0, 0, 255),
                 "heal": (0, 255, 0),
+                "treasure": (255, 255, 0),
                 "boss": (255, 0, 255)
             }.get(level.encounter_type, (255, 255, 255))
 
