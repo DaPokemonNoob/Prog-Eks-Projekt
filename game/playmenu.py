@@ -1,10 +1,11 @@
+# Brugte biblioteker
 import pygame
+import random
 import card_data as card
 from card_classes import BoardState
 from enemy import Enemy
 from screen import Screen, Button
 from settings import *
-import random
 from animations import play_card_draw_and_flip_animation
 from game_logic import (TurnManager, use_weapon, use_minion, use_spell)
 
