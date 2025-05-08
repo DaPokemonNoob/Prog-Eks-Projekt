@@ -297,3 +297,29 @@ class TurnManager:
     # funktion der checker hvis tur det er
     def get_current_player(self):
         return "player" if self.is_player_turn else "enemy"
+
+def battle_start(play_menu):
+    # Reset all board rows
+    play_menu.battle_state.player_front_row.clear()
+    play_menu.battle_state.player_back_row.clear()
+    play_menu.battle_state.enemy_front_row.clear()
+    play_menu.battle_state.enemy_back_row.clear()
+    
+    # Reset mana to 1
+    play_menu.turn_manager.max_mana = 1
+    play_menu.turn_manager.current_mana = 1
+    
+    # Extend playerDeckPile with cards from playerDiscard and playerHand
+    play_menu.playerDeckPile.extend(play_menu.playerDiscard)
+    play_menu.playerDeckPile.extend(play_menu.playerHand)
+    # Clear playerDiscard and playerHand
+    play_menu.playerDiscard.clear()
+    play_menu.playerHand.clear()
+    # Shuffle playerDeckPile
+    import random
+    random.shuffle(play_menu.playerDeckPile)
+    # Draw 4 cards to playerHand
+    for _ in range(4):
+        if play_menu.playerDeckPile:
+            card = play_menu.playerDeckPile.pop(0)
+            play_menu.playerHand.append(card)
