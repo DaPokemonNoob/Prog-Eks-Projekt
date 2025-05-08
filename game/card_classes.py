@@ -40,7 +40,6 @@ class Minion(Card):
         self.rest = True  # Minions start in rest state
         self.on_summon = lambda battle_state: None
         self.position = (0, 0)  # Default position, to be set when added to the board
-        Minion.all_minions.append(self)
 
     # funktion til at checke om musen er over en minion på boardet
     def check_hover(self):

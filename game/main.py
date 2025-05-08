@@ -67,7 +67,7 @@ while running:
                 encounter_type = handle_click(mouse_pos, map_data)
                 if encounter_type == "battle":
                     #reset fight
-                    screens["play_menu"].battle_state.reset_battle()
+                   # screens["play_menu"].battle_state.reset_battle()
                     switch_screen("play_menu")
                 elif encounter_type == "shop":
                     switch_screen("shop_menu")
