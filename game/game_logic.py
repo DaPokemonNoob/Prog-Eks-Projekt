@@ -265,10 +265,10 @@ class TurnManager:
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
         # Reset all minions' rest state
-        for row in [self.player_screen.battle_state.player_front_row, 
-                   self.player_screen.battle_state.player_back_row,
-                   self.player_screen.battle_state.enemy_front_row,
-                   self.player_screen.battle_state.enemy_back_row]:
+        for row in [self.play_menu.battle_state.player_front_row, 
+                   self.play_menu.battle_state.player_back_row,
+                   self.play_menu.battle_state.enemy_front_row,
+                   self.play_menu.battle_state.enemy_back_row]:
             for minion in row:
                 minion.rest = False
 
