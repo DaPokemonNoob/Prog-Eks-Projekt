@@ -168,16 +168,51 @@ class HealMenu(Screen):
         super().__init__()
         self.switch_screen = switch_screen
         self.bg_color = "green"
-        self.buttons = []  # Initialize with an empty list of buttons
-        self.initialize_ui_elements()
 
-    def initialize_ui_elements(self):
-        self.background_image = pygame.image.load("assets/background/heal_site.png").convert_alpha()
-        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        # Button dimensions
+        button_width = 400  # Made buttons slightly narrower
+        button_height = 100
+        
+        # Position buttons on left and right side of middle screen
+        left_x = WIDTH // 4 - button_width // 2  # Left quarter of screen
+        right_x = (WIDTH * 3) // 4 - button_width // 2  # Right quarter of screen
+        middle_y = HEIGHT // 2 - button_height // 2  # Vertical center
+        
+        # Create heal buttons
+        self.heal_50_button = Button((left_x, middle_y), "red", (button_width, button_height))
+        self.max_hp_button = Button((right_x, middle_y), "red", (button_width, button_height))
+        
+        # Set buttons and their actions
+        self.buttons = [self.heal_50_button, self.max_hp_button]
+        self.initialize_ui_elements(SCREEN) 
 
     def draw(self, screen):
-        # Draw background
-        screen.blit(self.background_image, (0, 0))
+            # Draw background
+            screen.blit(self.background_image, (0, 0))
+            
+            # Draw buttons
+            for button in self.buttons:
+                button.run()
+
+            # Draw button text
+            font = pygame.font.Font("assets/font/impact.ttf", 30)
+            heal_text = font.render("HEAL 50% HP", True, "white")
+            max_hp_text = font.render("GAIN 5 MAX HP", True, "white")
+            
+            # Center text on buttons
+            for button, text in [
+                (self.heal_50_button, heal_text),
+                (self.max_hp_button, max_hp_text)
+            ]:
+                text_rect = text.get_rect()
+                button_center_x = button.pos[0] + button.size[0] // 2
+                button_center_y = button.pos[1] + button.size[1] // 2
+                text_rect.center = (button_center_x, button_center_y)
+                screen.blit(text, text_rect)
+
+    def initialize_ui_elements(self, screen):
+        self.background_image = pygame.image.load("assets/background/heal_site.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
 class BattleMenu(Screen):
     def __init__(self, switch_screen):

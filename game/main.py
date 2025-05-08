@@ -42,7 +42,7 @@ screens = {
 
 }
 
-switch_screen("main_menu")
+switch_screen("map_menu")
 
 # === Main loop ===
 running = True
@@ -57,6 +57,8 @@ while running:
                 switch_screen("pause_menu")
             elif event.key == pygame.K_r:
                 map_data = generate_map()
+                assign_level_positions(map_data)
+                Level.current_level = None
         current_screen.handle_event(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if current_screen == screens["map_menu"]:
