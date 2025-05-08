@@ -279,7 +279,7 @@ class PlayMenu(Screen):
             # Hvis kortet er en minion, vis også attack og hp
             if hasattr(self.dragged_card, "category") and self.dragged_card.category == "minion":
                 screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
-                screen.blit(font.render(str(self.dragged_card.hp), True, (255, 255, 255)), (x + 81, y + 119))
+                screen.blit(font.render(str(self.dragged_card.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
 
             elif hasattr(self.dragged_card, "category") and self.dragged_card.category == "weapon":
                 screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))

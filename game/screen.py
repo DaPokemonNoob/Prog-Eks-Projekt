@@ -172,12 +172,12 @@ class HealMenu(Screen):
         self.initialize_ui_elements()
 
     def initialize_ui_elements(self):
-        self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
+        self.background_image = pygame.image.load("assets/background/heal_site.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def draw(self, screen):
         # Draw background
-        screen.fill(self.bg_color)
+        screen.blit(self.background_image, (0, 0))
 
 class BattleMenu(Screen):
     def __init__(self, switch_screen):
@@ -228,7 +228,6 @@ class BossMenu(Screen):
         screen.fill(self.bg_color)
 
 # win/lose screens
-
 class WinMenu(Screen):
     def __init__(self, switch_screen):
         super().__init__()
@@ -247,6 +246,7 @@ class WinMenu(Screen):
         text = font.render("YOU WIN!!!", True, "green")
         text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
         screen.blit(text, text_rect)
+
 class LoseMenu(Screen):
     def __init__(self, switch_screen):
         super().__init__()

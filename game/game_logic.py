@@ -19,7 +19,7 @@ def minion_death(minion, battle_state, discard_pile=None):
 
 # håndterer hero death
 def hero_death(hero, battle_state):
-    if hero.hp <= 0:
+    if hero.currentHp <= 0:
         # Get the actual board state from the PlayMenu object if needed
         if hasattr(battle_state, 'battle_state'):
             battle_state = battle_state.battle_state
@@ -33,7 +33,7 @@ def hero_death(hero, battle_state):
     return False
 
 def enemy_death(enemy, battle_state):
-    if enemy.hp <= 0:
+    if enemy.currentHp <= 0:
         # Get the actual board state from the PlayMenu object if needed
         if hasattr(battle_state, 'battle_state'):
             battle_state = battle_state.battle_state
