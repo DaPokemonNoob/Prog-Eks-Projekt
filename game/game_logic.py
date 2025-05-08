@@ -220,9 +220,12 @@ def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_disca
 # class for håndtering af hvis tur det er
 class TurnManager:
     def __init__(self, player_screen, enemy):
-        self.is_player_turn = True # True = spillerens tur, False = fjendens tur
+        self.is_player_turn = True  # True = spillerens tur, False = fjendens tur
         self.player_screen = player_screen
         self.enemy = enemy
+        self.current_mana = 1  # Start with 1 mana
+        self.max_mana = 1
+        self.spent_mana = 0
 
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
@@ -231,10 +234,22 @@ class TurnManager:
         self.is_player_turn = False
         self.enemy.perform_turn()
         self.is_player_turn = True
+        # Increase mana for next turn
+        self.max_mana = min(10, self.max_mana + 1)
+        self.current_mana = self.max_mana
+        self.spent_mana = 0
 
-    # funktion der checker om spilleren må spille et kort (ikke implementeret endnu)
+    # funktion der checker om spilleren må spille et kort
     def can_play_card(self, card):
-        return self.is_player_turn
+        return self.is_player_turn and card.manaCost <= self.current_mana
+
+    # funktion der håndterer mana når et kort bliver spillet
+    def spend_mana(self, amount):
+        if amount <= self.current_mana:
+            self.current_mana -= amount
+            self.spent_mana += amount
+            return True
+        return False
 
     # funktion der checker hvis tur det er
     def get_current_player(self):

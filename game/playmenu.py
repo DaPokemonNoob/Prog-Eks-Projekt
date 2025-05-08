@@ -26,6 +26,7 @@ class PlayMenu(Screen):
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
         self.turn_manager = TurnManager(self, self.enemy)
+        self.battle_state.set_turn_manager(self.turn_manager)  # Set the turn manager on battle_state
 
     # denne funktion initialiserer spillerens dæk
         self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal(), card.fireball(), card.sword()]    # Spillerens dæk
@@ -124,8 +125,10 @@ class PlayMenu(Screen):
                 if rect.collidepoint(mouse_x, mouse_y):
                     card = self.playerHand[i]
                     if hasattr(card, 'category') and (card.category == 'minion' or card.category == 'spell' or card.category == 'weapon'):
-                        self.dragged_card = self.playerHand.pop(i)
-                        self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
+                        # Check if we have enough mana to play the card
+                        if self.turn_manager.can_play_card(card):
+                            self.dragged_card = self.playerHand.pop(i)
+                            self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
                     break
 
             # Only check minions if we didn't grab a card
@@ -143,26 +146,36 @@ class PlayMenu(Screen):
 
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
-                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)   
+                    if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.dragged_card = None
+                    else:
+                        self.return_card_to_hand(mouse_x)
                     return
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
                         self.dragged_card = None
                         return
+                    else:
+                        self.return_card_to_hand(mouse_x)
 
                 # Handle minion placement
                 elif self.dragged_card.category == 'minion':
+                    placed = False
                     if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
-                            self.dragged_card = None
-                            return
-
+                            placed = True
                     elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, False):
-                            self.dragged_card = None
-                            return
+                            placed = True
+                            
+                    if placed:
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.dragged_card = None
+                        return
 
                 # If card wasn't used, return to hand
                 self.return_card_to_hand(mouse_x)
@@ -187,6 +200,9 @@ class PlayMenu(Screen):
         self.draw_hero_card(screen, self.battle_state.player_hero, self.player_hero_rect)
         self.draw_hero_card(screen, self.battle_state.enemy_hero, self.enemy_hero_rect, True)
         
+        # Draw mana crystals
+        self.draw_mana(screen)
+        
         # Draw play zones
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
@@ -204,6 +220,11 @@ class PlayMenu(Screen):
         self.draw_dragged_card(screen)
         for button in self.buttons:
             button.run()
+
+    def draw_mana(self, screen):
+        font = pygame.font.Font(None, 36)
+        mana_text = font.render(f"Mana: {self.turn_manager.current_mana}/{self.turn_manager.max_mana}", True, (0, 255, 255))
+        screen.blit(mana_text, (20, 20))
 
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20

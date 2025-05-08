@@ -42,7 +42,7 @@ screens = {
 
 }
 
-switch_screen("map_menu")
+switch_screen("main_menu")
 
 # === Main loop ===
 running = True
