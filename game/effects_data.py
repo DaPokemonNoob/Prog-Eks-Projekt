@@ -1,8 +1,4 @@
-def armor(amount):                  # Armor effekt - kan tage x skade før minionen mister hp
-    return amount
-
-def taunt():                        # Taunt effekt - enemy minions kan kun angribe minionen med taunt
-    return True
-
-def increase(attack, current_hp):   # increase effekt - giver en minion +x i attack og +x i hp
-    return attack, current_hp
+def armor(amount):  # armor skulle være en seperat stat for minionen, men grundet
+    return amount   # mangel på tid blev det bare lagt til minionens hp
+    
+# meningen var at have mulige effekter defineret herinde, der var ikke tid til det

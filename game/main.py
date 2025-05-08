@@ -4,6 +4,7 @@ from screen import MainMenu, OptionsMenu, MapMenu, PauseMenu, HealMenu, BattleMe
 from playmenu import PlayMenu
 from level import generate_map, assign_level_positions, draw_map, handle_click, Level
 from game_logic import hero_death, enemy_death
+from game_logic import battle_start
 import random
 from card_data import slimeling, knight, fireball, chaosCrystal
 
@@ -25,19 +26,7 @@ def switch_screen(name):
     if name == "resume":
         current_screen = previous_screen
     if name == "play_menu":
-        # extend playerDeckPile med kort fra playerDiscard og playerHand
-        screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerDiscard)
-        screens["play_menu"].playerDeckPile.extend(screens["play_menu"].playerHand)
-        # clear playerDiscard og playerHand
-        screens["play_menu"].playerDiscard.clear()
-        screens["play_menu"].playerHand.clear()
-        # shuffle playerDeckPile
-        random.shuffle(screens["play_menu"].playerDeckPile)
-        # træk 4 kort lige når kampen starter
-        for i in range(4):
-            if screens["play_menu"].playerDeckPile:
-                card = screens["play_menu"].playerDeckPile.pop(0)
-                screens["play_menu"].playerHand.append(card)
+        battle_start(screens["play_menu"])
         current_screen = screens[name]
     else:
         if current_screen != screens.get("pause_menu"):

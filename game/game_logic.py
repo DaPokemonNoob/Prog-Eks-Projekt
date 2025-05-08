@@ -1,6 +1,8 @@
 from animations import play_attack_animation
 from settings import *
 import pygame
+import random
+import card_data as card
 
 # funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
 def minion_death(minion, battle_state, discard_pile=None):
@@ -10,7 +12,7 @@ def minion_death(minion, battle_state, discard_pile=None):
                 battle_state.enemy_front_row.remove(minion)
             elif minion in battle_state.enemy_back_row:
                 battle_state.enemy_back_row.remove(minion)
-        else:  # Hvis ikke is_enemy, så er det en spiller-minion
+        else:  # hvis ikke is_enemy, så er det en spiller-minion
             if minion in battle_state.player_front_row:
                 battle_state.player_front_row.remove(minion)
             elif minion in battle_state.player_back_row:
@@ -27,7 +29,7 @@ def hero_death(hero, play_menu):
         # Get the actual board state from the PlayMenu object
         battle_state = play_menu.battle_state
             
-        # Clear the board
+        # clear board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
@@ -38,23 +40,15 @@ def hero_death(hero, play_menu):
 
 def enemy_death(enemy, play_menu):
     if enemy.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object
+        # get the actual board state from the PlayMenu object
         battle_state = play_menu.battle_state
             
-        # Clear the board
+        # clear board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
 
-        return True
-    return False
-
-# trækker et kort hvis det er muligt
-def draw_card(deck, hand, max_hand_size=7):
-    if len(deck) > 0 and len(hand) < max_hand_size:
-        card = deck.pop(0)
-        hand.append(card)
         return True
     return False
 
@@ -71,15 +65,15 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
     if len(target_row) < max_minions:
         minion.is_enemy = is_enemy
         minion.is_front_row = is_front_row
-        minion.has_taunt = False  # Reset taunt status before on_summon
+        minion.has_taunt = False  # reset taunt status før summon
         target_row.append(minion)
         
-        # Calculate position based on row and column
-        row_y = 100 if is_front_row else 200  # Example Y-coordinates for rows
-        column_x = 100 + len(target_row) * (CARD_WIDTH + 20)  # Example X-coordinates with spacing
-        minion.position = (column_x, row_y)  # Assign position to the minion
+        # udregn position baseret på række
+        row_y = 100 if is_front_row else 200  # eksempel Y-coordinater
+        column_x = 100 + len(target_row) * (CARD_WIDTH + 20)  # eksempel X-coordinater
+        minion.position = (column_x, row_y)  # giv position til minion
         
-        # Activate any summon effects the minion might have
+        # aktiver summon effekt, hvis denne findes
         if minion.on_summon:
             minion.on_summon(battle_state)
             
@@ -88,11 +82,11 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
 
 # håndterer når en minion angriber noget
 def perform_attack(attacker, target, battle_state, discard_pile=None, playmenu_draw_function=None):
-    # First check if target is valid based on taunt rules
+    # først check om target er valid baseret på taunt check
     if not can_attack_target(attacker, target, battle_state):
         return False
         
-    # Check if target is an enemy (do this after taunt check)
+    # check om target er en fjende
     if hasattr(target, 'is_enemy'):
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe allierede
             return False
@@ -100,17 +94,16 @@ def perform_attack(attacker, target, battle_state, discard_pile=None, playmenu_d
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egen hero
             return False
 
-    # Ensure card image is loaded as a pygame.Surface
+    # loader billede
     if isinstance(attacker.pic, str):
         attacker_image = pygame.image.load(f"assets/playingCard/{attacker.pic}").convert_alpha()
     else:
         attacker_image = attacker.pic
 
-    # Play attack animation if images are available
+    # attack animation
     if hasattr(attacker, 'image') and attacker.image and hasattr(target, 'image') and target.image:
         attacker_pos = (attacker.image.x, attacker.image.y)
         target_pos = (target.image.x, target.image.y)
-        # Pass the playmenu_draw_function explicitly
         if playmenu_draw_function:
             play_attack_animation(SCREEN, clock, attacker_pos, target_pos, attacker_image, playmenu_draw_function)
             
@@ -119,10 +112,10 @@ def perform_attack(attacker, target, battle_state, discard_pile=None, playmenu_d
     if hasattr(target, 'attack'):  # tager også selv skade
         attacker.current_hp -= target.attack
     
-    # Checker for minion death
+    # checker for minion death
     if hasattr(target, 'is_enemy'):  # Target er en minion
         minion_death(target, battle_state, discard_pile)
-    else:  # Target er en hero
+    else:  # target er en hero
         if target.current_hp <= 0:
             hero_death(target, battle_state)
     if hasattr(attacker, 'is_enemy'):  # kun check for minion death hvis det er en minion der bliver angrebet
@@ -132,12 +125,12 @@ def perform_attack(attacker, target, battle_state, discard_pile=None, playmenu_d
 
 # checker om en minion har taunt
 def taunt_check(battle_state, attacker):
-    # Check the appropriate rows based on who is attacking
-    if attacker.is_enemy:  # If enemy is attacking, check player rows
+    if attacker.is_enemy:  # hvis fjendlig minion angriber, check player rækker
         rows = [battle_state.player_front_row, battle_state.player_back_row]
-    else:  # If player/weapon is attacking, check enemy rows
+    else:  # hvis spilleren bruger weapon, check enemy rækker
         rows = [battle_state.enemy_front_row, battle_state.enemy_back_row]
-        
+    
+    # hvis taunt bliver fundet, return True. Hvis ikke, return False
     for row in rows:
         for minion in row:
             if minion.has_taunt:
@@ -146,21 +139,21 @@ def taunt_check(battle_state, attacker):
 
 # checker om minion kan angribe (baseret på taunt_check())
 def can_attack_target(attacker, target, battle_state):
-    # Check for valid target first
-    if hasattr(target, 'is_enemy'):  # if target is a minion
+    # Check for valid target først
+    if hasattr(target, 'is_enemy'):  # om target er en minion
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egne minions
             return False
-    else:  # if target is a hero
+    else:  # om target er en hero
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egen hero
             return False
     
-    # Get the appropriate rows to check for taunt based on who's attacking
-    if attacker.is_enemy:  # If enemy is attacking, check player rows
+    # hvis fjendtlig minion angriber, tjekkes spillerens rækker for taunt
+    if attacker.is_enemy:
         rows_to_check = [battle_state.player_front_row, battle_state.player_back_row]
-    else:  # If player is attacking, check enemy rows
+    else:  # hvis spillerens minion angriber, tjekkes fjendens rækker for taunt
         rows_to_check = [battle_state.enemy_front_row, battle_state.enemy_back_row]
         
-    # Check if there are any taunt minions
+    # check om der er taunt minions
     has_taunt = False
     for row in rows_to_check:
         for minion in row:
@@ -170,19 +163,19 @@ def can_attack_target(attacker, target, battle_state):
         if has_taunt:
             break
             
-    # If there's no taunt, can attack anything
+    # hvis taunt ikke kan findes, kan minions target alting
     if not has_taunt:
         return True
         
-    # If there is taunt, can only attack taunt minions
-    if hasattr(target, 'is_enemy'):  # If target is a minion
+    # hvis taunt findes, kan minions kun target fjender med taunt
+    if hasattr(target, 'is_enemy'):  # om target er en minion
         return target.has_taunt
-    else:  # If target is a hero
-        return False  # Can't attack hero if there's taunt
+    else:  # om target er en hero
+        return False
 
 # funktion for brug af 'weapon' kort
 def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    # Check for taunt
+    # check for taunt
     has_taunt = taunt_check(battle_state, weapon)
     
     # Check for enemy hero click first
@@ -218,7 +211,7 @@ def use_weapon(weapon, mouse_x, mouse_y, battle_state, enemy_discard, player_dis
                 return True
     return False
 
-# funktion for brug af 'minion' kort
+# funktion for summon af 'minion' kort
 def use_minion(minion, mouse_x, mouse_y, battle_state, front_row_zone, back_row_zone):
     if front_row_zone.collidepoint(mouse_x, mouse_y):
         return battle_state.add_minion(minion, False, True)
@@ -228,20 +221,20 @@ def use_minion(minion, mouse_x, mouse_y, battle_state, front_row_zone, back_row_
 
 # funktion for brug af 'spell' kort
 def use_spell(spell, mouse_x, mouse_y, battle_state, enemy_discard, player_discard):
-    # Hvis spell har en custom effekt, brug den
+    # hvis spell har en custom effekt, brug den
     if hasattr(spell, 'use_effect'):
         if spell.use_effect(battle_state, spell, enemy_discard, player_discard):
             player_discard.append(spell)
             return True
         return False
 
-    # Check for enemy hero click first (spells can bypass taunt)
+    # check om spell bliver brugt på fjendlig hero
     if battle_state.enemy_hero.image and battle_state.enemy_hero.image.collidepoint(mouse_x, mouse_y):
         battle_state.enemy_hero.current_hp -= spell.attack
         player_discard.append(spell)
         return True
 
-    # Normal spell håndtering for andre spells
+    # normal spell håndtering for andre spells
     for row in [battle_state.enemy_front_row, battle_state.enemy_back_row]:
         for minion in row:
             if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
@@ -258,26 +251,24 @@ class TurnManager:
         self.enemy = enemy
         self.draw_function = draw_function
         self.is_player_turn = True  # True = spillerens tur, False = fjendens tur
-        self.current_mana = 1  # Start with 1 mana
+        self.current_mana = 1  # start med 1 mana
         self.max_mana = 1
         self.spent_mana = 0
 
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
-        # Reset all minions' rest state
+        # reset alle minions' rest variabel
         for row in [self.play_menu.battle_state.player_front_row, 
                    self.play_menu.battle_state.player_back_row,
                    self.play_menu.battle_state.enemy_front_row,
                    self.play_menu.battle_state.enemy_back_row]:
             for minion in row:
                 minion.rest = False
-
-        # trækker et kort fra bunken
-        draw_card(self.play_menu.playerDeckPile, self.play_menu.playerHand)
+        draw_card(self.play_menu.playerDeckPile, self.play_menu.playerHand, self.play_menu.playerDiscard)
         self.is_player_turn = False
         self.enemy.perform_turn(SCREEN, self.play_menu.clock, self.draw_function)
         self.is_player_turn = True
-        # Increase mana for next turn
+        # øg max_mana til næste tur
         self.max_mana = min(10, self.max_mana + 1)
         self.current_mana = self.max_mana
         self.spent_mana = 0
@@ -286,7 +277,7 @@ class TurnManager:
     def can_play_card(self, card):
         return self.is_player_turn and card.mana_cost <= self.current_mana
 
-    # funktion der håndterer mana når et kort bliver spillet
+    # funktion der bruger mana når et kort bliver spillet
     def spend_mana(self, amount):
         if amount <= self.current_mana:
             self.current_mana -= amount
@@ -297,3 +288,51 @@ class TurnManager:
     # funktion der checker hvis tur det er
     def get_current_player(self):
         return "player" if self.is_player_turn else "enemy"
+
+# funktion der bliver kaldt når en kamp starter
+def battle_start(play_menu):
+    # reset alle rækker
+    play_menu.battle_state.player_front_row.clear()
+    play_menu.battle_state.player_back_row.clear()
+    play_menu.battle_state.enemy_front_row.clear()
+    play_menu.battle_state.enemy_back_row.clear()
+    
+    # reset mana til 1
+    play_menu.turn_manager.max_mana = 1
+    play_menu.turn_manager.current_mana = 1
+    
+    # flyt alle kort til discard
+    play_menu.playerDiscard.extend(play_menu.playerHand)
+    play_menu.playerHand.clear()
+    
+    # gendan dæk til original tilstand
+    play_menu.playerDeckPile = [card.knight(), card.knight(), card.slimeling(), 
+                               card.slimeling(), card.slimeling(), card.chaosCrystal(), 
+                               card.fireball(), card.fireball(), card.sword(), card.sword()]
+    
+    # shuffle dæk
+    random.shuffle(play_menu.playerDeckPile)
+    
+    # træk 4 kort til playerHand i starten af kampen
+    for _ in range(4):
+        draw_card(play_menu.playerDeckPile, play_menu.playerHand, play_menu.playerDiscard)
+
+# trækker et kort hvis det er muligt. Hvis der ikke er flere kort i deck, tager den kort fra discard
+def draw_card(deck, hand, discard, max_hand_size=7):
+    # hvis dæk er tomt og der er kort i discard, flyt kortene fra discard til dæk og shuffle
+    if len(deck) == 0 and len(discard) > 0:
+        deck.extend(discard)
+        discard.clear()
+        random.shuffle(deck)
+    
+    # prøv at trække et kort hvis der er kort tilbage og hånden ikke er fuld
+    if len(deck) > 0 and len(hand) < max_hand_size:
+        card = deck.pop(0)
+        # reset kort stats
+        if hasattr(card, 'max_hp'):  # for minions
+            card.current_hp = card.max_hp
+        if hasattr(card, 'durability'):  # for weapons
+            card.durability = card.base_durability if hasattr(card, 'base_durability') else card.durability
+        hand.append(card)
+        return True
+    return False

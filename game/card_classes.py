@@ -67,17 +67,17 @@ class Minion(Card):
             rows = [battle_state.player_front_row, battle_state.player_back_row] if not self.is_enemy else [battle_state.enemy_front_row, battle_state.enemy_back_row]
             for row in rows:
                 for minion in row:
-                    if minion != self:  # Don't buff self again
+                    if minion != self:  # don't buff self again
                         minion.attack += 1
 
-# Spell subclass:
+# spell subclass:
 class Spell(Card):
     def __init__(self, name, mana_cost, attack, activationTimes=1, effect=None, pic=None):
         super().__init__('spell', name, mana_cost, effect, pic)
         self.attack = attack
         self.activationTimes = activationTimes
 
-# Weapon subclass:
+# weapon subclass:
 class Weapon(Card):
     def __init__(self, name, mana_cost, attack, durability, pic=None):
         super().__init__('weapon', name, mana_cost, effect=None, pic=pic)
