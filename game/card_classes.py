@@ -12,19 +12,23 @@ class Card:
 
 # Hero subclass:
 class Hero(Card):
-    def __init__(self, name, attack, hp, pic=None):
+    def __init__(self, name, attack, maxHp, is_enemy=False, pic=None):
         super().__init__('hero', name, manaCost=0, effect=None, pic=pic)
         self.attack = attack
-        self.hp = hp
+        self.maxHp = maxHp
+        self.currentHp = maxHp
+        self.is_enemy = is_enemy
+        self.has_taunt = False
 
 # Minion subclass:
 class Minion(Card):
     all_minions = []  # index med alle minions der spilles
-    def __init__(self, name, manaCost, attack, hp, effect, pic=None):
+    def __init__(self, name, manaCost, attack, maxHp, effect, pic=None):
         super().__init__('minion', name, manaCost, effect, pic)
         self.attack = attack
         self.base_attack = attack
-        self.hp = hp
+        self.maxHp = maxHp
+        self.currentHp = maxHp
         self.effect = effect
         self.is_selected_for_attack = False
         self.image = None
@@ -98,6 +102,15 @@ class BoardState:
                     break
             if selected_minion:
                 break
+
+        # If a hero was clicked
+        if isinstance(clicked_minion, Hero):
+            if clicked_minion.is_enemy and selected_minion:
+                selected_minion.perform_attack(clicked_minion, self)
+                return True
+            return False
+            
+        # If a minion was clicked
         if clicked_minion.is_enemy and selected_minion:
             selected_minion.perform_attack(clicked_minion, self)
             return True

@@ -69,7 +69,14 @@ class PlayMenu(Screen):
         screen.blit(text, text_rect)
         
         # Draw HP
-        hp_text = font.render(f"HP: {hero.hp}", True, (0, 0, 0))
+        if hero.currentHp == hero.maxHp:
+            hp_text = font.render(f"HP: {hero.currentHp}", True, (0, 0, 0))
+        if hero.currentHp > hero.maxHp:
+            hp_text = font.render(f"HP: {hero.currentHp}", True, (0, 255, 0))
+        if hero.currentHp < hero.maxHp:
+            hp_text = font.render(f"HP: {hero.currentHp}", True, (150, 0, 0))
+        if hero.currentHp < 0:
+            hp_text = font.render(f"HP: {hero.currentHp}", True, (255, 0, 0))
         hp_rect = hp_text.get_rect(center=(rect.centerx, rect.centery + rect.height//4))
         screen.blit(hp_text, hp_rect)
 
@@ -106,6 +113,12 @@ class PlayMenu(Screen):
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
+            
+            # Check for enemy hero clicks
+            if self.enemy_hero_rect.collidepoint(mouse_x, mouse_y):
+                self.battle_state.handle_minion_click(self.battle_state.enemy_hero)
+                return
+                
             # Check for card clicks in hand first
             for i, rect in enumerate(self.hand_card_rects):
                 if rect.collidepoint(mouse_x, mouse_y):
@@ -208,13 +221,13 @@ class PlayMenu(Screen):
                 screen.blit(image, (x, y))
             else:
                 # Fallback: farvet rektangel
-                color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
+                color = (200, 0, 0) if minion.currentHp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
                 pygame.draw.rect(screen, color, minion.image)
             
             font = pygame.font.Font(None, 24)
             screen.blit(font.render(str(minion.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
             screen.blit(font.render(str(minion.attack), True, (255, 255, 255)), (x + 11, y + 119))
-            screen.blit(font.render(str(minion.hp), True, (255, 255, 255)), (x + 81, y + 119))
+            screen.blit(font.render(str(minion.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
             
             
             y += 120 + spacing
@@ -236,7 +249,7 @@ class PlayMenu(Screen):
             # Attack og HP kun for minions
             if hasattr(card, "category") and card.category == "minion":
                 screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
-                screen.blit(font.render(str(card.hp), True, (255, 255, 255)), (x + 81, y + 119))
+                screen.blit(font.render(str(card.currentHp), True, (255, 255, 255)), (x + 81, y + 119))
             else:
                 None
 
@@ -264,7 +277,7 @@ class PlayMenu(Screen):
                 attack_text = font.render(str(self.dragged_card.attack), True, (255, 255, 255))
                 screen.blit(attack_text, (x + 11, y + 119))
 
-                hp_text = font.render(str(self.dragged_card.hp), True, (255, 255, 255))
+                hp_text = font.render(str(self.dragged_card.maxHp), True, (255, 255, 255))
                 screen.blit(hp_text, (x + 81, y + 119))
 
     def handle_mouse_up(self, event):

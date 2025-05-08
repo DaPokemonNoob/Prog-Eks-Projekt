@@ -15,7 +15,7 @@ class Enemy:
 
     def draw_card(self):
         return draw_card(self.deck_pile, self.hand)
-# kill yourself github, please i hate you
+
     def perform_turn(self):
         # fjenden trækker et kort hver tur
         self.draw_card()
@@ -32,21 +32,42 @@ class Enemy:
                 add_minion_to_board(enemy_minion, self.battle_state, True, False)
         
         # fjendens minions angriber - først angriber minions i første række
-        for attacking_minion in self.battle_state.enemy_front_row[:]:  # copi a liste
-            if not self.battle_state.player_front_row:
-                # angriber spillerens hero hvis de ikke har nogen minions
-                perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
-            elif self.battle_state.player_front_row:
-                # angriber spillerens første minion
-                target = self.battle_state.player_front_row[0]
+        for attacking_minion in self.battle_state.enemy_front_row[:]:  # copy af liste
+            # Find valid targets (minions with taunt or any target if no taunt)
+            valid_targets = []
+            has_taunt = any(minion.has_taunt for minion in self.battle_state.player_front_row + self.battle_state.player_back_row)
+            
+            if has_taunt:
+                # Only target minions with taunt
+                for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
+                    if target.has_taunt:
+                        valid_targets.append(target)
+            else:
+                # Can target any minion or hero
+                valid_targets.extend(self.battle_state.player_front_row)
+                valid_targets.extend(self.battle_state.player_back_row)
+                if not valid_targets:  # If no minions, can attack hero
+                    valid_targets.append(self.battle_state.player_hero)
+                    
+            if valid_targets:
+                target = valid_targets[0]  # Attack first valid target
                 perform_attack(attacking_minion, target, self.battle_state, self.discard)
 
-        # anden række angriber bagefter
+        # anden række angriber bagefter med samme logik
         for attacking_minion in self.battle_state.enemy_back_row[:]:
-            if not self.battle_state.player_front_row:
-                # angriber spillerens hero hvis de ikke har nogen minions
-                perform_attack(attacking_minion, self.battle_state.player_hero, self.battle_state, self.discard)
-            elif self.battle_state.player_front_row:
-                # angriber spillerens første minion
-                target = self.battle_state.player_front_row[0]
+            valid_targets = []
+            has_taunt = any(minion.has_taunt for minion in self.battle_state.player_front_row + self.battle_state.player_back_row)
+            
+            if has_taunt:
+                for target in self.battle_state.player_front_row + self.battle_state.player_back_row:
+                    if target.has_taunt:
+                        valid_targets.append(target)
+            else:
+                valid_targets.extend(self.battle_state.player_front_row)
+                valid_targets.extend(self.battle_state.player_back_row)
+                if not valid_targets:
+                    valid_targets.append(self.battle_state.player_hero)
+                    
+            if valid_targets:
+                target = valid_targets[0]
                 perform_attack(attacking_minion, target, self.battle_state, self.discard)
