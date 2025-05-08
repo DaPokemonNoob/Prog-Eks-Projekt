@@ -1,5 +1,8 @@
 import pygame
-from settings import CARD_WIDTH, CARD_HEIGHT
+import card_data as card
+
+
+from settings import *
 
 def play_card_draw_and_flip_animation(screen, clock, card_back, card_front, deck_pos, hand_pos, playmenu_draw_function, flip_speed=0.05, slide_speed=0.02, delay_after_flip=500):
     # Initialiser variabler
@@ -112,13 +115,14 @@ def quadratic_bezier(p0, p1, p2, t):
         (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],
     )
 
-def play_attack_animation(screen, clock, attacker_pos, target_pos, card_image, playmenu_draw_function, attack_speed=0.05, delay_after_attack=500):
+def play_attack_animation(screen, clock, attacker_pos, target_pos, sard_image, playmenu_draw_function, attack_speed=0.05, delay_after_attack=500):
     """
     Animation for a card attacking another card.
     The card moves from its position to the target's position and back.
     """
     # Scale the card image to match the size of the card when placed down
-    card_image = pygame.transform.scale(card_image, (CARD_WIDTH, CARD_HEIGHT))
+    image = pygame.image.load(f"assets/playingCard/{minion.pic}").convert_alpha()
+    image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
 
     attack_progress = 0
     returning = False
@@ -154,7 +158,7 @@ def play_attack_animation(screen, clock, attacker_pos, target_pos, card_image, p
             current_pos[1] = lerp(target_pos[1], attacker_pos[1], 1 - attack_progress)
 
         # Draw the attacking card only during the animation
-        screen.blit(card_image, current_pos)
+        screen.blit(sard_image, current_pos)
 
         # Update the display
         pygame.display.flip()

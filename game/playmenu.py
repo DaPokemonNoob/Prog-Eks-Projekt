@@ -32,7 +32,7 @@ class PlayMenu(Screen):
         self.battle_state.set_turn_manager(self.turn_manager)  # Set the turn manager on battle_state
 
     # denne funktion initialiserer spillerens dæk
-        self.playerDeckPile = [card.knight(), card.knight(), card.slimeling(), card.slimeling(), card.slimeling(), card.chaosCrystal(), card.fireball(), card.fireball(), card.sword(), card.sword()]    # Spillerens dæk
+        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal(), card.fireball(), card.sword()]    # Spillerens dæk
         random.shuffle(self.playerDeckPile)
         self.playerHand = []                                                            #Laver en tom liste til kortene i spillerens hånd
         self.playerDiscard = []                                                         #Laver en tom liste til kortene i spillerens discard pile
@@ -56,7 +56,7 @@ class PlayMenu(Screen):
 
         self.buttons = [self.menu_button, self.next_turn_button]
         self.actions = {
-            self.menu_button: lambda: self.switch_screen("map_menu"),
+            self.menu_button: lambda: self.switch_screen("main_menu"),
             self.next_turn_button: self.end_turn
         }
         self.hand_card_rects = []

@@ -22,31 +22,31 @@ def minion_death(minion, battle_state, discard_pile=None):
     return False
 
 # håndterer hero death
-def hero_death(hero, play_menu):
+def hero_death(hero, battle_state):
     if hero.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object
-        battle_state = play_menu.battle_state
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
-
         return True
     return False
 
-def enemy_death(enemy, play_menu):
+def enemy_death(enemy, battle_state):
     if enemy.current_hp <= 0:
-        # Get the actual board state from the PlayMenu object
-        battle_state = play_menu.battle_state
+        # Get the actual board state from the PlayMenu object if needed
+        if hasattr(battle_state, 'battle_state'):
+            battle_state = battle_state.battle_state
             
         # Clear the board
         battle_state.player_front_row.clear()
         battle_state.player_back_row.clear()
         battle_state.enemy_front_row.clear()
         battle_state.enemy_back_row.clear()
-
         return True
     return False
 
@@ -265,10 +265,10 @@ class TurnManager:
     # funktion der bliver kaldt når spilleren ender sin tur
     def end_player_turn(self):
         # Reset all minions' rest state
-        for row in [self.play_menu.battle_state.player_front_row, 
-                   self.play_menu.battle_state.player_back_row,
-                   self.play_menu.battle_state.enemy_front_row,
-                   self.play_menu.battle_state.enemy_back_row]:
+        for row in [self.player_screen.battle_state.player_front_row, 
+                   self.player_screen.battle_state.player_back_row,
+                   self.player_screen.battle_state.enemy_front_row,
+                   self.player_screen.battle_state.enemy_back_row]:
             for minion in row:
                 minion.rest = False
 
