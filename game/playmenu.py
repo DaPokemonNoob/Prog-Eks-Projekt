@@ -26,9 +26,10 @@ class PlayMenu(Screen):
         # Create enemy instance and turn manager
         self.enemy = Enemy(self.battle_state)
         self.turn_manager = TurnManager(self, self.enemy)
+        self.battle_state.set_turn_manager(self.turn_manager)  # Set the turn manager on battle_state
 
     # denne funktion initialiserer spillerens dæk
-        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal()]    # Spillerens dæk
+        self.playerDeckPile = [card.knight(), card.slimeling(), card.chaosCrystal(), card.fireball(), card.sword()]    # Spillerens dæk
         random.shuffle(self.playerDeckPile)
         self.playerHand = []                                                            #Laver en tom liste til kortene i spillerens hånd
         self.playerDiscard = []                                                         #Laver en tom liste til kortene i spillerens discard pile
@@ -62,6 +63,9 @@ class PlayMenu(Screen):
         color = (200, 0, 0) if is_enemy else (0, 200, 0)  # Red for enemy, green for player
         pygame.draw.rect(screen, color, rect)
         
+        # Set the hero's image property to the rect for click detection
+        hero.image = rect
+        
         # Draw hero name
         font = pygame.font.Font(None, int(24 * 1.8))  # Scaled up font
         text = font.render(hero.name, True, (0, 0, 0))
@@ -69,7 +73,14 @@ class PlayMenu(Screen):
         screen.blit(text, text_rect)
         
         # Draw HP
-        hp_text = font.render(f"HP: {hero.hp}", True, (0, 0, 0))
+        if hero.current_hp == hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (0, 0, 0))
+        if hero.current_hp > hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (0, 255, 0))
+        if hero.current_hp < hero.max_hp:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (150, 0, 0))
+        if hero.current_hp < 0:
+            hp_text = font.render(f"HP: {hero.current_hp}", True, (255, 0, 0))
         hp_rect = hp_text.get_rect(center=(rect.centerx, rect.centery + rect.height//4))
         screen.blit(hp_text, hp_rect)
 
@@ -106,13 +117,21 @@ class PlayMenu(Screen):
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
+            
+            # Check for enemy hero clicks
+            if self.enemy_hero_rect.collidepoint(mouse_x, mouse_y):
+                self.battle_state.handle_minion_click(self.battle_state.enemy_hero)
+                return
+                
             # Check for card clicks in hand first
             for i, rect in enumerate(self.hand_card_rects):
                 if rect.collidepoint(mouse_x, mouse_y):
                     card = self.playerHand[i]
                     if hasattr(card, 'category') and (card.category == 'minion' or card.category == 'spell' or card.category == 'weapon'):
-                        self.dragged_card = self.playerHand.pop(i)
-                        self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
+                        # Check if we have enough mana to play the card
+                        if self.turn_manager.can_play_card(card):
+                            self.dragged_card = self.playerHand.pop(i)
+                            self.drag_offset = (mouse_x - rect.x, mouse_y - rect.y)
                     break
 
             # Only check minions if we didn't grab a card
@@ -130,28 +149,44 @@ class PlayMenu(Screen):
 
                 # Handle weapon attacks
                 if self.dragged_card.category == 'weapon':
-                    use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard)   
+                    if use_weapon(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        # Successfully used weapon
+                        if self.dragged_card.durability > 0:
+                            # If weapon still has durability, return to hand
+                            self.return_card_to_hand(mouse_x)
+                        else:
+                            # If no durability left, discard and clear dragged card
+                            self.dragged_card = None
+                    else:
+                        # Attack was not valid, return to hand
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.dragged_card = None
+                        self.return_card_to_hand(mouse_x)
                     return
 
                 # Handle spell casting
                 elif self.dragged_card.category == 'spell':
                     if use_spell(self.dragged_card, mouse_x, mouse_y, self.battle_state, self.enemy.discard, self.playerDiscard):
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
                         self.dragged_card = None
                         return
+                    else:
+                        self.return_card_to_hand(mouse_x)
 
                 # Handle minion placement
                 elif self.dragged_card.category == 'minion':
+                    placed = False
                     if self.player_front_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, True):
-                            self.battle_state.player_front_row.append(self.dragged_card)
-                            self.dragged_card = None
-                            return
-
+                            placed = True
                     elif self.player_back_row_zone.collidepoint(mouse_x, mouse_y):
                         if self.battle_state.add_minion(self.dragged_card, False, False):
-                            self.battle_state.player_back_row.append(self.dragged_card)
-                            self.dragged_card = None
-                            return
+                            placed = True
+                            
+                    if placed:
+                        self.turn_manager.spend_mana(self.dragged_card.manaCost)
+                        self.dragged_card = None
+                        return
 
                 # If card wasn't used, return to hand
                 self.return_card_to_hand(mouse_x)
@@ -176,6 +211,9 @@ class PlayMenu(Screen):
         self.draw_hero_card(screen, self.battle_state.player_hero, self.player_hero_rect)
         self.draw_hero_card(screen, self.battle_state.enemy_hero, self.enemy_hero_rect, True)
         
+        # Draw mana crystals
+        self.draw_mana(screen)
+        
         # Draw play zones
         pygame.draw.rect(screen, (100, 200, 100), self.player_front_row_zone, 2)
         pygame.draw.rect(screen, (100, 200, 100), self.player_back_row_zone, 2)
@@ -194,6 +232,11 @@ class PlayMenu(Screen):
         for button in self.buttons:
             button.run()
 
+    def draw_mana(self, screen):
+        font = pygame.font.Font(None, 36)
+        mana_text = font.render(f"Mana: {self.turn_manager.current_mana}/{self.turn_manager.max_mana}", True, (0, 255, 255))
+        screen.blit(mana_text, (20, 20))
+
     def draw_minion_row(self, screen, row, zone_rect):
         spacing = 20
         x = zone_rect.x + (zone_rect.width - CARD_WIDTH) // 2
@@ -206,16 +249,21 @@ class PlayMenu(Screen):
                 image = pygame.image.load(f"assets/playingCard/{minion.pic}").convert_alpha()
                 image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
                 screen.blit(image, (x, y))
+                
+                # Draw taunt indicator
+                if minion.has_taunt:
+                    pygame.draw.rect(screen, (255, 215, 0), minion.image, 3)  # Gold border for taunt minions
             else:
                 # Fallback: farvet rektangel
-                color = (200, 0, 0) if minion.hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
+                color = (200, 0, 0) if minion.current_hp <= 0 else (200, 200, 0) if minion.is_selected_for_attack else (200, 200, 200)
                 pygame.draw.rect(screen, color, minion.image)
+                if minion.has_taunt:
+                    pygame.draw.rect(screen, (255, 215, 0), minion.image, 3)
             
             font = pygame.font.Font(None, 24)
             screen.blit(font.render(str(minion.manaCost), True, (255, 255, 255)), (x + 81, y + 9))
             screen.blit(font.render(str(minion.attack), True, (255, 255, 255)), (x + 11, y + 119))
-            screen.blit(font.render(str(minion.hp), True, (255, 255, 255)), (x + 81, y + 119))
-            
+            screen.blit(font.render(str(minion.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
             
             y += 120 + spacing
 
@@ -236,7 +284,10 @@ class PlayMenu(Screen):
             # Attack og HP kun for minions
             if hasattr(card, "category") and card.category == "minion":
                 screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
-                screen.blit(font.render(str(card.hp), True, (255, 255, 255)), (x + 81, y + 119))
+                screen.blit(font.render(str(card.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
+            elif hasattr(card, "category") and card.category == "weapon":
+                screen.blit(font.render(str(card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(card.durability), True, (255, 255, 255)), (x + 81, y + 119))
             else:
                 None
 
@@ -261,11 +312,13 @@ class PlayMenu(Screen):
 
             # Hvis kortet er en minion, vis også attack og hp
             if hasattr(self.dragged_card, "category") and self.dragged_card.category == "minion":
-                attack_text = font.render(str(self.dragged_card.attack), True, (255, 255, 255))
-                screen.blit(attack_text, (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.current_hp), True, (255, 255, 255)), (x + 81, y + 119))
 
-                hp_text = font.render(str(self.dragged_card.hp), True, (255, 255, 255))
-                screen.blit(hp_text, (x + 81, y + 119))
+            elif hasattr(self.dragged_card, "category") and self.dragged_card.category == "weapon":
+                screen.blit(font.render(str(self.dragged_card.attack), True, (255, 255, 255)), (x + 11, y + 119))
+                screen.blit(font.render(str(self.dragged_card.durability), True, (255, 255, 255)), (x + 81, y + 119)) 
+                        
 
     def handle_mouse_up(self, event):
         if self.dragged_card:
