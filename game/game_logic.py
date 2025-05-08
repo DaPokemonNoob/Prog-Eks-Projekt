@@ -307,7 +307,7 @@ def battle_start(play_menu):
     
     # Reset mana to 1
     play_menu.turn_manager.max_mana = 1
-    play_menu.turn_manager.current_mana = 1
+    play_menu.turn_manager.current_mana = play_menu.turn_manager.max_mana
     
     # Extend playerDeckPile with cards from playerDiscard and playerHand
     play_menu.playerDeckPile.extend(play_menu.playerDiscard)
