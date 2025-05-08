@@ -94,7 +94,7 @@ class MainMenu(Screen):
         self.buttons = [self.play_button, self.options_button, self.quit_button] # liste til knapperne på skærmen
 
         self.actions = {
-            self.play_button: lambda: self.switch_screen("play_menu"),       # handling til play knappen    - skifter til play menuen 
+            self.play_button: lambda: self.switch_screen("map_menu"),       # handling til play knappen    - skifter til play menuen 
             self.options_button: lambda: self.switch_screen("options_menu"), # handling til options knappen - skifter til options menuen
             self.quit_button: lambda: sys.exit()                             # handling til quit knappen    - lukker spillet
         }

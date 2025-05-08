@@ -56,7 +56,7 @@ screens.update({
 screens.update({"heal_menu": HealMenu(switch_screen, screens["play_menu"].battle_state.player_hero)})
 
 # sætter den nuværende skærm til mappet, som er den første skærm der vises
-switch_screen("map_menu")
+switch_screen("main_menu")
 
 # === Main loop ===
 running = True
