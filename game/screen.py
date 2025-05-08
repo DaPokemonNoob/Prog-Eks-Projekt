@@ -164,19 +164,19 @@ class PauseMenu(Screen):
 # map menus (treasure, shop, heal)
 
 class HealMenu(Screen):
-    def __init__(self, switch_screen):
+    def __init__(self, switch_screen, player_hero=None):
         super().__init__()
         self.switch_screen = switch_screen
         self.bg_color = "green"
+        self.player_hero = player_hero
 
         # Button dimensions
-        button_width = 400  # Made buttons slightly narrower
+        button_width = 400
         button_height = 100
         
-        # Position buttons on left and right side of middle screen
-        left_x = WIDTH // 4 - button_width // 2  # Left quarter of screen
-        right_x = (WIDTH * 3) // 4 - button_width // 2  # Right quarter of screen
-        middle_y = HEIGHT // 2 - button_height // 2  # Vertical center
+        left_x = WIDTH // 4 - button_width // 2
+        right_x = (WIDTH * 3) // 4 - button_width // 2
+        middle_y = HEIGHT // 2 - button_height // 2
         
         # Create heal buttons
         self.heal_50_button = Button((left_x, middle_y), "red", (button_width, button_height))
@@ -184,7 +184,28 @@ class HealMenu(Screen):
         
         # Set buttons and their actions
         self.buttons = [self.heal_50_button, self.max_hp_button]
-        self.initialize_ui_elements(SCREEN) 
+        self.actions = {
+            self.heal_50_button: self.heal_50_percent,
+            self.max_hp_button: self.increase_max_hp
+        }
+        self.initialize_ui_elements(SCREEN)
+
+    def heal_50_percent(self):
+        if self.player_hero:
+            heal_amount = self.player_hero.max_hp * 0.5
+            self.player_hero.current_hp = min(
+                self.player_hero.current_hp + heal_amount,
+                self.player_hero.max_hp
+            )
+            print(f"Healed {heal_amount} HP. Current HP: {self.player_hero.current_hp}")
+            self.switch_screen("map_menu")
+
+    def increase_max_hp(self):
+        if self.player_hero:
+            self.player_hero.max_hp += 5
+            self.player_hero.current_hp += 5
+            print(f"Increased max HP by 5. New max HP: {self.player_hero.max_hp}")
+            self.switch_screen("map_menu") 
 
     def draw(self, screen):
             # Draw background

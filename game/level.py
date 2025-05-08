@@ -68,23 +68,41 @@ def handle_click(mouse_pos, map_levels):
     return False
 
 def generate_map(level_count=6):
-    encounter_types = ["battle", "battle", "battle", "shop", "heal"] # de forskellige typer af encounters
-    level_id_counter = 0 # initialiserer id tælleren til håndtering af leveler
-    map_levels = [] # opretter en tom liste til at gemme leveler
+    level_id_counter = 0
+    
+    # Create first level group with at least one battle
+    first_group = []
+    num_first_levels = random.randint(2, 3)
+    
+    # Create one battle level first
+    battle_level = Level(level_id_counter, 0, "battle")
+    level_id_counter += 1
+    first_group.append(battle_level)
+    
+    # Add other random levels to first group
+    for _ in range(num_first_levels - 1):
+        encounter_type = random.choice(["battle", "shop", "heal"])
+        level = Level(level_id_counter, 0, encounter_type)
+        first_group.append(level)
+        level_id_counter += 1
+    
+    map_levels = [first_group]
+    
+    encounter_types = ["battle", "battle", "battle", "shop", "heal"]
 
-    # step 1: opretter leveler og grupperer dem i en liste
-    for level_number in range(level_count):
-        num_levels = random.randint(2, 3) # antal forskellige grener i en gruppe
+    # Create remaining levels
+    for level_number in range(1, level_count):
+        num_levels = random.randint(2, 3)
         levels_in_group = []
         for _ in range(num_levels):
-            # opretter et level med et id, levelnummer og en tilfældig encounter type
-            encounter_type = random.choice(encounter_types) 
-            level = Level(level_id_counter, level_number, encounter_type) # opretter et level objekt
-            levels_in_group.append(level) 
-            level_id_counter += 1   
+            encounter_type = random.choice(encounter_types)
+            level = Level(level_id_counter, level_number, encounter_type)
+            levels_in_group.append(level)
+            level_id_counter += 1
         map_levels.append(levels_in_group)
 
-    boss_level = Level(level_id_counter, level_count, "boss") # opretter et boss level med et id og levelnummer
+    # Add boss level
+    boss_level = Level(level_id_counter, level_count, "boss")
     map_levels.append([boss_level])
 
     # step 2: forbinder levelerne i grupperne med hinanden
