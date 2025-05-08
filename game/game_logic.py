@@ -1,3 +1,7 @@
+from animations import play_attack_animation
+from settings import clock, SCREEN
+import pygame
+
 # funktion for håndtering af minion death. Tjekker om minion er død, hvis ja, fjerner minion fra boardet og lægger i discard bunke.
 def minion_death(minion, battle_state, discard_pile=None):
     if minion.current_hp <= 0:
@@ -78,7 +82,7 @@ def add_minion_to_board(minion, battle_state, is_enemy, is_front_row):
     return False
 
 # håndterer når en minion angriber noget
-def perform_attack(attacker, target, battle_state, discard_pile=None):
+def perform_attack(attacker, target, battle_state, discard_pile=None, playmenu_draw_function=None):
     # First check if target is valid based on taunt rules
     if not can_attack_target(attacker, target, battle_state):
         return False
@@ -90,6 +94,20 @@ def perform_attack(attacker, target, battle_state, discard_pile=None):
     else:  # target er en hero
         if target.is_enemy == attacker.is_enemy:  # kan ikke angribe egen hero
             return False
+
+    # Ensure card image is loaded as a pygame.Surface
+    if isinstance(attacker.pic, str):
+        attacker_image = pygame.image.load(f"assets/playingCard/{attacker.pic}").convert_alpha()
+    else:
+        attacker_image = attacker.pic
+
+    # Play attack animation if images are available
+    if hasattr(attacker, 'image') and attacker.image and hasattr(target, 'image') and target.image:
+        attacker_pos = (attacker.image.x, attacker.image.y)
+        target_pos = (target.image.x, target.image.y)
+        # Pass the playmenu_draw_function explicitly
+        if playmenu_draw_function:
+            play_attack_animation(SCREEN, clock, attacker_pos, target_pos, attacker_image, playmenu_draw_function)
             
     # gør skade
     target.current_hp -= attacker.attack

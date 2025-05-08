@@ -45,9 +45,9 @@ class Minion(Card):
         return self.image.collidepoint(mouse_pos)
 
 # funktion til at minion angriber
-    def perform_attack(self, target, battle_state):
+    def perform_attack(self, target, battle_state, playmenu_draw_function):
         if self.is_selected_for_attack and target:
-            perform_attack(self, target, battle_state)
+            perform_attack(self, target, battle_state, playmenu_draw_function=playmenu_draw_function)
             self.is_selected_for_attack = False
 
     # funktion til at select en minion til at angribe
@@ -116,7 +116,7 @@ class BoardState:
         return False
     
     # funktion til at håndtere klik på minions
-    def handle_minion_click(self, clicked_minion):
+    def handle_minion_click(self, clicked_minion, playmenu_draw_function):
         selected_minion = None
         for row in [self.player_front_row, self.player_back_row]:
             for minion in row:
@@ -129,13 +129,13 @@ class BoardState:
         # If a hero was clicked
         if isinstance(clicked_minion, Hero):
             if clicked_minion.is_enemy and selected_minion:
-                selected_minion.perform_attack(clicked_minion, self)
+                selected_minion.perform_attack(clicked_minion, self, playmenu_draw_function=playmenu_draw_function)
                 return True
             return False
             
         # If a minion was clicked
         if clicked_minion.is_enemy and selected_minion:
-            selected_minion.perform_attack(clicked_minion, self)
+            selected_minion.perform_attack(clicked_minion, self, playmenu_draw_function=playmenu_draw_function)
             return True
         elif not clicked_minion.is_enemy:
             if selected_minion and selected_minion != clicked_minion:

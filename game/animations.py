@@ -1,4 +1,5 @@
 import pygame
+from settings import CARD_WIDTH, CARD_HEIGHT
 
 def play_card_draw_and_flip_animation(screen, clock, card_back, card_front, deck_pos, hand_pos, playmenu_draw_function, flip_speed=0.05, slide_speed=0.02, delay_after_flip=500):
     # Initialiser variabler
@@ -110,3 +111,54 @@ def quadratic_bezier(p0, p1, p2, t):
         (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
         (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],
     )
+
+def play_attack_animation(screen, clock, attacker_pos, target_pos, card_image, playmenu_draw_function, attack_speed=0.05, delay_after_attack=500):
+    """
+    Animation for a card attacking another card.
+    The card moves from its position to the target's position and back.
+    """
+    # Scale the card image to match the size of the card when placed down
+    card_image = pygame.transform.scale(card_image, (CARD_WIDTH, CARD_HEIGHT))
+
+    attack_progress = 0
+    returning = False
+    current_pos = list(attacker_pos)
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Temporarily hide the placed card by redrawing the PlayMenu without it
+        playmenu_draw_function(screen)
+
+        # Update attack progress
+        if not returning:
+            attack_progress += attack_speed
+            if attack_progress >= 1:
+                attack_progress = 1
+                returning = True
+        else:
+            attack_progress -= attack_speed
+            if attack_progress <= 0:
+                attack_progress = 0
+                running = False
+
+        # Calculate current position based on progress
+        if not returning:
+            current_pos[0] = lerp(attacker_pos[0], target_pos[0], attack_progress)
+            current_pos[1] = lerp(attacker_pos[1], target_pos[1], attack_progress)
+        else:
+            current_pos[0] = lerp(target_pos[0], attacker_pos[0], 1 - attack_progress)
+            current_pos[1] = lerp(target_pos[1], attacker_pos[1], 1 - attack_progress)
+
+        # Draw the attacking card only during the animation
+        screen.blit(card_image, current_pos)
+
+        # Update the display
+        pygame.display.flip()
+        clock.tick(60)
+
+    # Delay after the attack animation
+    pygame.time.delay(delay_after_attack)

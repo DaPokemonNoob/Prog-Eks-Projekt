@@ -143,7 +143,7 @@ class PlayMenu(Screen):
                           self.battle_state.player_front_row, self.battle_state.player_back_row]:
                     for minion in row:
                         if minion.image and minion.image.collidepoint(mouse_x, mouse_y):
-                            self.battle_state.handle_minion_click(minion)
+                            self.battle_state.handle_minion_click(minion, playmenu_draw_function=self.draw)
                             break
 
         elif event.type == pygame.MOUSEBUTTONUP:
