@@ -41,14 +41,14 @@ previous_screen = None
 # dictionaryet består af skærmnavnene som nøgler og skærm objekterne som værdier
 screens = {}
 screens.update({
-    "main_menu": MainMenu(switch_screen),
-    "play_menu": PlayMenu(switch_screen, clock),
-    "options_menu": OptionsMenu(switch_screen, SCREEN),
-    "map_menu": MapMenu(switch_screen, SCREEN),
-    "pause_menu": PauseMenu(switch_screen),
-    "shop_menu": ShopMenu(switch_screen),
-    "boss_menu": BossMenu(switch_screen),
-    "win_menu": WinMenu(switch_screen),
+    "main_menu": MainMenu(switch_screen),               # main neu er den menu der bliver åbnet når programmet bliver kørt
+    "play_menu": PlayMenu(switch_screen, clock),        # play menu er den menu der bliver åbnet når en kamp starter
+    "options_menu": OptionsMenu(switch_screen, SCREEN), # options menu er den menu der bliver åbnet når options knappen klikkes i main menu
+    "map_menu": MapMenu(switch_screen, SCREEN),         # map menu er den menu der bliver vist nr der klikkes play
+    "pause_menu": PauseMenu(switch_screen),             # pause menu er den menu der bliver vist når spillet er sat på pause (esc)
+    "shop_menu": ShopMenu(switch_screen),               # shop menu er lige nu en pladsholder, den er ikke implementeret grundet tidsmangel 
+    "boss_menu": BossMenu(switch_screen),               # boss menu er lige nu en pladsholder, den er ikke implementeret grundet tidsmangel
+    "win_menu": WinMenu(switch_screen),                 
     "lose_menu": LoseMenu(switch_screen)
 })
 
