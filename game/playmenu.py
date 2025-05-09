@@ -43,8 +43,8 @@ class PlayMenu(Screen):
         # denne funktion initialiserer spillerens dæk
         self.playerDeckPile = [card.knight(), card.knight(), card.slimeling(),              # Spillerens dæk
                                card.slimeling(), card.slimeling(), card.chaosCrystal(),
-                                 card.fireball(), card.fireball(), card.sword(),
-                                   card.sword()]    
+                               card.fireball(), card.fireball(), card.sword(),
+                               card.sword()]    
         random.shuffle(self.playerDeckPile)                                                 # Blander spillerens dæk        
         self.playerHand = []                                                                # Laver en tom liste til kortene i spillerens hånd
         self.playerDiscard = []                                                             # Laver en tom liste til kortene i spillerens discard pile
