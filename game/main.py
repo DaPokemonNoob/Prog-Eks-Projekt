@@ -6,14 +6,14 @@ from level import generate_map, assign_level_positions, draw_map, handle_click, 
 from game_logic import hero_death, enemy_death
 from game_logic import battle_start
 import random
-from card_data import slimeling, knight, fireball, chaosCrystal
+import card_data as card
 
 # starter pygame
 pygame.init()
 
 # alle forskellige typer af kort
 # kortene er defineret i card_data.py og importeres her
-all_cards = [slimeling(), knight(), fireball(), chaosCrystal()]
+all_cards = [card.slimeling(), card.knight(), card.fireball(), card.chaosCrystal()]
 
 # map ting - map_data er en liste af level objekter
 # level objekterne er defineret i level.py og importeres her
