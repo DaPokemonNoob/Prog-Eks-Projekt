@@ -79,10 +79,10 @@ def chaosCrystal():
     spell.use_effect = custom_spell_effect
     return spell
 
-def firestorm():
+def firestorm(): # ikke implementeret
     spell = Spell("Firestorm", mana_cost=5, attack=3, effect="Deals 3 damage to all Minions.")
     return spell
-    # ikke implementeret
+    
 
 # -----Weapon kort-----:
 def sword():
